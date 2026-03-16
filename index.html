@@ -16,89 +16,80 @@
             <input id="password" type="password" placeholder="Heslo" class="w-full mb-6 p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 text-white">
             <button id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold mb-3 transition">Přihlásit se</button>
             <button id="btnRegister" class="w-full bg-gray-600 hover:bg-gray-500 p-3 rounded font-bold transition">Vytvořit účet</button>
-            <p id="login-error" class="text-red-400 text-sm mt-4 hidden text-center"></p>
         </div>
     </div>
 
-    <div id="app-section" class="hidden max-w-6xl mx-auto p-4 md:p-6 text-gray-100">
+    <div id="app-section" class="hidden max-w-6xl mx-auto p-4 md:p-6">
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4 gap-4">
-            <h1 class="text-3xl font-bold text-blue-400">Správa financí v8.1</h1>
-            <div class="flex flex-wrap gap-4 items-center justify-center text-gray-100">
-                <button onclick="switchTab('overview')" class="hover:text-blue-400 transition font-bold">Přehled</button>
-                <button onclick="switchTab('analysis')" class="hover:text-blue-400 transition font-bold text-gray-100">Analýza</button>
-                <button onclick="switchTab('recurring')" class="hover:text-blue-400 transition font-bold text-gray-100">Trvalé platby</button>
-                <button onclick="switchTab('settings')" class="hover:text-blue-400 transition font-bold text-gray-400">Import</button>
-                <button id="btnLogout" class="bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded text-sm transition font-bold text-gray-100">Odhlásit</button>
+            <h1 class="text-2xl font-bold text-blue-400">Správa financí</h1>
+            
+            <div class="flex flex-wrap gap-4 items-center justify-center">
+                <nav class="flex gap-4 mr-4 border-r border-gray-700 pr-4">
+                    <button onclick="switchTab('overview')" class="hover:text-blue-400 transition font-bold">Přehled</button>
+                    <button onclick="switchTab('analysis')" class="hover:text-blue-400 transition font-bold">Analýza</button>
+                    <button onclick="switchTab('recurring')" class="hover:text-blue-400 transition font-bold">Trvalé</button>
+                </nav>
+
+                <select id="globalPeriodFilter" class="p-1.5 rounded bg-gray-800 border border-gray-600 text-sm font-bold text-blue-300 outline-none focus:border-blue-500">
+                    <option value="current_month">Tento měsíc</option>
+                    <option value="last_month">Minulý měsíc</option>
+                    <option value="all" selected>Celá historie</option>
+                </select>
+
+                <button id="btnLogout" class="bg-red-900/50 hover:bg-red-800 px-3 py-1.5 rounded text-xs transition border border-red-700">Odhlásit</button>
             </div>
         </div>
 
         <div id="tab-overview" class="tab-content block">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                    <span class="text-gray-400 text-xs uppercase text-gray-100">Příjmy</span>
+                    <span class="text-gray-400 text-xs uppercase">Příjmy</span>
                     <div id="summary-income" class="text-2xl font-bold text-green-400">0 Kč</div>
                 </div>
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                    <span class="text-gray-400 text-xs uppercase text-gray-100">Výdaje</span>
+                    <span class="text-gray-400 text-xs uppercase">Výdaje</span>
                     <div id="summary-expense" class="text-2xl font-bold text-red-400">0 Kč</div>
                 </div>
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 border-l-4 border-l-blue-500">
-                    <span class="text-gray-400 text-xs uppercase text-gray-100">Zůstatek</span>
+                    <span class="text-gray-400 text-xs uppercase">Zůstatek</span>
                     <div id="summary-balance" class="text-2xl font-bold text-blue-400">0 Kč</div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-1 h-fit">
-                    <h2 id="formTitle" class="text-xl font-bold mb-4">Nová transakce</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-fit">
+                    <h2 id="formTitle" class="text-lg font-bold mb-4">Nová transakce</h2>
                     <input type="hidden" id="editTxId">
-                    
-                    <label class="block text-sm mb-1 text-gray-400">Datum platby</label>
-                    <input id="txDateInput" type="date" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white">
-
-                    <label class="block text-sm mb-1 text-gray-400">Typ</label>
-                    <select id="txType" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white">
+                    <input id="txDateInput" type="date" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white">
+                    <select id="txType" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold text-sm">
                         <option value="Výdaj">Výdaj</option>
                         <option value="Příjem">Příjem</option>
                     </select>
-
-                    <label class="block text-sm mb-1 text-gray-400 text-gray-100">Kategorie</label>
-                    <select id="txCategorySelect" class="w-full mb-2 p-2 rounded bg-gray-700 border border-gray-600 text-white"></select>
-                    <input id="txCategoryCustom" type="text" placeholder="Vlastní název..." class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 hidden text-white">
-                    
-                    <label class="block text-sm mb-1 text-gray-400 text-gray-100">Částka (Kč)</label>
-                    <input id="txAmount" type="number" placeholder="0.00" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white">
-                    
-                    <label class="block text-sm mb-1 text-gray-400 text-gray-100">Poznámka</label>
-                    <input id="txNote" type="text" placeholder="Nepovinné..." class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white">
-                    
-                    <div class="flex items-center mb-6">
+                    <select id="txCategorySelect" class="w-full mb-1 p-2 rounded bg-gray-700 border border-gray-600 text-white text-sm"></select>
+                    <input id="txCategoryCustom" type="text" placeholder="Vlastní název..." class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 hidden text-white text-sm">
+                    <input id="txAmount" type="number" placeholder="Částka (Kč)" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold">
+                    <input id="txNote" type="text" placeholder="Poznámka" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white text-sm">
+                    <div class="flex items-center mb-4 text-xs text-gray-400">
                         <input id="txRecurring" type="checkbox" class="w-4 h-4 rounded">
-                        <label for="txRecurring" class="ml-2 text-sm text-gray-400">Opakovat měsíčně</label>
+                        <label for="txRecurring" class="ml-2">Opakovat měsíčně</label>
                     </div>
-                    <button id="btnAddTx" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded font-bold mb-2">ULOŽIT</button>
-                    <button id="btnCancelEdit" class="hidden w-full bg-gray-600 p-3 rounded font-bold">ZRUŠIT</button>
+                    <button id="btnAddTx" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded font-bold transition">ULOŽIT</button>
+                    <button id="btnCancelEdit" class="hidden w-full bg-gray-600 p-2 rounded mt-2 font-bold text-sm">ZRUŠIT</button>
                 </div>
 
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-3">
-                    <div class="flex justify-between items-center mb-4">
-                        <select id="globalPeriodFilter" class="p-1.5 rounded bg-gray-700 border border-gray-600 text-sm">
-                            <option value="current_month">Tento měsíc</option>
-                            <option value="last_month">Minulý měsíc</option>
-                            <option value="all" selected>Celá historie</option>
-                        </select>
-                        <button onclick="deleteSelected()" class="bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded text-sm font-bold">Smazat vybrané</button>
+                    <div class="flex justify-end mb-4">
+                        <button onclick="deleteSelected()" class="text-red-400 hover:text-red-300 text-sm font-bold border border-red-900 px-3 py-1 rounded">Smazat vybrané</button>
                     </div>
-                    <div class="overflow-x-auto max-h-[600px]">
+                    <div class="overflow-x-auto max-h-[500px]">
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky top-0 bg-gray-800">
-                                <tr class="border-b border-gray-700 text-gray-400 text-xs">
-                                    <th class="p-2 w-10 text-center"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-                                    <th class="p-2 text-gray-100">Datum</th>
-                                    <th class="p-2 text-center text-gray-100">Typ</th>
-                                    <th class="p-2 text-gray-100">Kategorie</th>
-                                    <th class="p-2 text-right text-gray-100">Částka</th>
-                                    <th class="p-2 text-center text-gray-100">Akce</th>
+                                <tr class="border-b border-gray-700 text-gray-500 text-xs">
+                                    <th class="p-2 w-8"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                                    <th class="p-2">Datum</th>
+                                    <th class="p-2">Kat.</th>
+                                    <th class="p-2 text-right">Částka</th>
+                                    <th class="p-2 text-center w-12"></th>
                                 </tr>
                             </thead>
                             <tbody id="txTableBody"></tbody>
@@ -109,29 +100,28 @@
         </div>
 
         <div id="tab-analysis" class="tab-content hidden">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-100">
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-fit">
-                    <h2 class="text-xl font-bold mb-4 text-blue-400 text-gray-100">Souhrn období</h2>
-                    <div id="analysisSummary" class="text-gray-300 font-mono text-sm bg-gray-900 p-4 rounded border border-gray-700 whitespace-pre-wrap text-gray-100"></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <h3 id="analysisTitle" class="text-blue-400 font-bold mb-4 uppercase text-sm tracking-widest">Detail období</h3>
+                    <div id="analysisSummary" class="text-gray-300 font-mono text-sm whitespace-pre-wrap leading-relaxed"></div>
                 </div>
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 md:col-span-2 space-y-8">
-                    <div class="h-[300px]"><canvas id="expenseChart"></canvas></div>
-                    <div class="h-[300px]"><canvas id="trendChart"></canvas></div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 md:col-span-2">
+                    <div class="h-[350px]"><canvas id="expenseChart"></canvas></div>
                 </div>
             </div>
         </div>
 
-        <div id="tab-recurring" class="tab-content hidden">
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <h2 class="text-xl font-bold mb-4 text-blue-400">Správa trvalých plateb</h2>
+        <div id="tab-recurring" class="tab-content hidden text-gray-100">
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 text-gray-100">
+                <h2 class="text-xl font-bold mb-4 text-blue-400 text-gray-100 text-gray-100">Trvalé platby (Šablony)</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-gray-700 text-gray-400 text-sm">
-                                <th class="p-2 text-gray-100">Kategorie</th>
-                                <th class="p-2 text-right text-gray-100">Částka</th>
+                            <tr class="border-b border-gray-700 text-gray-400 text-sm text-gray-100 text-gray-100">
+                                <th class="p-2 text-gray-100 text-gray-100">Kategorie</th>
+                                <th class="p-2 text-right text-gray-100 text-gray-100">Částka</th>
                                 <th class="p-2 text-gray-100 text-gray-100">Poznámka</th>
-                                <th class="p-2 text-center text-gray-100">Akce</th>
+                                <th class="p-2 text-center text-gray-100 text-gray-100">Akce</th>
                             </tr>
                         </thead>
                         <tbody id="recurringTableBody"></tbody>
@@ -139,22 +129,13 @@
                 </div>
             </div>
         </div>
-
-        <div id="tab-settings" class="tab-content hidden">
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-xl text-gray-100">
-                <h2 class="text-xl font-bold mb-4 text-gray-100">Nastavení & Import</h2>
-                <input type="file" id="importFile" accept=".json" class="mb-4 block w-full text-sm text-gray-400">
-                <button id="btnImport" class="bg-purple-600 px-6 py-2 rounded font-bold text-gray-100 text-gray-100">Nahrát JSON</button>
-            </div>
-        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, orderBy, doc, deleteDoc, updateDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, doc, deleteDoc, updateDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // --- KONFIGURACE FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyDOODjOh7NNc1pJyLgr68MNTDH1V4ep57k",
             authDomain: "uctenkovani.firebaseapp.com",
@@ -167,58 +148,30 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- KONFIGURACE ---
-        const allowedEmails = ["tvuj.email@seznam.cz"]; // SEM DOPLŇ SVŮJ EMAIL!
-        const defaultCategories = {
-            "Výdaj": ["Jídlo", "Bydlení", "Doprava", "Zábava"],
-            "Příjem": ["Mzda", "Investice", "Dar"]
-        };
+        const allowedEmails = ["tvuj.email@seznam.cz"]; // ZDE ZMĚŇ
+        const defaultCategories = { "Výdaj": ["Jídlo", "Bydlení", "Doprava", "Zábava"], "Příjem": ["Mzda", "Investice", "Dar"] };
 
-        let currentUser = null;
-        let allTx = [];
-        let expChart = null, trendChart = null;
+        let currentUser = null, allTx = [], expChart = null;
 
         window.switchTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
             document.getElementById('tab-' + id).classList.remove('hidden');
-            if(id === 'analysis') render();
+            render(); // Vždy překreslíme při změně záložky
         };
 
-        // Nastavení výchozího data na dnešek
-        function setDefaultDate() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('txDateInput').value = today;
-        }
+        function setDefaultDate() { document.getElementById('txDateInput').value = new Date().toISOString().split('T')[0]; }
 
-        // --- AUTH ---
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('login-section').classList.add('hidden');
-                document.getElementById('app-section').classList.remove('hidden');
-                setDefaultDate();
-                init();
-            } else {
-                document.getElementById('login-section').classList.remove('hidden');
-                document.getElementById('app-section').classList.add('hidden');
-            }
+            if (user) { currentUser = user; document.getElementById('login-section').classList.add('hidden'); document.getElementById('app-section').classList.remove('hidden'); setDefaultDate(); init(); }
+            else { document.getElementById('login-section').classList.remove('hidden'); document.getElementById('app-section').classList.add('hidden'); }
         });
 
-        document.getElementById('btnLogin').addEventListener('click', async () => {
+        document.getElementById('btnLogin').onclick = async () => {
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); }
-            catch (e) { alert("Chyba přihlášení."); }
-        });
+            catch (e) { alert("Chyba."); }
+        };
+        document.getElementById('btnLogout').onclick = () => signOut(auth);
 
-        document.getElementById('btnRegister').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            if (!allowedEmails.includes(email)) return alert("Tento email není povolen.");
-            try { await createUserWithEmailAndPassword(auth, email, document.getElementById('password').value); }
-            catch (e) { alert(e.message); }
-        });
-
-        document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
-
-        // --- CORE LOGIKA ---
         function init() {
             updateCats();
             const q = query(collection(db, "transactions"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
@@ -233,75 +186,44 @@
             });
         }
 
-        const txType = document.getElementById('txType');
-        const catSel = document.getElementById('txCategorySelect');
-        const catCust = document.getElementById('txCategoryCustom');
-
+        const txType = document.getElementById('txType'), catSel = document.getElementById('txCategorySelect'), catCust = document.getElementById('txCategoryCustom');
         function updateCats() {
             catSel.innerHTML = "";
-            defaultCategories[txType.value].forEach(c => {
-                let o = document.createElement("option"); o.value = c; o.textContent = c; catSel.appendChild(o);
-            });
+            defaultCategories[txType.value].forEach(c => { let o = document.createElement("option"); o.value = c; o.textContent = c; catSel.appendChild(o); });
             let o = document.createElement("option"); o.value = "Ostatní"; o.textContent = "Ostatní..."; catSel.appendChild(o);
             checkCust();
         }
         function checkCust() { catCust.classList.toggle("hidden", catSel.value !== "Ostatní"); }
         txType.onchange = updateCats; catSel.onchange = checkCust;
 
-        // ULOŽENÍ TRANSAKCE
         document.getElementById('btnAddTx').onclick = async () => {
             const editId = document.getElementById('editTxId').value;
             const amount = parseFloat(document.getElementById('txAmount').value);
             const category = catSel.value === "Ostatní" ? catCust.value : catSel.value;
-            const inputDate = document.getElementById('txDateInput').value;
-            
-            if (!category || isNaN(amount) || amount <= 0 || !inputDate) return alert("Chybná data.");
-
-            // Převod vybraného data na Timestamp pro Firebase
-            const dateParts = inputDate.split('-');
-            const txDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-
-            const data = {
-                userId: currentUser.uid, 
-                type: txType.value, 
-                category, 
-                amount,
-                note: document.getElementById('txNote').value,
-                recurring: document.getElementById('txRecurring').checked,
-                createdAt: Timestamp.fromDate(txDate) // Uložíme vybrané datum
-            };
-
-            try {
-                if (editId) await updateDoc(doc(db, "transactions", editId), data);
-                else await addDoc(collection(db, "transactions"), data);
-                cancelEdit();
-                setDefaultDate();
-            } catch (e) { alert(e.message); }
+            const txDate = new Date(document.getElementById('txDateInput').value);
+            const data = { userId: currentUser.uid, type: txType.value, category, amount, note: document.getElementById('txNote').value, recurring: document.getElementById('txRecurring').checked, createdAt: Timestamp.fromDate(txDate) };
+            if (editId) await updateDoc(doc(db, "transactions", editId), data);
+            else await addDoc(collection(db, "transactions"), data);
+            cancelEdit();
         };
 
-        window.deleteTx = async (id) => { if(confirm("Opravdu smazat?")) await deleteDoc(doc(db, "transactions", id)); };
-        
+        window.deleteTx = async (id) => { if(confirm("Smazat?")) await deleteDoc(doc(db, "transactions", id)); };
         window.deleteSelected = async () => {
             const selected = document.querySelectorAll('.tx-checkbox:checked');
-            if (selected.length === 0 || !confirm(`Smazat ${selected.length} položek?`)) return;
+            if (!selected.length || !confirm("Smazat?")) return;
             const batch = writeBatch(db);
             selected.forEach(cb => batch.delete(doc(db, "transactions", cb.value)));
             await batch.commit();
         };
 
-        window.toggleSelectAll = (src) => document.querySelectorAll('.tx-checkbox').forEach(cb => cb.checked = src.checked);
-
         window.editTx = (id) => {
             const t = allTx.find(x => x.id === id);
             switchTab('overview');
             document.getElementById('editTxId').value = t.id;
-            
-            // Načtení data do inputu
             document.getElementById('txDateInput').value = t.dateObj.toISOString().split('T')[0];
-            
             txType.value = t.type; updateCats();
-            if (defaultCategories[t.type].includes(t.category)) catSel.value = t.category;
-            else { catSel.value = "Ostatní"; checkCust(); catCust.value = t.category; }
+            catSel.value = defaultCategories[t.type].includes(t.category) ? t.category : "Ostatní";
+            if (catSel.value === "Ostatní") { checkCust(); catCust.value = t.category; }
             document.getElementById('txAmount').value = t.amount;
             document.getElementById('txNote').value = t.note || "";
             document.getElementById('txRecurring').checked = t.recurring;
@@ -310,115 +232,84 @@
         };
 
         function cancelEdit() {
-            document.getElementById('editTxId').value = "";
-            document.getElementById('btnAddTx').textContent = "ULOŽIT";
+            document.getElementById('editTxId').value = ""; document.getElementById('btnAddTx').textContent = "ULOŽIT";
             document.getElementById('btnCancelEdit').classList.add('hidden');
-            document.getElementById('txAmount').value = ""; document.getElementById('txNote').value = "";
-            setDefaultDate();
+            document.getElementById('txAmount').value = ""; document.getElementById('txNote').value = ""; setDefaultDate();
         }
         document.getElementById('btnCancelEdit').onclick = cancelEdit;
 
         window.dupRec = async (id) => {
             const t = allTx.find(x => x.id === id);
-            // Při duplikaci trvalé platby použijeme dnešní datum
-            await addDoc(collection(db, "transactions"), { ...t, id:null, createdAt: serverTimestamp() });
+            await addDoc(collection(db, "transactions"), { ...t, id:null, createdAt: Timestamp.now() });
         };
 
         function render() {
             const filter = document.getElementById('globalPeriodFilter').value;
             const now = new Date();
             let filtered = allTx;
+            
             if (filter === 'current_month') filtered = allTx.filter(t => t.dateObj.getMonth() === now.getMonth() && t.dateObj.getFullYear() === now.getFullYear());
-            if (filter === 'last_month') { let m=now.getMonth()-1, y=now.getFullYear(); if(m<0){m=11;y--;} filtered = allTx.filter(t => t.dateObj.getMonth() === m && t.dateObj.getFullYear() === y); }
+            else if (filter === 'last_month') { 
+                let m = now.getMonth() - 1, y = now.getFullYear(); 
+                if (m < 0) { m = 11; y--; }
+                filtered = allTx.filter(t => t.dateObj.getMonth() === m && t.dateObj.getFullYear() === y);
+            }
 
-            let inc = 0, exp = 0, cats = {}, trend = {};
-            const txBody = document.getElementById('txTableBody');
-            const recBody = document.getElementById('recurringTableBody');
+            let inc = 0, exp = 0, cats = {};
+            const txBody = document.getElementById('txTableBody'), recBody = document.getElementById('recurringTableBody');
             txBody.innerHTML = ""; recBody.innerHTML = "";
 
-            allTx.forEach(t => {
+            // Naplnění dat
+            filtered.forEach(t => {
                 const isInc = t.type === "Příjem";
-                const color = isInc ? "text-green-400" : "text-red-400";
-                if (filtered.includes(t)) {
-                    isInc ? inc += t.amount : exp += t.amount;
-                    if (!isInc) cats[t.category] = (cats[t.category] || 0) + t.amount;
-                    txBody.innerHTML += `<tr class="border-b border-gray-700 text-sm">
-                        <td class="p-2 text-center text-gray-100"><input type="checkbox" value="${t.id}" class="tx-checkbox"></td>
-                        <td class="p-2 text-gray-400">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
-                        <td class="p-2 text-center ${color}">${t.type[0]}</td>
-                        <td class="p-2 text-gray-100">${t.category}</td>
-                        <td class="p-2 text-right font-bold text-gray-100">${t.amount.toLocaleString()}</td>
-                        <td class="p-2 text-center text-gray-100"><button onclick="editTx('${t.id}')">✏️</button></td></tr>`;
-                }
-                const mKey = t.dateObj.getFullYear() + "-" + (t.dateObj.getMonth()+1);
-                if(!trend[mKey]) trend[mKey] = {i:0, e:0};
-                isInc ? trend[mKey].i += t.amount : trend[mKey].e += t.amount;
+                isInc ? inc += t.amount : exp += t.amount;
+                if (!isInc) cats[t.category] = (cats[t.category] || 0) + t.amount;
 
-                if (t.recurring) {
-                    recBody.innerHTML += `<tr class="border-b border-gray-700 text-sm">
-                        <td class="p-2 text-gray-100">${t.category}</td>
-                        <td class="p-2 text-right font-bold text-gray-100">${t.amount.toLocaleString()} Kč</td>
-                        <td class="p-2 text-gray-500 text-xs">${t.note || ""}</td>
-                        <td class="p-2 text-center">
-                            <button onclick="dupRec('${t.id}')" class="bg-green-700 px-2 py-1 rounded text-xs mr-1 font-bold">+ Dnes</button>
-                            <button onclick="deleteTx('${t.id}')" class="bg-red-800 px-2 py-1 rounded text-xs font-bold">Zrušit</button>
-                        </td></tr>`;
-                }
+                txBody.innerHTML += `<tr class="border-b border-gray-700 text-sm hover:bg-gray-800/50">
+                    <td class="p-2 text-center"><input type="checkbox" value="${t.id}" class="tx-checkbox"></td>
+                    <td class="p-2 text-gray-500 text-xs">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
+                    <td class="p-2 font-medium">${t.category}</td>
+                    <td class="p-2 text-right font-bold ${isInc ? 'text-green-400':'text-red-400'}">${t.amount.toLocaleString()}</td>
+                    <td class="p-2 text-center"><button onclick="editTx('${t.id}')" class="opacity-50 hover:opacity-100">✏️</button></td></tr>`;
             });
 
+            // Trvalé platby (vždy ze všech dat)
+            allTx.filter(t => t.recurring).forEach(t => {
+                recBody.innerHTML += `<tr class="border-b border-gray-700 text-sm">
+                    <td class="p-2">${t.category}</td>
+                    <td class="p-2 text-right font-bold">${t.amount.toLocaleString()} Kč</td>
+                    <td class="p-2 text-gray-500 text-xs italic">${t.note || '-'}</td>
+                    <td class="p-2 text-center whitespace-nowrap">
+                        <button onclick="dupRec('${t.id}')" class="bg-green-800 px-2 py-1 rounded text-[10px] font-bold">+ DNES</button>
+                        <button onclick="deleteTx('${t.id}')" class="bg-red-900 px-2 py-1 rounded text-[10px] font-bold ml-1">ZRUŠIT</button>
+                    </td></tr>`;
+            });
+
+            // Hlavní souhrny
             document.getElementById('summary-income').textContent = inc.toLocaleString() + " Kč";
             document.getElementById('summary-expense').textContent = exp.toLocaleString() + " Kč";
             document.getElementById('summary-balance').textContent = (inc - exp).toLocaleString() + " Kč";
 
+            // ANALÝZA TEXT
+            const periodLabel = document.getElementById('globalPeriodFilter').options[document.getElementById('globalPeriodFilter').selectedIndex].text;
+            document.getElementById('analysisTitle').textContent = `Detail: ${periodLabel}`;
+            
             const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
-            let s = `BILANCE ZA OBDOBÍ\n------------------\nPříjmy:   ${inc.toLocaleString()} Kč\nVýdaje:   ${exp.toLocaleString()} Kč\nZůstatek: ${(inc-exp).toLocaleString()} Kč\n\nKATEGORIE VÝDAJŮ:\n`;
-            sorted.forEach(([c, v]) => s += `${c.padEnd(12)}: ${v.toLocaleString()} Kč\n`);
+            let s = `Zůstatek: ${(inc-exp).toLocaleString()} Kč\n\nPOŘADÍ VÝDAJŮ:\n`;
+            sorted.forEach(([c,v])=> s += `${c.padEnd(10)}: ${v.toLocaleString()} Kč\n`);
             document.getElementById('analysisSummary').textContent = s;
 
+            // GRAF
             if (expChart) expChart.destroy();
             expChart = new Chart(document.getElementById('expenseChart'), {
                 type: 'doughnut',
-                data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'] }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: {color:'#fff'} } } }
-            });
-            
-            if (trendChart) trendChart.destroy();
-            const months = Object.keys(trend).sort();
-            trendChart = new Chart(document.getElementById('trendChart'), {
-                type: 'bar',
-                data: { labels: months, datasets: [
-                    { label: 'Příjmy', data: months.map(m=>trend[m].i), backgroundColor: '#4ade80' },
-                    { label: 'Výdaje', data: months.map(m=>trend[m].e), backgroundColor: '#f87171' }
-                ]},
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: {color:'#fff'} } } }
+                data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#9ca3af', font: { size: 12 } } } } }
             });
         }
 
         document.getElementById('globalPeriodFilter').onchange = render;
-
-        // --- IMPORT Z JSON ---
-        document.getElementById('btnImport').onclick = () => {
-            const file = document.getElementById('importFile').files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const data = JSON.parse(e.target.result);
-                let count = 0;
-                for (const t of data) {
-                    let d = new Date();
-                    if (t.date) { const p = t.date.split('.'); d = new Date(p[2], p[1]-1, p[0]); }
-                    await addDoc(collection(db, "transactions"), {
-                        userId: currentUser.uid, type: t.type||"Výdaj", category: t.category||"Ostatní",
-                        amount: parseFloat(t.amount)||0, note: t.note||"",
-                        recurring: t.recurring === "Ano", createdAt: Timestamp.fromDate(d)
-                    });
-                    count++;
-                }
-                alert("Úspěšně naimportováno " + count + " transakcí.");
-                switchTab('overview');
-            };
-            reader.readAsText(file);
-        };
+        window.toggleSelectAll = (src) => document.querySelectorAll('.tx-checkbox').forEach(cb => cb.checked = src.checked);
     </script>
 </body>
 </html>
