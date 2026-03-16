@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Správa financí - Web</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans min-h-screen">
+
+    <div id="login-section" class="flex flex-col items-center justify-center min-h-screen">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-lg w-96 border border-gray-700">
+            <h1 class="text-2xl font-bold mb-6 text-center text-blue-400">Bezpečnostní brána</h1>
+            <input id="email" type="email" placeholder="Email" class="w-full mb-4 p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 text-white">
+            <input id="password" type="password" placeholder="Heslo" class="w-full mb-6 p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 text-white">
+            <button id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold mb-3 transition">Přihlásit se</button>
+            <button id="btnRegister" class="w-full bg-gray-600 hover:bg-gray-500 p-3 rounded font-bold transition">Vytvořit účet</button>
+            <p id="login-error" class="text-red-400 text-sm mt-4 hidden text-center"></p>
+        </div>
+    </div>
+
+    <div id="app-section" class="hidden max-w-6xl mx-auto p-4 md:p-6">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4 gap-4">
+            <h1 class="text-3xl font-bold text-blue-400">Imperátor Financí v8.0</h1>
+            <div class="flex flex-wrap gap-4 items-center justify-center">
+                <select id="globalPeriodFilter" class="p-2 rounded bg-gray-700 border border-gray-600 text-sm font-bold text-blue-300">
+                    <option value="current_month">Tento měsíc</option>
+                    <option value="last_month">Minulý měsíc</option>
+                    <option value="current_year">Tento rok</option>
+                    <option value="all" selected>Všechna období</option>
+                </select>
+                <button onclick="switchTab('overview')" class="hover:text-blue-400 transition font-bold">Přehled</button>
+                <button onclick="switchTab('analysis')" class="hover:text-blue-400 transition font-bold">Analýza</button>
+                <button onclick="switchTab('recurring')" class="hover:text-blue-400 transition font-bold">Trvalé platby</button>
+                <button onclick="switchTab('settings')" class="hover:text-blue-400 transition font-bold text-gray-400">Nastavení</button>
+                <button id="btnLogout" class="bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded text-sm transition font-bold">Odhlásit</button>
+            </div>
+        </div>
+
+        <div id="tab-overview" class="tab-content block">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
+                    <span class="text-gray-400 text-xs uppercase">Příjmy</span>
+                    <div id="summary-income" class="text-2xl font-bold text-green-400">0 Kč</div>
+                </div>
+                <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
+                    <span class="text-gray-400 text-xs uppercase">Výdaje</span>
+                    <div id="summary-expense" class="text-2xl font-bold text-red-400">0 Kč</div>
+                </div>
+                <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 border-l-4 border-l-blue-500">
+                    <span class="text-gray-400 text-xs uppercase">Zůstatek</span>
+                    <div id="summary-balance" class="text-2xl font-bold text-blue-400">0 Kč</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-1 h-fit">
+                    <h2 id="formTitle" class="text-xl font-bold mb-4">Nová transakce</h2>
+                    <input type="hidden" id="editTxId">
+                    <label class="block text-sm mb-1 text-gray-400">Typ</label>
+                    <select id="txType" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white">
+                        <option value="Výdaj">Výdaj</option>
+                        <option value="Příjem">Příjem</option>
+                    </select>
+                    <label class="block text-sm mb-1 text-gray-400">Kategorie</label>
+                    <select id="txCategorySelect" class="w-full mb-2 p-2 rounded bg-gray-700 border border-gray-600 text-white"></select>
+                    <input id="txCategoryCustom" type="text" placeholder="Vlastní název..." class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 hidden text-white">
+                    <label class="block text-sm mb-1 text-gray-400">Částka (Kč)</label>
+                    <input id="txAmount" type="number" placeholder="0.00" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white">
+                    <label class="block text-sm mb-1 text-gray-400">Poznámka</label>
+                    <input id="txNote" type="text" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white">
+                    <div class="flex items-center mb-6">
+                        <input id="txRecurring" type="checkbox" class="w-4 h-4 rounded bg-gray-700 border-gray-600">
+                        <label for="txRecurring" class="ml-2 text-sm text-gray-400">Opakovat měsíčně</label>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <button id="btnAddTx" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded font-bold transition">ULOŽIT</button>
+                        <button id="btnCancelEdit" class="hidden bg-gray-600 hover:bg-gray-500 p-3 rounded font-bold transition">ZRUŠIT</button>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-3">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Historie</h2>
+                        <button onclick="deleteSelected()" class="bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded text-sm font-bold transition">Hromadné smazání</button>
+                    </div>
+                    <div class="overflow-x-auto max-h-[600px]">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="sticky top-0 bg-gray-800">
+                                <tr class="border-b border-gray-700 text-gray-400 text-sm">
+                                    <th class="p-2 w-10 text-center"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" class="w-4 h-4 rounded"></th>
+                                    <th class="p-2">Datum</th>
+                                    <th class="p-2 text-center">Typ</th>
+                                    <th class="p-2">Kategorie</th>
+                                    <th class="p-2 text-right">Částka</th>
+                                    <th class="p-2">Poznámka</th>
+                                    <th class="p-2 text-center">Akce</th>
+                                </tr>
+                            </thead>
+                            <tbody id="txTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-analysis" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-fit">
+                    <h2 class="text-xl font-bold mb-4 text-blue-400">Detailní souhrn</h2>
+                    <div id="analysisSummary" class="text-gray-300 font-mono text-sm bg-gray-900 p-4 rounded border border-gray-700 whitespace-pre-wrap"></div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 md:col-span-2 space-y-8">
+                    <div class="h-[350px] w-full"><canvas id="expenseChart"></canvas></div>
+                    <hr class="border-gray-700">
+                    <div class="h-[350px] w-full"><canvas id="trendChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-recurring" class="tab-content hidden">
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                <h2 class="text-xl font-bold mb-4 text-blue-400">Moje trvalé platby</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-700 text-gray-400">
+                                <th class="p-2">Poslední</th>
+                                <th class="p-2 text-center">Typ</th>
+                                <th class="p-2">Kategorie</th>
+                                <th class="p-2 text-right">Částka</th>
+                                <th class="p-2">Poznámka</th>
+                                <th class="p-2 text-center">Akce</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recurringTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-settings" class="tab-content hidden">
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-xl">
+                <h2 class="text-xl font-bold mb-4 text-blue-400">Import dat z Pythonu</h2>
+                <p class="text-gray-400 mb-4 text-sm">Vyberte soubor <b>export.json</b> vygenerovaný migračním skriptem. Datumy budou zachovány.</p>
+                <input type="file" id="importFile" accept=".json" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white mb-6">
+                <button id="btnImport" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded font-bold transition">Spustit import</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, orderBy, doc, deleteDoc, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDOODjOh7NNc1pJyLgr68MNTDH1V4ep57k",
+            authDomain: "uctenkovani.firebaseapp.com",
+            projectId: "uctenkovani",
+            storageBucket: "uctenkovani.firebasestorage.app",
+            messagingSenderId: "112014852298",
+            appId: "1:112014852298:web:f40a8bfd946bdef4983433"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // CONFIG - DOPLŇ SVŮJ EMAIL SEM:
+        const allowedEmails = ["vojtalisztwan@gmail.com", "plisztwanova@gmail.com"]; // pouze tyto emaily se mohou registrovat
+        const defaultCategories = {
+            "Výdaj": ["Jídlo", "Bydlení", "Doprava", "Zábava"],
+            "Příjem": ["Mzda", "Investice", "Dar"]
+        };
+
+        let currentUser = null;
+        let unsubscribeDb = null;
+        let allTransactions = []; 
+        let expenseChartObj = null; 
+        let trendChartObj = null;
+
+        window.switchTab = (id) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + id).classList.remove('hidden');
+            if(id === 'analysis') renderDashboard();
+        }
+
+        // --- KATEGORIE ---
+        const txTypeSelect = document.getElementById('txType');
+        const txCategorySelect = document.getElementById('txCategorySelect');
+        const txCategoryCustom = document.getElementById('txCategoryCustom');
+
+        function updateCategoryDropdown() {
+            txCategorySelect.innerHTML = "";
+            defaultCategories[txTypeSelect.value].forEach(cat => {
+                const opt = document.createElement("option"); opt.value = cat; opt.textContent = cat;
+                txCategorySelect.appendChild(opt);
+            });
+            const other = document.createElement("option"); other.value = "Ostatní"; other.textContent = "Ostatní...";
+            txCategorySelect.appendChild(other);
+            checkCustomCategory();
+        }
+
+        function checkCustomCategory() {
+            if (txCategorySelect.value === "Ostatní") txCategoryCustom.classList.remove("hidden");
+            else txCategoryCustom.classList.add("hidden");
+        }
+        txTypeSelect.addEventListener('change', updateCategoryDropdown);
+        txCategorySelect.addEventListener('change', checkCustomCategory);
+
+        // --- AUTH ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+                updateCategoryDropdown(); 
+                loadTransactions(); 
+            } else {
+                currentUser = null;
+                document.getElementById('login-section').classList.remove('hidden');
+                document.getElementById('app-section').classList.add('hidden');
+                if (unsubscribeDb) unsubscribeDb(); 
+            }
+        });
+
+        document.getElementById('btnLogin').addEventListener('click', async () => {
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
+                document.getElementById('login-error').classList.add('hidden');
+            } catch (e) {
+                document.getElementById('login-error').textContent = "Přihlášení selhalo.";
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('btnRegister').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            if (!allowedEmails.includes(email)) {
+                alert("Tento email není na whitelistu."); return;
+            }
+            try {
+                await createUserWithEmailAndPassword(auth, email, document.getElementById('password').value);
+            } catch (e) { alert(e.message); }
+        });
+
+        document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
+
+        // --- LOGIKA DAT ---
+        document.getElementById('btnAddTx').addEventListener('click', async () => {
+            const editId = document.getElementById('editTxId').value;
+            const type = txTypeSelect.value;
+            let category = txCategorySelect.value === "Ostatní" ? txCategoryCustom.value.trim() : txCategorySelect.value;
+            const amount = parseFloat(document.getElementById('txAmount').value);
+            const note = document.getElementById('txNote').value;
+            const isRec = document.getElementById('txRecurring').checked;
+
+            if (!category || isNaN(amount) || amount <= 0) return alert("Chybná data.");
+
+            const dataObj = { userId: currentUser.uid, type, category, amount, note, recurring: isRec };
+
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, "transactions", editId), dataObj);
+                    cancelEdit();
+                } else {
+                    dataObj.createdAt = serverTimestamp();
+                    await addDoc(collection(db, "transactions"), dataObj);
+                }
+                document.getElementById('txAmount').value = ""; document.getElementById('txNote').value = "";
+                document.getElementById('txRecurring').checked = false;
+            } catch (e) { alert(e.message); }
+        });
+
+        window.toggleSelectAll = (source) => {
+            document.querySelectorAll('.tx-checkbox').forEach(cb => cb.checked = source.checked);
+        }
+
+        window.deleteSelected = async () => {
+            const selected = document.querySelectorAll('.tx-checkbox:checked');
+            if (selected.length === 0) return;
+            if (!confirm(`Smazat ${selected.length} položek?`)) return;
+            const batch = writeBatch(db);
+            selected.forEach(cb => batch.delete(doc(db, "transactions", cb.value)));
+            await batch.commit();
+            document.getElementById('selectAll').checked = false;
+        }
+
+        window.editTransaction = (id) => {
+            const tx = allTransactions.find(t => t.id === id);
+            if (!tx) return;
+            switchTab('overview');
+            document.getElementById('editTxId').value = tx.id;
+            document.getElementById('formTitle').textContent = "Úprava transakce";
+            document.getElementById('txType').value = tx.type;
+            updateCategoryDropdown();
+            if (defaultCategories[tx.type].includes(tx.category)) txCategorySelect.value = tx.category;
+            else { txCategorySelect.value = "Ostatní"; checkCustomCategory(); txCategoryCustom.value = tx.category; }
+            document.getElementById('txAmount').value = tx.amount;
+            document.getElementById('txNote').value = tx.note || "";
+            document.getElementById('txRecurring').checked = tx.recurring || false;
+            document.getElementById('btnAddTx').textContent = "AKTUALIZOVAT";
+            document.getElementById('btnCancelEdit').classList.remove('hidden');
+        }
+
+        function cancelEdit() {
+            document.getElementById('editTxId').value = "";
+            document.getElementById('formTitle').textContent = "Nová transakce";
+            document.getElementById('btnAddTx').textContent = "ULOŽIT";
+            document.getElementById('btnCancelEdit').classList.add('hidden');
+            document.getElementById('txAmount').value = ""; document.getElementById('txNote').value = "";
+        }
+
+        window.duplicateRecurring = async (id) => {
+            const tx = allTransactions.find(t => t.id === id);
+            await addDoc(collection(db, "transactions"), { ...tx, id: null, createdAt: serverTimestamp() });
+            alert("Duplikováno pro aktuální měsíc.");
+        }
+
+        function loadTransactions() {
+            const q = query(collection(db, "transactions"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
+            unsubscribeDb = onSnapshot(q, (snap) => {
+                allTransactions = [];
+                snap.forEach(d => {
+                    let data = d.data(); data.id = d.id;
+                    data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
+                    allTransactions.push(data);
+                });
+                renderDashboard();
+            });
+        }
+
+        function renderDashboard() {
+            const filter = document.getElementById('globalPeriodFilter').value;
+            const now = new Date();
+            let filtered = allTransactions;
+
+            if (filter === 'current_month') filtered = allTransactions.filter(t => t.dateObj.getMonth() === now.getMonth() && t.dateObj.getFullYear() === now.getFullYear());
+            else if (filter === 'last_month') {
+                let m = now.getMonth()-1, y = now.getFullYear(); if(m<0){m=11;y--;}
+                filtered = allTransactions.filter(t => t.dateObj.getMonth() === m && t.dateObj.getFullYear() === y);
+            } else if (filter === 'current_year') filtered = allTransactions.filter(t => t.dateObj.getFullYear() === now.getFullYear());
+
+            let inc = 0, exp = 0, catExp = {}, trend = {};
+            const txBody = document.getElementById('txTableBody');
+            const recBody = document.getElementById('recurringTableBody');
+            txBody.innerHTML = ""; recBody.innerHTML = "";
+
+            allTransactions.forEach(t => {
+                const dateStr = t.dateObj.toLocaleDateString('cs-CZ');
+                const isInc = t.type === "Příjem";
+                const color = isInc ? "text-green-400" : "text-red-400";
+
+                if (filtered.includes(t)) {
+                    isInc ? inc += t.amount : exp += t.amount;
+                    if (!isInc) catExp[t.category] = (catExp[t.category] || 0) + t.amount;
+                    txBody.innerHTML += `
+                        <tr class="border-b border-gray-700 hover:bg-gray-700 transition text-sm">
+                            <td class="p-2 text-center"><input type="checkbox" value="${t.id}" class="tx-checkbox w-4 h-4"></td>
+                            <td class="p-2 text-gray-400">${dateStr}</td>
+                            <td class="p-2 text-center ${color}">${t.type[0]}</td>
+                            <td class="p-2">${t.category}</td>
+                            <td class="p-2 text-right font-bold ${color}">${t.amount.toLocaleString()} Kč</td>
+                            <td class="p-2 text-gray-500 truncate max-w-[100px]">${t.note || ""}</td>
+                            <td class="p-2 text-center text-lg"><button onclick="editTransaction('${t.id}')">✏️</button></td>
+                        </tr>`;
+                }
+
+                const mKey = t.dateObj.getFullYear() + "-" + (t.dateObj.getMonth()+1).toString().padStart(2,'0');
+                if(!trend[mKey]) trend[mKey] = {i:0, e:0};
+                isInc ? trend[mKey].i += t.amount : trend[mKey].e += t.amount;
+
+                if (t.recurring) {
+                    recBody.innerHTML += `
+                        <tr class="border-b border-gray-700 text-sm">
+                            <td class="p-2">${dateStr}</td>
+                            <td class="p-2 text-center ${color}">${t.type[0]}</td>
+                            <td class="p-2">${t.category}</td>
+                            <td class="p-2 text-right font-bold">${t.amount.toLocaleString()} Kč</td>
+                            <td class="p-2 text-gray-500">${t.note || ""}</td>
+                            <td class="p-2 text-center">
+                                <button onclick="duplicateRecurring('${t.id}')" class="bg-green-600 px-2 py-1 rounded text-xs mr-2">+ Dnes</button>
+                                <button onclick="editTransaction('${t.id}')" class="bg-gray-600 px-2 py-1 rounded text-xs">Upravit</button>
+                            </td>
+                        </tr>`;
+                }
+            });
+
+            document.getElementById('summary-income').textContent = inc.toLocaleString() + " Kč";
+            document.getElementById('summary-expense').textContent = exp.toLocaleString() + " Kč";
+            document.getElementById('summary-balance').textContent = (inc - exp).toLocaleString() + " Kč";
+
+            updateAnalysisUI(inc, exp, catExp, trend);
+        }
+
+        document.getElementById('globalPeriodFilter').addEventListener('change', renderDashboard);
+
+        function updateAnalysisUI(inc, exp, catExp, trend) {
+            const sorted = Object.entries(catExp).sort((a,b)=>b[1]-a[1]);
+            let s = `BILANCE ZA OBDOBÍ\n------------------\nPříjmy:  ${inc.toLocaleString()} Kč\nVýdaje:  ${exp.toLocaleString()} Kč\nZůstatek: ${(inc-exp).toLocaleString()} Kč\n\nPOŘADÍ VÝDAJŮ:\n`;
+            sorted.forEach(([c, v]) => s += `${c.padEnd(12)}: ${v.toLocaleString()} Kč\n`);
+            document.getElementById('analysisSummary').textContent = s;
+
+            if (expenseChartObj) expenseChartObj.destroy();
+            expenseChartObj = new Chart(document.getElementById('expenseChart'), {
+                type: 'doughnut',
+                data: { labels: Object.keys(catExp), datasets: [{ data: Object.values(catExp), backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6'] }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: {color:'#fff'} }, title: {display:true, text:'Kategorie výdajů', color:'#fff'} } }
+            });
+
+            if (trendChartObj) trendChartObj.destroy();
+            const months = Object.keys(trend).sort();
+            trendChartObj = new Chart(document.getElementById('trendChart'), {
+                type: 'bar',
+                data: { labels: months, datasets: [
+                    { label: 'Příjmy', data: months.map(m=>trend[m].i), backgroundColor: '#4ade80' },
+                    { label: 'Výdaje', data: months.map(m=>trend[m].e), backgroundColor: '#f87171' }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: {color:'#fff'} }, title: {display:true, text:'Měsíční trend', color:'#fff'} } }
+            });
+        }
+
+        // --- IMPORT ---
+        document.getElementById('btnImport').addEventListener('click', () => {
+            const file = document.getElementById('importFile').files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const data = JSON.parse(e.target.result);
+                let count = 0;
+                for (const tx of data) {
+                    let d = new Date();
+                    if (tx.date) {
+                        const p = tx.date.split('.');
+                        if(p.length===3) d = new Date(p[2], p[1]-1, p[0]);
+                    }
+                    await addDoc(collection(db, "transactions"), {
+                        userId: currentUser.uid, type: tx.type||"Výdaj", category: tx.category||"Ostatní",
+                        amount: parseFloat(tx.amount)||0, note: tx.note||"",
+                        recurring: tx.recurring === "Ano", createdAt: d
+                    });
+                    count++;
+                }
+                alert("Importováno " + count + " transakcí.");
+                switchTab('overview');
+            };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>
