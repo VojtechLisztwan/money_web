@@ -19,48 +19,49 @@
         </div>
     </div>
 
-    <div id="app-section" class="hidden max-w-6xl mx-auto p-4 md:p-6">
+    <div id="app-section" class="hidden max-w-6xl mx-auto p-4 md:p-6 text-gray-100">
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4 gap-4">
             <h1 class="text-2xl font-bold text-blue-400">Správa financí</h1>
             
             <div class="flex flex-wrap gap-4 items-center justify-center">
                 <nav class="flex gap-4 mr-4 border-r border-gray-700 pr-4">
                     <button onclick="switchTab('overview')" class="hover:text-blue-400 transition font-bold">Přehled</button>
-                    <button onclick="switchTab('analysis')" class="hover:text-blue-400 transition font-bold">Analýza</button>
-                    <button onclick="switchTab('recurring')" class="hover:text-blue-400 transition font-bold">Trvalé</button>
+                    <button onclick="switchTab('analysis')" class="hover:text-blue-400 transition font-bold text-gray-100">Analýza</button>
+                    <button onclick="switchTab('recurring')" class="hover:text-blue-400 transition font-bold text-gray-100">Trvalé</button>
+                    <button onclick="switchTab('settings')" class="hover:text-blue-400 transition font-bold text-gray-400 text-gray-100">Nastavení</button>
                 </nav>
 
-                <select id="globalPeriodFilter" class="p-1.5 rounded bg-gray-800 border border-gray-600 text-sm font-bold text-blue-300 outline-none focus:border-blue-500">
+                <select id="globalPeriodFilter" class="p-1.5 rounded bg-gray-800 border border-gray-600 text-sm font-bold text-blue-300 outline-none focus:border-blue-500 text-gray-100">
                     <option value="current_month">Tento měsíc</option>
                     <option value="last_month">Minulý měsíc</option>
                     <option value="all" selected>Celá historie</option>
                 </select>
 
-                <button id="btnLogout" class="bg-red-900/50 hover:bg-red-800 px-3 py-1.5 rounded text-xs transition border border-red-700">Odhlásit</button>
+                <button id="btnLogout" class="bg-red-900/50 hover:bg-red-800 px-3 py-1.5 rounded text-xs transition border border-red-700 text-gray-100">Odhlásit</button>
             </div>
         </div>
 
-        <div id="tab-overview" class="tab-content block">
+        <div id="tab-overview" class="tab-content block text-gray-100">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                    <span class="text-gray-400 text-xs uppercase">Příjmy</span>
+                    <span class="text-gray-400 text-xs uppercase text-gray-100">Příjmy</span>
                     <div id="summary-income" class="text-2xl font-bold text-green-400">0 Kč</div>
                 </div>
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                    <span class="text-gray-400 text-xs uppercase">Výdaje</span>
+                    <span class="text-gray-400 text-xs uppercase text-gray-100">Výdaje</span>
                     <div id="summary-expense" class="text-2xl font-bold text-red-400">0 Kč</div>
                 </div>
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 border-l-4 border-l-blue-500">
-                    <span class="text-gray-400 text-xs uppercase">Zůstatek</span>
+                    <span class="text-gray-400 text-xs uppercase text-gray-100">Zůstatek</span>
                     <div id="summary-balance" class="text-2xl font-bold text-blue-400">0 Kč</div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-fit">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-1 h-fit text-gray-100">
                     <h2 id="formTitle" class="text-lg font-bold mb-4">Nová transakce</h2>
                     <input type="hidden" id="editTxId">
-                    <input id="txDateInput" type="date" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white">
+                    <input id="txDateInput" type="date" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white text-gray-100">
                     <select id="txType" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold text-sm">
                         <option value="Výdaj">Výdaj</option>
                         <option value="Příjem">Příjem</option>
@@ -68,28 +69,28 @@
                     <select id="txCategorySelect" class="w-full mb-1 p-2 rounded bg-gray-700 border border-gray-600 text-white text-sm"></select>
                     <input id="txCategoryCustom" type="text" placeholder="Vlastní název..." class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 hidden text-white text-sm">
                     <input id="txAmount" type="number" placeholder="Částka (Kč)" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold">
-                    <input id="txNote" type="text" placeholder="Poznámka" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white text-sm">
+                    <input id="txNote" type="text" placeholder="Poznámka" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white text-sm text-gray-100">
                     <div class="flex items-center mb-4 text-xs text-gray-400">
                         <input id="txRecurring" type="checkbox" class="w-4 h-4 rounded">
-                        <label for="txRecurring" class="ml-2">Opakovat měsíčně</label>
+                        <label for="txRecurring" class="ml-2 text-gray-100">Opakovat měsíčně</label>
                     </div>
-                    <button id="btnAddTx" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded font-bold transition">ULOŽIT</button>
-                    <button id="btnCancelEdit" class="hidden w-full bg-gray-600 p-2 rounded mt-2 font-bold text-sm">ZRUŠIT</button>
+                    <button id="btnAddTx" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded font-bold transition text-gray-100">ULOŽIT</button>
+                    <button id="btnCancelEdit" class="hidden w-full bg-gray-600 p-2 rounded mt-2 font-bold text-sm text-gray-100">ZRUŠIT</button>
                 </div>
 
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-3">
                     <div class="flex justify-end mb-4">
-                        <button onclick="deleteSelected()" class="text-red-400 hover:text-red-300 text-sm font-bold border border-red-900 px-3 py-1 rounded">Smazat vybrané</button>
+                        <button onclick="deleteSelected()" class="text-red-400 hover:text-red-300 text-sm font-bold border border-red-900 px-3 py-1 rounded text-gray-100">Smazat vybrané</button>
                     </div>
                     <div class="overflow-x-auto max-h-[500px]">
                         <table class="w-full text-left border-collapse">
                             <thead class="sticky top-0 bg-gray-800">
                                 <tr class="border-b border-gray-700 text-gray-500 text-xs">
-                                    <th class="p-2 w-8"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-                                    <th class="p-2">Datum</th>
-                                    <th class="p-2">Kat.</th>
-                                    <th class="p-2 text-right">Částka</th>
-                                    <th class="p-2 text-center w-12"></th>
+                                    <th class="p-2 w-8 text-gray-100 text-center"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                                    <th class="p-2 text-gray-100 text-gray-100">Datum</th>
+                                    <th class="p-2 text-gray-100 text-gray-100">Kategorie</th>
+                                    <th class="p-2 text-right text-gray-100 text-gray-100">Částka</th>
+                                    <th class="p-2 text-center w-12 text-gray-100 text-gray-100">Akce</th>
                                 </tr>
                             </thead>
                             <tbody id="txTableBody"></tbody>
@@ -99,11 +100,11 @@
             </div>
         </div>
 
-        <div id="tab-analysis" class="tab-content hidden">
+        <div id="tab-analysis" class="tab-content hidden text-gray-100">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                    <h3 id="analysisTitle" class="text-blue-400 font-bold mb-4 uppercase text-sm tracking-widest">Detail období</h3>
-                    <div id="analysisSummary" class="text-gray-300 font-mono text-sm whitespace-pre-wrap leading-relaxed"></div>
+                    <h3 id="analysisTitle" class="text-blue-400 font-bold mb-4 uppercase text-sm tracking-widest text-gray-100">Detail období</h3>
+                    <div id="analysisSummary" class="text-gray-300 font-mono text-sm whitespace-pre-wrap leading-relaxed text-gray-100"></div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 md:col-span-2">
                     <div class="h-[350px]"><canvas id="expenseChart"></canvas></div>
@@ -112,14 +113,14 @@
         </div>
 
         <div id="tab-recurring" class="tab-content hidden text-gray-100">
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 text-gray-100">
-                <h2 class="text-xl font-bold mb-4 text-blue-400 text-gray-100 text-gray-100">Trvalé platby (Šablony)</h2>
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                <h2 class="text-xl font-bold mb-4 text-blue-400">Trvalé platby</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-gray-700 text-gray-400 text-sm text-gray-100 text-gray-100">
-                                <th class="p-2 text-gray-100 text-gray-100">Kategorie</th>
-                                <th class="p-2 text-right text-gray-100 text-gray-100">Částka</th>
+                            <tr class="border-b border-gray-700 text-gray-400 text-sm">
+                                <th class="p-2 text-gray-100">Kategorie</th>
+                                <th class="p-2 text-right text-gray-100 text-gray-100 font-bold">Částka</th>
                                 <th class="p-2 text-gray-100 text-gray-100">Poznámka</th>
                                 <th class="p-2 text-center text-gray-100 text-gray-100">Akce</th>
                             </tr>
@@ -129,11 +130,20 @@
                 </div>
             </div>
         </div>
+
+        <div id="tab-settings" class="tab-content hidden text-gray-100">
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-xl text-gray-100">
+                <h2 class="text-xl font-bold mb-4 text-blue-400 text-gray-100">Nastavení & Import</h2>
+                <p class="text-gray-400 mb-4 text-sm text-gray-100">Zde můžete naimportovat svůj <b>export.json</b> vygenerovaný z Pythonu.</p>
+                <input type="file" id="importFile" accept=".json" class="mb-4 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-600 file:text-white">
+                <button id="btnImport" class="bg-purple-600 px-6 py-2 rounded font-bold transition text-gray-100">Spustit import</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, doc, deleteDoc, updateDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -148,7 +158,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const allowedEmails = ["tvuj.email@seznam.cz"]; // ZDE ZMĚŇ
+        const allowedEmails = ["tvuj.email@seznam.cz"]; 
         const defaultCategories = { "Výdaj": ["Jídlo", "Bydlení", "Doprava", "Zábava"], "Příjem": ["Mzda", "Investice", "Dar"] };
 
         let currentUser = null, allTx = [], expChart = null;
@@ -156,7 +166,7 @@
         window.switchTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
             document.getElementById('tab-' + id).classList.remove('hidden');
-            render(); // Vždy překreslíme při změně záložky
+            render();
         };
 
         function setDefaultDate() { document.getElementById('txDateInput').value = new Date().toISOString().split('T')[0]; }
@@ -168,7 +178,13 @@
 
         document.getElementById('btnLogin').onclick = async () => {
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); }
-            catch (e) { alert("Chyba."); }
+            catch (e) { alert("Chyba přihlášení."); }
+        };
+        document.getElementById('btnRegister').onclick = async () => {
+            const email = document.getElementById('email').value;
+            if (!allowedEmails.includes(email)) return alert("Email není povolen.");
+            try { await createUserWithEmailAndPassword(auth, email, document.getElementById('password').value); }
+            catch (e) { alert(e.message); }
         };
         document.getElementById('btnLogout').onclick = () => signOut(auth);
 
@@ -259,7 +275,6 @@
             const txBody = document.getElementById('txTableBody'), recBody = document.getElementById('recurringTableBody');
             txBody.innerHTML = ""; recBody.innerHTML = "";
 
-            // Naplnění dat
             filtered.forEach(t => {
                 const isInc = t.type === "Příjem";
                 isInc ? inc += t.amount : exp += t.amount;
@@ -267,13 +282,12 @@
 
                 txBody.innerHTML += `<tr class="border-b border-gray-700 text-sm hover:bg-gray-800/50">
                     <td class="p-2 text-center"><input type="checkbox" value="${t.id}" class="tx-checkbox"></td>
-                    <td class="p-2 text-gray-500 text-xs">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
+                    <td class="p-2 text-gray-400 text-xs">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
                     <td class="p-2 font-medium">${t.category}</td>
                     <td class="p-2 text-right font-bold ${isInc ? 'text-green-400':'text-red-400'}">${t.amount.toLocaleString()}</td>
-                    <td class="p-2 text-center"><button onclick="editTx('${t.id}')" class="opacity-50 hover:opacity-100">✏️</button></td></tr>`;
+                    <td class="p-2 text-center"><button onclick="editTx('${t.id}')">✏️</button></td></tr>`;
             });
 
-            // Trvalé platby (vždy ze všech dat)
             allTx.filter(t => t.recurring).forEach(t => {
                 recBody.innerHTML += `<tr class="border-b border-gray-700 text-sm">
                     <td class="p-2">${t.category}</td>
@@ -285,21 +299,17 @@
                     </td></tr>`;
             });
 
-            // Hlavní souhrny
             document.getElementById('summary-income').textContent = inc.toLocaleString() + " Kč";
             document.getElementById('summary-expense').textContent = exp.toLocaleString() + " Kč";
             document.getElementById('summary-balance').textContent = (inc - exp).toLocaleString() + " Kč";
 
-            // ANALÝZA TEXT
             const periodLabel = document.getElementById('globalPeriodFilter').options[document.getElementById('globalPeriodFilter').selectedIndex].text;
             document.getElementById('analysisTitle').textContent = `Detail: ${periodLabel}`;
-            
             const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
             let s = `Zůstatek: ${(inc-exp).toLocaleString()} Kč\n\nPOŘADÍ VÝDAJŮ:\n`;
             sorted.forEach(([c,v])=> s += `${c.padEnd(10)}: ${v.toLocaleString()} Kč\n`);
             document.getElementById('analysisSummary').textContent = s;
 
-            // GRAF
             if (expChart) expChart.destroy();
             expChart = new Chart(document.getElementById('expenseChart'), {
                 type: 'doughnut',
@@ -310,6 +320,30 @@
 
         document.getElementById('globalPeriodFilter').onchange = render;
         window.toggleSelectAll = (src) => document.querySelectorAll('.tx-checkbox').forEach(cb => cb.checked = src.checked);
+
+        // LOGIKA IMPORTU
+        document.getElementById('btnImport').onclick = () => {
+            const fileInput = document.getElementById('importFile');
+            if (!fileInput.files.length) return alert("Vyberte soubor.");
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    for (const tx of data) {
+                        let d = new Date();
+                        if (tx.date) { const p = tx.date.split('.'); d = new Date(p[2], p[1]-1, p[0]); }
+                        await addDoc(collection(db, "transactions"), {
+                            userId: currentUser.uid, type: tx.type||"Výdaj", category: tx.category||"Ostatní",
+                            amount: parseFloat(tx.amount)||0, note: tx.note||"",
+                            recurring: tx.recurring === "Ano", createdAt: Timestamp.fromDate(d)
+                        });
+                    }
+                    alert("Import dokončen.");
+                    switchTab('overview');
+                } catch (err) { alert("Chyba: " + err.message); }
+            };
+            reader.readAsText(fileInput.files[0]);
+        };
     </script>
 </body>
 </html>
