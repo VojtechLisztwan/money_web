@@ -8,16 +8,22 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @media print {
+            @page { size: A4; margin: 15mm; }
             .no-print { display: none !important; }
             .print-only { display: block !important; color: black !important; }
-            body { background: white !important; color: black !important; padding: 0 !important; }
-            .bg-gray-800, .bg-gray-900, .bg-gray-700 { background: white !important; border: 1px solid #eee !important; color: black !important; }
-            .text-white, .text-gray-100, .text-gray-300, .text-gray-400 { color: black !important; }
-            .text-blue-400 { color: #2563eb !important; text-decoration: underline; }
+            body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
+            .bg-gray-800, .bg-gray-900, .bg-gray-700 { background: white !important; border: 1px solid #eee !important; color: black !important; box-shadow: none !important; }
+            .text-white, .text-gray-100, .text-gray-300, .text-gray-400, .text-gray-500 { color: black !important; }
+            .text-blue-400 { color: #2563eb !important; text-decoration: none !important; }
             .border-gray-700 { border-color: #ddd !important; }
+            #report-content { border: none !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
             canvas { max-width: 100% !important; height: auto !important; }
-            table { font-size: 10pt !important; width: 100% !important; border: 1px solid #ddd !important; }
-            th, td { border-bottom: 1px solid #eee !important; padding: 4px !important; }
+            table { font-size: 10pt !important; width: 100% !important; border: 1px solid #ddd !important; border-collapse: collapse !important; }
+            th, td { border-bottom: 1px solid #eee !important; padding: 6px !important; }
+            /* Vynucení rozložení do mřížky i při tisku */
+            .grid { display: flex !important; flex-wrap: wrap !important; gap: 1rem !important; }
+            .grid > div { flex: 1 1 45% !important; }
+            .md\:grid-cols-4 > div { flex: 1 1 20% !important; }
         }
     </style>
 </head>
@@ -147,7 +153,8 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-700 pb-4 gap-4">
                     <div>
                         <h2 class="text-2xl font-bold text-blue-400">Finanční report</h2>
-                        <p id="reportPeriodText" class="text-gray-400 text-sm"></p>
+                        <p id="reportPeriodText" class="text-gray-300 text-sm font-bold"></p>
+                        <p id="reportUserEmail" class="text-gray-500 text-xs mt-1"></p>
                     </div>
                     <div class="flex items-center gap-4 no-print">
                         <div class="flex items-center gap-2">
@@ -176,7 +183,7 @@
                     </div>
                 </div>
                 
-                <div class="print-only hidden mt-8 text-[9px] text-gray-400 text-center italic">Vygenerováno aplikací Správa financí v8.3.2</div>
+                <div class="print-only hidden mt-8 text-[9px] text-gray-400 text-center italic">Vygenerováno aplikací Správa financí v8.3.3</div>
             </div>
         </div>
 
@@ -208,6 +215,7 @@
 
         const allowedEmails = ["tvuj.email@seznam.cz"]; 
         const defaultCategories = { "Výdaj": ["Jídlo", "Bydlení", "Doprava", "Zábava"], "Příjem": ["Mzda", "Investice", "Dar"] };
+        const monthNames = ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"];
 
         let currentUser = null, allTx = [], expChart = null, trendChart = null;
 
@@ -305,12 +313,17 @@
             const filter = document.getElementById('globalPeriodFilter').value;
             const now = new Date();
             let filtered = allTx;
+            let customPeriodLabel = document.getElementById('globalPeriodFilter').options[document.getElementById('globalPeriodFilter').selectedIndex].text;
             
-            if (filter === 'current_month') filtered = allTx.filter(t => t.dateObj.getMonth() === now.getMonth() && t.dateObj.getFullYear() === now.getFullYear());
+            if (filter === 'current_month') {
+                filtered = allTx.filter(t => t.dateObj.getMonth() === now.getMonth() && t.dateObj.getFullYear() === now.getFullYear());
+                customPeriodLabel = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+            }
             else if (filter === 'last_month') { 
                 let m = now.getMonth() - 1, y = now.getFullYear(); 
                 if (m < 0) { m = 11; y--; }
                 filtered = allTx.filter(t => t.dateObj.getMonth() === m && t.dateObj.getFullYear() === y);
+                customPeriodLabel = `${monthNames[m]} ${y}`;
             }
 
             let inc = 0, exp = 0, cats = {}, trend = {};
@@ -353,8 +366,9 @@
             document.getElementById('summary-expense').textContent = exp.toLocaleString() + " Kč";
             document.getElementById('summary-balance').textContent = bal.toLocaleString() + " Kč";
 
-            const periodLabel = document.getElementById('globalPeriodFilter').options[document.getElementById('globalPeriodFilter').selectedIndex].text;
-            document.getElementById('reportPeriodText').textContent = periodLabel;
+            document.getElementById('reportPeriodText').textContent = customPeriodLabel;
+            if (currentUser) document.getElementById('reportUserEmail').textContent = `Vygenerováno pro: ${currentUser.email}`;
+            
             document.getElementById('rep-inc').textContent = inc.toLocaleString() + " Kč";
             document.getElementById('rep-exp').textContent = exp.toLocaleString() + " Kč";
             document.getElementById('rep-bal').textContent = bal.toLocaleString() + " Kč";
@@ -386,7 +400,7 @@
                     </div>`;
             });
 
-            document.getElementById('analysisTitle').textContent = `Detail: ${periodLabel}`;
+            document.getElementById('analysisTitle').textContent = `Detail: ${customPeriodLabel}`;
             let s = `Zůstatek: ${bal.toLocaleString()} Kč\n\nPOŘADÍ VÝDAJŮ:\n`;
             sortedCats.forEach(([c,v])=> s += `${c.padEnd(10)}: ${v.toLocaleString()} Kč\n`);
             document.getElementById('analysisSummary').textContent = s;
