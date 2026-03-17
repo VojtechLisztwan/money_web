@@ -105,6 +105,7 @@
                                     <th class="p-2 w-8 no-print"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
                                     <th class="p-2">Datum</th>
                                     <th class="p-2">Kategorie</th>
+                                    <th class="p-2">Poznámka</th>
                                     <th class="p-2 text-right">Částka</th>
                                     <th class="p-2 text-center w-12 no-print">Akce</th>
                                 </tr>
@@ -132,7 +133,6 @@
         <div id="tab-recurring" class="tab-content hidden">
             <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
                 <h2 class="text-xl font-bold mb-4 text-blue-400">Správa trvalých plateb</h2>
-                <tbody id="recurringTableBody"></tbody>
                 <table class="w-full text-left border-collapse">
                     <thead><tr class="border-b border-gray-700 text-gray-400 text-sm">
                         <th class="p-2">Kategorie</th><th class="p-2 text-right">Částka</th><th class="p-2">Poznámka</th><th class="p-2 text-center">Akce</th>
@@ -320,11 +320,11 @@
                     <td class="p-2 text-center no-print"><input type="checkbox" value="${t.id}" class="tx-checkbox"></td>
                     <td class="p-2 text-gray-400 text-xs">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
                     <td class="p-2 font-medium">${t.category}</td>
+                    <td class="p-2 text-gray-500 text-xs italic">${t.note || '-'}</td>
                     <td class="p-2 text-right font-bold ${isInc ? 'text-green-400':'text-red-400'}">${t.amount.toLocaleString()}</td>
                     <td class="p-2 text-center no-print"><button onclick="editTx('${t.id}')">✏️</button></td></tr>`;
             });
 
-            // Trend pro bar chart (ze všech dat)
             allTx.forEach(t => {
                 const mKey = t.dateObj.getFullYear() + "-" + (t.dateObj.getMonth()+1).toString().padStart(2,'0');
                 if(!trend[mKey]) trend[mKey] = {i:0, e:0};
@@ -337,8 +337,8 @@
                     <td class="p-2 text-right font-bold">${t.amount.toLocaleString()} Kč</td>
                     <td class="p-2 text-gray-500 text-xs italic">${t.note || '-'}</td>
                     <td class="p-2 text-center whitespace-nowrap">
-                        <button onclick="dupRec('${t.id}')" class="bg-green-800 px-2 py-1 rounded text-[10px] font-bold font-bold">+ DNES</button>
-                        <button onclick="deleteTx('${t.id}')" class="bg-red-900 px-2 py-1 rounded text-[10px] font-bold ml-1 font-bold">ZRUŠIT</button>
+                        <button onclick="dupRec('${t.id}')" class="bg-green-800 px-2 py-1 rounded text-[10px] font-bold">+ DNES</button>
+                        <button onclick="deleteTx('${t.id}')" class="bg-red-900 px-2 py-1 rounded text-[10px] font-bold ml-1">ZRUŠIT</button>
                     </td></tr>`;
             });
 
@@ -347,7 +347,6 @@
             document.getElementById('summary-expense').textContent = exp.toLocaleString() + " Kč";
             document.getElementById('summary-balance').textContent = bal.toLocaleString() + " Kč";
 
-            // --- REPORT ---
             const periodLabel = document.getElementById('globalPeriodFilter').options[document.getElementById('globalPeriodFilter').selectedIndex].text;
             document.getElementById('reportPeriodText').textContent = periodLabel;
             document.getElementById('rep-inc').textContent = inc.toLocaleString() + " Kč";
@@ -367,7 +366,7 @@
                     </div>`;
             });
 
-            const top10 = filtered.filter(t => t.type === "Výdavok" || t.type === "Výdaj").sort((a,b)=>b.amount-a.amount).slice(0,10);
+            const top10 = filtered.filter(t => t.type === "Výdaj").sort((a,b)=>b.amount-a.amount).slice(0,10);
             const repTopDiv = document.getElementById('rep-top');
             repTopDiv.innerHTML = "";
             top10.forEach(t => {
@@ -378,13 +377,11 @@
                     </div>`;
             });
 
-            // --- ANALÝZA TEXT ---
             document.getElementById('analysisTitle').textContent = `Detail: ${periodLabel}`;
             let s = `Zůstatek: ${bal.toLocaleString()} Kč\n\nPOŘADÍ VÝDAJŮ:\n`;
             sortedCats.forEach(([c,v])=> s += `${c.padEnd(10)}: ${v.toLocaleString()} Kč\n`);
             document.getElementById('analysisSummary').textContent = s;
 
-            // --- GRAFY ---
             if (expChart) expChart.destroy();
             expChart = new Chart(document.getElementById('expenseChart'), {
                 type: 'doughnut',
