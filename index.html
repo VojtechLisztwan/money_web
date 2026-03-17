@@ -47,9 +47,9 @@
                 </nav>
 
                 <select id="globalPeriodFilter" class="p-1.5 rounded bg-gray-800 border border-gray-600 text-sm font-bold text-blue-300 outline-none">
-                    <option value="current_month">Tento měsíc</option>
+                    <option value="current_month" selected>Tento měsíc</option>
                     <option value="last_month">Minulý měsíc</option>
-                    <option value="all" selected>Celá historie</option>
+                    <option value="all">Celá historie</option>
                 </select>
 
                 <button id="btnLogout" class="bg-red-900/50 hover:bg-red-800 px-3 py-1.5 rounded text-xs transition border border-red-700">Odhlásit</button>
@@ -144,12 +144,18 @@
 
         <div id="tab-reports" class="tab-content hidden">
             <div id="report-content" class="bg-gray-800 p-8 rounded-xl border border-gray-700 max-w-4xl mx-auto shadow-2xl">
-                <div class="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-700 pb-4 gap-4">
                     <div>
                         <h2 class="text-2xl font-bold text-blue-400">Finanční report</h2>
                         <p id="reportPeriodText" class="text-gray-400 text-sm"></p>
                     </div>
-                    <button onclick="window.print()" class="no-print bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-bold transition shadow-lg">Tisk do PDF</button>
+                    <div class="flex items-center gap-4 no-print">
+                        <div class="flex items-center gap-2">
+                            <label for="topTxCount" class="text-sm text-gray-400">Počet top položek:</label>
+                            <input type="number" id="topTxCount" value="10" min="1" max="100" class="bg-gray-700 border border-gray-600 text-white px-2 py-1 rounded w-16 text-sm outline-none focus:border-blue-500">
+                        </div>
+                        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-bold transition shadow-lg">Tisk do PDF</button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -165,12 +171,12 @@
                         <div id="rep-cats" class="text-sm space-y-2"></div>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold mb-4 uppercase text-gray-500 border-b border-gray-700 pb-1">Top 10 transakcí</h3>
+                        <h3 id="rep-top-title" class="text-sm font-bold mb-4 uppercase text-gray-500 border-b border-gray-700 pb-1">Top 10 transakcí</h3>
                         <div id="rep-top" class="text-xs space-y-1"></div>
                     </div>
                 </div>
                 
-                <div class="print-only hidden mt-8 text-[9px] text-gray-400 text-center italic">Vygenerováno aplikací Správa financí v8.3.1</div>
+                <div class="print-only hidden mt-8 text-[9px] text-gray-400 text-center italic">Vygenerováno aplikací Správa financí v8.3.2</div>
             </div>
         </div>
 
@@ -366,10 +372,13 @@
                     </div>`;
             });
 
-            const top10 = filtered.filter(t => t.type === "Výdaj").sort((a,b)=>b.amount-a.amount).slice(0,10);
+            const topCount = parseInt(document.getElementById('topTxCount').value) || 10;
+            document.getElementById('rep-top-title').textContent = `Top ${topCount} transakcí`;
+
+            const topTx = filtered.filter(t => t.type === "Výdaj").sort((a,b)=>b.amount-a.amount).slice(0, topCount);
             const repTopDiv = document.getElementById('rep-top');
             repTopDiv.innerHTML = "";
-            top10.forEach(t => {
+            topTx.forEach(t => {
                 repTopDiv.innerHTML += `
                     <div class="flex justify-between border-b border-gray-800 py-1">
                         <span class="truncate pr-2">${t.dateObj.toLocaleDateString('cs-CZ')} - ${t.category}: <span class="text-gray-500 italic">${t.note||''}</span></span>
@@ -405,6 +414,7 @@
         }
 
         document.getElementById('globalPeriodFilter').onchange = render;
+        document.getElementById('topTxCount').onchange = render;
         window.toggleSelectAll = (src) => document.querySelectorAll('.tx-checkbox').forEach(cb => cb.checked = src.checked);
 
         document.getElementById('btnImport').onclick = () => {
