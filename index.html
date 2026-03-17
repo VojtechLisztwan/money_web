@@ -20,7 +20,6 @@
             canvas { max-width: 100% !important; height: auto !important; }
             table { font-size: 10pt !important; width: 100% !important; border: 1px solid #ddd !important; border-collapse: collapse !important; }
             th, td { border-bottom: 1px solid #eee !important; padding: 6px !important; }
-            /* Vynucení rozložení do mřížky i při tisku */
             .grid { display: flex !important; flex-wrap: wrap !important; gap: 1rem !important; }
             .grid > div { flex: 1 1 45% !important; }
             .md\:grid-cols-4 > div { flex: 1 1 20% !important; }
@@ -174,8 +173,11 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div>
-                        <h3 class="text-sm font-bold mb-4 uppercase text-gray-500 border-b border-gray-700 pb-1">Rozpis kategorií (nenulové)</h3>
-                        <div id="rep-cats" class="text-sm space-y-2"></div>
+                        <h3 class="text-sm font-bold mb-4 uppercase text-gray-500 border-b border-gray-700 pb-1">Rozpis výdajů</h3>
+                        <div id="rep-cats" class="text-sm space-y-2 mb-6"></div>
+
+                        <h3 class="text-sm font-bold mb-4 uppercase text-gray-500 border-b border-gray-700 pb-1">Rozpis příjmů</h3>
+                        <div id="rep-inc-cats" class="text-sm space-y-2"></div>
                     </div>
                     <div>
                         <h3 id="rep-top-title" class="text-sm font-bold mb-4 uppercase text-gray-500 border-b border-gray-700 pb-1">Top 10 transakcí</h3>
@@ -183,7 +185,7 @@
                     </div>
                 </div>
                 
-                <div class="print-only hidden mt-8 text-[9px] text-gray-400 text-center italic">Vygenerováno aplikací Správa financí v8.3.3</div>
+                <div class="print-only hidden mt-8 text-[9px] text-gray-400 text-center italic">Vygenerováno aplikací Správa financí v8.3.4</div>
             </div>
         </div>
 
@@ -326,14 +328,19 @@
                 customPeriodLabel = `${monthNames[m]} ${y}`;
             }
 
-            let inc = 0, exp = 0, cats = {}, trend = {};
+            let inc = 0, exp = 0, cats = {}, incCats = {}, trend = {};
             const txBody = document.getElementById('txTableBody'), recBody = document.getElementById('recurringTableBody');
             txBody.innerHTML = ""; recBody.innerHTML = "";
 
             filtered.forEach(t => {
                 const isInc = t.type === "Příjem";
-                isInc ? inc += t.amount : exp += t.amount;
-                if (!isInc) cats[t.category] = (cats[t.category] || 0) + t.amount;
+                if (isInc) {
+                    inc += t.amount;
+                    incCats[t.category] = (incCats[t.category] || 0) + t.amount;
+                } else {
+                    exp += t.amount;
+                    cats[t.category] = (cats[t.category] || 0) + t.amount;
+                }
 
                 txBody.innerHTML += `<tr class="border-b border-gray-700 text-sm hover:bg-gray-800/50">
                     <td class="p-2 text-center no-print"><input type="checkbox" value="${t.id}" class="tx-checkbox"></td>
@@ -374,6 +381,7 @@
             document.getElementById('rep-bal').textContent = bal.toLocaleString() + " Kč";
             document.getElementById('rep-count').textContent = filtered.length;
 
+            // Render výdajových kategorií
             const sortedCats = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
             const repCatsDiv = document.getElementById('rep-cats');
             repCatsDiv.innerHTML = "";
@@ -383,6 +391,19 @@
                     <div class="flex justify-between border-b border-gray-800 py-1">
                         <span>${name} <span class="text-gray-500 text-[10px]">(${pct}%)</span></span>
                         <span class="font-bold">${value.toLocaleString()} Kč</span>
+                    </div>`;
+            });
+
+            // Render příjmových kategorií
+            const sortedIncCats = Object.entries(incCats).sort((a,b)=>b[1]-a[1]);
+            const repIncCatsDiv = document.getElementById('rep-inc-cats');
+            repIncCatsDiv.innerHTML = "";
+            sortedIncCats.forEach(([name, value]) => {
+                const pct = inc > 0 ? ((value / inc) * 100).toFixed(1) : 0;
+                repIncCatsDiv.innerHTML += `
+                    <div class="flex justify-between border-b border-gray-800 py-1">
+                        <span>${name} <span class="text-gray-500 text-[10px]">(${pct}%)</span></span>
+                        <span class="font-bold text-green-400">${value.toLocaleString()} Kč</span>
                     </div>`;
             });
 
