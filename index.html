@@ -236,6 +236,7 @@
 
             <!-- Formulář a historie -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- LEVÝ SLOUPEC: Formulář a kalkulačka -->
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 h-fit no-print">
                     <h2 class="text-lg font-bold mb-4 text-orange-400">Nový záznam</h2>
                     <input id="btcDateInput" type="date" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white">
@@ -246,8 +247,26 @@
                     <input id="btcAmountCzk" type="number" step="1" placeholder="Částka (Kč)" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold">
                     <input id="btcAmountCoin" type="number" step="0.00000001" placeholder="Množství BTC" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold">
                     <button id="btnAddBtc" class="w-full bg-orange-600 hover:bg-orange-700 p-3 rounded font-bold transition">ULOŽIT BTC</button>
+
+                    <!-- KALKULAČKA KURZU -->
+                    <div class="mt-8 border-t border-gray-700 pt-6">
+                        <h2 class="text-lg font-bold mb-4 text-yellow-400">Kalkulačka zisku</h2>
+                        <input id="btcCalcRate" type="number" step="1" placeholder="Hypotetický kurz (Kč)" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold outline-none focus:border-yellow-500">
+                        
+                        <div class="space-y-3">
+                            <div class="bg-gray-900 p-3 rounded border border-gray-700 flex justify-between items-center">
+                                <span class="text-gray-500 text-[10px] uppercase">Hodnota</span>
+                                <div id="btcCalcValue" class="font-bold text-blue-400">0 Kč</div>
+                            </div>
+                            <div class="bg-gray-900 p-3 rounded border border-gray-700 flex justify-between items-center">
+                                <span class="text-gray-500 text-[10px] uppercase">Zisk</span>
+                                <div id="btcCalcProfit" class="font-bold text-gray-300">0 Kč</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- PRAVÝ SLOUPEC: Historie transakcí -->
                 <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-3">
                     <div class="flex justify-between items-center mb-4 no-print">
                         <h2 class="font-bold text-orange-400">Historie BTC transakcí</h2>
@@ -304,6 +323,7 @@
 
         let currentUser = null, allTx = [], expChart = null, trendChart = null;
         let allBtcTx = [], currentBtcPriceCzk = 0; // Nové proměnné pro BTC
+        let globalTotalBtc = 0, globalTotalCzk = 0; // Pomocné proměnné pro kalkulačku
         let btcChartInstance = null, btcChartLoaded = false; // Proměnné pro BTC graf
 
         window.switchTab = (id) => {
@@ -609,6 +629,8 @@
                 const labels = prices.map(p => {
                     const d = new Date(p[0]);
                     if (days == 1) return d.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute:'2-digit'});
+                    // Pro roční graf je hezčí ukázat jen měsíc a rok pro větší přehlednost
+                    if (days == 365) return d.toLocaleDateString('cs-CZ', {month: 'short', year: 'numeric'});
                     return d.toLocaleDateString('cs-CZ', {day: 'numeric', month: 'numeric'});
                 });
                 const values = prices.map(p => p[1]);
@@ -633,7 +655,13 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            x: { ticks: {color: '#9ca3af', maxTicksLimit: 8} },
+                            x: { 
+                                ticks: { 
+                                    color: '#9ca3af', 
+                                    maxTicksLimit: 8,
+                                    maxRotation: 0 // Zabrání šikmému rotování popisků, udrží je vodorovně
+                                } 
+                            },
                             y: { ticks: {color: '#9ca3af'} }
                         },
                         plugins: { legend: { display: false } },
@@ -646,6 +674,32 @@
         };
 
         document.getElementById('btcChartPeriod').onchange = (e) => fetchBtcChart(e.target.value);
+
+        // Funkce pro aktualizaci kalkulačky zisku
+        window.updateCalculator = () => {
+            const customRateInput = document.getElementById('btcCalcRate');
+            if (!customRateInput) return;
+            const customRate = parseFloat(customRateInput.value);
+
+            const valEl = document.getElementById('btcCalcValue');
+            const profEl = document.getElementById('btcCalcProfit');
+
+            if (isNaN(customRate) || customRate <= 0) {
+                valEl.textContent = "0 Kč";
+                profEl.textContent = "0 Kč";
+                profEl.className = "font-bold text-gray-300";
+                return;
+            }
+
+            const potentialValue = globalTotalBtc * customRate;
+            const potentialProfit = potentialValue - globalTotalCzk;
+
+            valEl.textContent = potentialValue.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
+            profEl.textContent = potentialProfit.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
+            profEl.className = `font-bold ${potentialProfit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+        };
+
+        document.getElementById('btcCalcRate').addEventListener('input', updateCalculator);
 
         document.getElementById('btnAddBtc').onclick = async () => {
             const type = document.getElementById('btcType').value;
@@ -702,6 +756,10 @@
                 </tr>`;
             });
 
+            // Uložíme si celkové hodnoty globálně pro naši kalkulačku
+            globalTotalBtc = totalBtc;
+            globalTotalCzk = totalCzk;
+
             const currentValue = totalBtc * currentBtcPriceCzk;
             const profit = currentValue - totalCzk;
 
@@ -711,7 +769,10 @@
 
             const profitEl = document.getElementById('btc-profit');
             profitEl.textContent = profit.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
-            profitEl.className = `text-2xl font-bold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            profitEl.className = `text-xl md:text-2xl font-bold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+
+            // Při každém překreslení tabulky/dat zaktualizujeme i kalkulačku (kdyby se tam změnil kurz)
+            updateCalculator();
         };
     </script>
 </body>
