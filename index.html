@@ -197,23 +197,41 @@
         <!-- ZÁLOŽKA: BTC -->
         <div id="tab-btc" class="tab-content hidden">
             <!-- Shrnutí BTC -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
+                    <span class="text-gray-400 text-xs uppercase">Kurz 1 BTC</span>
+                    <div id="btc-current-rate" class="text-xl md:text-2xl font-bold text-yellow-400">0 Kč</div>
+                </div>
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
                     <span class="text-gray-400 text-xs uppercase">Celkem vloženo</span>
-                    <div id="btc-total-czk" class="text-2xl font-bold text-gray-300">0 Kč</div>
+                    <div id="btc-total-czk" class="text-xl md:text-2xl font-bold text-gray-300">0 Kč</div>
                 </div>
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 border-l-4 border-l-orange-500">
                     <span class="text-gray-400 text-xs uppercase">Množství BTC</span>
-                    <div id="btc-total-amount" class="text-2xl font-bold text-orange-400">0.00000000</div>
+                    <div id="btc-total-amount" class="text-xl md:text-2xl font-bold text-orange-400">0.00000000</div>
                 </div>
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
                     <span class="text-gray-400 text-xs uppercase">Aktuální hodnota</span>
-                    <div id="btc-current-value" class="text-2xl font-bold text-blue-400">0 Kč</div>
+                    <div id="btc-current-value" class="text-xl md:text-2xl font-bold text-blue-400">0 Kč</div>
                 </div>
                 <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
                     <span class="text-gray-400 text-xs uppercase">Zisk / Ztráta</span>
-                    <div id="btc-profit" class="text-2xl font-bold text-gray-300">0 Kč</div>
+                    <div id="btc-profit" class="text-xl md:text-2xl font-bold text-gray-300">0 Kč</div>
                 </div>
+            </div>
+
+            <!-- Graf BTC -->
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 mb-6 no-print">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-orange-400">Vývoj ceny BTC (CZK)</h2>
+                    <select id="btcChartPeriod" class="p-1.5 rounded bg-gray-700 border border-gray-600 text-sm font-bold text-orange-300 outline-none">
+                        <option value="1">1 Den</option>
+                        <option value="7">1 Týden</option>
+                        <option value="30" selected>1 Měsíc</option>
+                        <option value="365">1 Rok</option>
+                    </select>
+                </div>
+                <div class="h-[250px]"><canvas id="btcChart"></canvas></div>
             </div>
 
             <!-- Formulář a historie -->
@@ -286,12 +304,19 @@
 
         let currentUser = null, allTx = [], expChart = null, trendChart = null;
         let allBtcTx = [], currentBtcPriceCzk = 0; // Nové proměnné pro BTC
+        let btcChartInstance = null, btcChartLoaded = false; // Proměnné pro BTC graf
 
         window.switchTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
             document.getElementById('tab-' + id).classList.remove('hidden');
             render();
-            if(id === 'btc') renderBtc(); // Vykreslit BTC data po přepnutí
+            if(id === 'btc') {
+                renderBtc(); // Vykreslit BTC data po přepnutí
+                if(!btcChartLoaded) {
+                    fetchBtcChart(document.getElementById('btcChartPeriod').value);
+                    btcChartLoaded = true;
+                }
+            }
         };
 
         function setDefaultDate() { 
@@ -567,12 +592,60 @@
                 const data = await res.json();
                 if (data.bitcoin && data.bitcoin.czk) {
                     currentBtcPriceCzk = data.bitcoin.czk;
+                    document.getElementById('btc-current-rate').textContent = currentBtcPriceCzk.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
                     renderBtc();
                 }
             } catch (e) {
                 console.error("Chyba při stahování ceny BTC:", e);
             }
         };
+
+        window.fetchBtcChart = async (days) => {
+            try {
+                const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=czk&days=${days}`);
+                const data = await res.json();
+                const prices = data.prices;
+
+                const labels = prices.map(p => {
+                    const d = new Date(p[0]);
+                    if (days == 1) return d.toLocaleTimeString('cs-CZ', {hour: '2-digit', minute:'2-digit'});
+                    return d.toLocaleDateString('cs-CZ', {day: 'numeric', month: 'numeric'});
+                });
+                const values = prices.map(p => p[1]);
+
+                if (btcChartInstance) btcChartInstance.destroy();
+                btcChartInstance = new Chart(document.getElementById('btcChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cena BTC (Kč)',
+                            data: values,
+                            borderColor: '#f97316',
+                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            pointRadius: 0,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: {color: '#9ca3af', maxTicksLimit: 8} },
+                            y: { ticks: {color: '#9ca3af'} }
+                        },
+                        plugins: { legend: { display: false } },
+                        interaction: { intersect: false, mode: 'index' }
+                    }
+                });
+            } catch (e) {
+                console.error("Chyba při stahování grafu BTC:", e);
+            }
+        };
+
+        document.getElementById('btcChartPeriod').onchange = (e) => fetchBtcChart(e.target.value);
 
         document.getElementById('btnAddBtc').onclick = async () => {
             const type = document.getElementById('btcType').value;
