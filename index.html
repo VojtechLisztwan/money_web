@@ -283,7 +283,10 @@
                     <h1 class="text-2xl font-bold text-purple-400">Fondy: Invesco Global Consumer Trends</h1>
                     <div class="flex gap-2">
                         <input type="number" id="fundManualPrice" class="p-1.5 rounded bg-gray-700 border border-gray-600 text-white w-28 text-sm outline-none focus:border-purple-500" placeholder="Kurz fondu">
-                        <button onclick="saveFundPrice()" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded text-sm font-bold transition">Uložit aktuální kurz</button>
+                        <button onclick="saveFundPrice()" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded text-sm font-bold transition">Uložit ručně</button>
+                        <button onclick="fetchFundPriceFromWeb(event)" class="bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded text-sm font-bold transition flex items-center gap-1">
+                            <span>🔄 Auto</span>
+                        </button>
                     </div>
                 </div>
                 
@@ -518,7 +521,6 @@
         };
 
         function render() {
-            // (Standardní vykreslování přehledu, grafů, reportů zůstává beze změny)
             const filter = document.getElementById('globalPeriodFilter').value;
             const now = new Date();
             let filtered = allTx;
@@ -733,6 +735,47 @@
         };
 
         // --- FOND LOGIKA ---
+        
+        // Nová funkce pro automatické stažení kurzu
+        window.fetchFundPriceFromWeb = async (event) => {
+            try {
+                const btn = event.currentTarget;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = "⏳ Hledám...";
+                
+                const targetUrl = encodeURIComponent('https://markets.ft.com/data/funds/tearsheet/summary?s=LU1603788220:CZK');
+                const proxyUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
+
+                const res = await fetch(proxyUrl);
+                const data = await res.json();
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, "text/html");
+
+                const priceElement = doc.querySelector('.mod-tearsheet-overview__quote__bar .mod-ui-data-list__value');
+                
+                if (priceElement) {
+                    let priceText = priceElement.innerText.trim();
+                    let priceValue = parseFloat(priceText.replace(/,/g, ''));
+                    
+                    if (!isNaN(priceValue)) {
+                        currentFundPriceCzk = priceValue;
+                        localStorage.setItem('fundPriceCZK', currentFundPriceCzk);
+                        document.getElementById('fundManualPrice').value = currentFundPriceCzk;
+                        renderFund();
+                    }
+                } else {
+                    alert("Nepodařilo se najít cenu. Web FT.com možná změnil strukturu.");
+                }
+                
+                btn.innerHTML = originalText;
+                
+            } catch (e) {
+                console.error("Chyba při auto-stahování kurzu fondu:", e);
+                alert("Automatická aktualizace selhala. Zkus to ručně.");
+            }
+        };
+
         window.saveFundPrice = () => {
             const val = parseFloat(document.getElementById('fundManualPrice').value);
             if(!isNaN(val) && val > 0) {
