@@ -168,8 +168,8 @@
                     <button onclick="switchTab('reports')" data-tab="reports" class="px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5">
                         <span>📑</span><span>Reporty</span>
                     </button>
-                    <button onclick="switchTab('investments')" data-tab="investments" class="px-3.5 py-2 rounded-lg font-medium text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-950/30 transition-all duration-200 flex items-center gap-1.5">
-                        <span>⚡</span><span>Investice</span>
+                    <button onclick="switchTab('investments')" data-tab="investments" class="px-3.5 py-2 rounded-lg font-medium text-sm text-orange-400 hover:text-orange-300 hover:bg-orange-950/30 transition-all duration-200 flex items-center gap-1.5">
+                        <span>₿</span><span>Bitcoin</span>
                     </button>
                     <button onclick="switchTab('settings')" data-tab="settings" class="px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5">
                         <span>⚙️</span><span>Data / DB</span>
@@ -212,8 +212,8 @@
         <!-- TAB: OVERVIEW -->
         <div id="tab-overview" class="tab-content block">
             
-            <!-- Summary Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+            <!-- Summary Stats Cards (4 grid items including BTC box) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                 <!-- Příjmy -->
                 <div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all"></div>
@@ -221,7 +221,7 @@
                         <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Celkové Příjmy</span>
                         <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">↗</div>
                     </div>
-                    <div id="summary-income" class="text-3xl font-extrabold text-emerald-400 font-mono tracking-tight">0 Kč</div>
+                    <div id="summary-income" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono tracking-tight">0 Kč</div>
                     <p class="text-[11px] text-slate-500 mt-2 font-medium">Součet za zvolené období</p>
                 </div>
 
@@ -232,7 +232,7 @@
                         <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Celkové Výdaje</span>
                         <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 font-bold">↘</div>
                     </div>
-                    <div id="summary-expense" class="text-3xl font-extrabold text-rose-400 font-mono tracking-tight">0 Kč</div>
+                    <div id="summary-expense" class="text-2xl sm:text-3xl font-extrabold text-rose-400 font-mono tracking-tight">0 Kč</div>
                     <p class="text-[11px] text-slate-500 mt-2 font-medium">Součet za zvolené období</p>
                 </div>
 
@@ -243,8 +243,21 @@
                         <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Čistý Zůstatek</span>
                         <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold">💎</div>
                     </div>
-                    <div id="summary-balance" class="text-3xl font-extrabold text-blue-400 font-mono tracking-tight">0 Kč</div>
+                    <div id="summary-balance" class="text-2xl sm:text-3xl font-extrabold text-blue-400 font-mono tracking-tight">0 Kč</div>
                     <p class="text-[11px] text-slate-500 mt-2 font-medium">Příjmy mínus výdaje</p>
+                </div>
+
+                <!-- BTC Přehledové okénko -->
+                <div onclick="switchTab('investments')" title="Kliknutím přejdete do sekce Bitcoin" class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-orange-500/40 transition-all duration-300 cursor-pointer border-l-4 border-l-orange-500">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Hodnota v Bitcoinu</span>
+                        <div class="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-base">₿</div>
+                    </div>
+                    <div id="overview-btc-value" class="text-2xl sm:text-3xl font-extrabold text-orange-400 font-mono tracking-tight">0 Kč</div>
+                    <p id="overview-btc-rate" class="text-[11px] text-slate-400 mt-2 font-mono flex items-center gap-1 truncate">
+                        Kurz: 0 Kč / BTC
+                    </p>
                 </div>
             </div>
 
@@ -479,7 +492,7 @@
             </div>
         </div>
 
-        <!-- TAB: INVESTMENTS -->
+        <!-- TAB: INVESTMENTS (ONLY BITCOIN) -->
         <div id="tab-investments" class="tab-content hidden space-y-12">
             
             <!-- BITCOIN SECTION -->
@@ -588,87 +601,6 @@
                 </div>
             </div>
 
-            <!-- FUNDS SECTION -->
-            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-800/80 shadow-xl">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 mb-6 border-b border-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold">📈</div>
-                        <div>
-                            <h1 class="text-xl font-extrabold text-white">Podílové Fondy: Invesco Global Consumer Trends</h1>
-                            <p class="text-xs text-slate-400">Sledování investičních jednotek a vývoje investice</p>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <input type="number" id="fundManualPrice" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono text-xs w-28 outline-none focus:border-purple-500" placeholder="Kurz fondu">
-                        <button onclick="saveFundPrice()" class="bg-purple-600 hover:bg-purple-500 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">Uložit ručně</button>
-                        <button onclick="fetchFundPriceFromWeb(event)" class="bg-emerald-600 hover:bg-emerald-500 px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1">
-                            <span>🔄 Auto kurz</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Kurz 1 ks</span>
-                        <div id="fund-current-rate" class="text-lg md:text-xl font-mono font-bold text-yellow-400 mt-1">0 Kč</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Celkem vloženo</span>
-                        <div id="fund-total-czk" class="text-lg md:text-xl font-mono font-bold text-slate-300 mt-1">0 Kč</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 border-l-4 border-l-purple-500">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Množství ks</span>
-                        <div id="fund-total-amount" class="text-lg md:text-xl font-mono font-bold text-purple-400 mt-1">0.0000</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Aktuální hodnota</span>
-                        <div id="fund-current-value" class="text-lg md:text-xl font-mono font-bold text-blue-400 mt-1">0 Kč</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Zisk / Ztráta</span>
-                        <div id="fund-profit" class="text-lg md:text-xl font-mono font-bold text-slate-300 mt-1">0 Kč</div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <!-- Fund Form -->
-                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 col-span-1 h-fit no-print">
-                        <h2 class="text-sm font-bold mb-4 text-purple-400 uppercase tracking-wider">➕ Nový záznam Fondu</h2>
-                        
-                        <div class="space-y-3">
-                            <input id="fundDateInput" type="date" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-medium focus:outline-none focus:border-purple-500">
-                            <select id="fundType" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs focus:outline-none focus:border-purple-500">
-                                <option value="Nákup">🟢 Nákup</option>
-                                <option value="Prodej">🔴 Prodej</option>
-                            </select>
-                            <input id="fundAmountCzk" type="number" step="0.01" placeholder="Částka (Kč)" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs focus:outline-none focus:border-purple-500">
-                            <input id="fundAmountUnit" type="number" step="0.0001" placeholder="Množství (ks)" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs focus:outline-none focus:border-purple-500">
-                            <button id="btnAddFund" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 p-3 rounded-xl font-bold text-xs text-white transition shadow-md shadow-purple-600/20">
-                                ULOŽIT ZÁZNAM FONDU
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Fund Table -->
-                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 col-span-1 lg:col-span-3">
-                        <h2 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">📜 Historie transakcí fondu</h2>
-                        <div class="overflow-x-auto max-h-[400px] rounded-xl border border-slate-800 bg-slate-950/40">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="sticky top-0 bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
-                                    <tr>
-                                        <th class="p-3">Datum</th>
-                                        <th class="p-3">Typ</th>
-                                        <th class="p-3 text-right">Částka (Kč)</th>
-                                        <th class="p-3 text-right">Množství (ks)</th>
-                                        <th class="p-3 text-center w-12 no-print">Akce</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="fundTableBody" class="divide-y divide-slate-800/60 text-xs"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- TAB: SETTINGS & DATABASE -->
@@ -707,7 +639,7 @@
                                 💾
                             </div>
                             <h3 class="font-bold text-white text-base">Kompletní JSON záloha</h3>
-                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Uloží veškerá data (běžné transakce, Bitcoin i podílové fondy) do strukturovaného JSON souboru, který lze kdykoli obnovit přes Import níže.</p>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Uloží veškerá data (běžné transakce i Bitcoin portfolia) do strukturovaného JSON souboru, který lze kdykoli obnovit přes Import níže.</p>
                         </div>
                         <button id="btnExportJson" class="mt-6 w-full bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 p-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
                             <span>📥 Stáhnout JSON zálohu (.json)</span>
@@ -734,7 +666,7 @@
                     <h3 class="text-base font-bold text-white mb-2 flex items-center gap-2">
                         <span>🔄</span><span>Import a obnova dat do databáze</span>
                     </h3>
-                    <p class="text-xs text-slate-400 mb-4">Podporuje jak kompletní zálohy ze systému (JSON s kolekcemi transakcí, BTC a fondů), tak i původní jednoduché pole transakcí.</p>
+                    <p class="text-xs text-slate-400 mb-4">Podporuje jak kompletní zálohy ze systému (JSON s kolekcemi transakcí a BTC), tak i původní pole transakcí.</p>
                     
                     <div class="flex flex-col sm:flex-row items-center gap-4">
                         <input type="file" id="importFile" accept=".json" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600/20 file:text-blue-400 hover:file:bg-blue-600/30 cursor-pointer bg-slate-950 p-1.5 rounded-xl border border-slate-800">
@@ -779,9 +711,6 @@
         let allBtcTx = [], currentBtcPriceCzk = 0, globalTotalBtc = 0, globalTotalCzk = 0;
         let btcChartInstance = null, btcChartLoaded = false;
 
-        // FOND Proměnné
-        let allFundTx = [], currentFundPriceCzk = 0, globalTotalFund = 0, globalTotalFundCzk = 0;
-
         window.switchTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
             const tabEl = document.getElementById('tab-' + id);
@@ -799,7 +728,6 @@
             render();
             if(id === 'investments') {
                 renderBtc(); 
-                renderFund();
                 if(!btcChartLoaded) {
                     fetchBtcChart(document.getElementById('btcChartPeriod').value);
                     btcChartLoaded = true;
@@ -813,7 +741,6 @@
             
             document.getElementById('txDateInput').value = today; 
             document.getElementById('btcDateInput').value = today;
-            document.getElementById('fundDateInput').value = today;
             
             const df = document.getElementById('filterDateFrom');
             const dt = document.getElementById('filterDateTo');
@@ -874,25 +801,6 @@
                 renderBtc();
             });
 
-            // FOND transakce
-            const fundQ = query(collection(db, "fund_transactions"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
-            onSnapshot(fundQ, (snap) => {
-                allFundTx = [];
-                snap.forEach(d => {
-                    let data = d.data(); data.id = d.id;
-                    data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
-                    allFundTx.push(data);
-                });
-                renderFund();
-            });
-
-            // Načtení uloženého kurzu fondu
-            const savedFundPrice = localStorage.getItem('fundPriceCZK');
-            if(savedFundPrice) {
-                currentFundPriceCzk = parseFloat(savedFundPrice);
-                document.getElementById('fundManualPrice').value = currentFundPriceCzk;
-            }
-
             fetchBtcPrice(); 
         }
 
@@ -906,7 +814,6 @@
                 o.textContent = c; 
                 catSel.appendChild(o); 
             });
-            // Jediná volba pro ruční zadání vlastního názvu, pokud by uživatel chtěl něco extra
             let o = document.createElement("option"); 
             o.value = "__custom__"; 
             o.textContent = "➕ Vlastní kategorie..."; 
@@ -1210,8 +1117,7 @@
                 exportDate: new Date().toISOString(),
                 userEmail: currentUser.email,
                 transactions: allTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
-                btc_transactions: allBtcTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
-                fund_transactions: allFundTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() }))
+                btc_transactions: allBtcTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() }))
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -1239,12 +1145,6 @@
             allBtcTx.forEach(t => {
                 const dateStr = t.dateObj.toISOString().slice(0, 19).replace('T', ' ');
                 sql += `INSERT INTO btc_transactions (id, user_id, type, amount_czk, amount_coin, created_at) VALUES ('${t.id}', '${currentUser.uid}', '${t.type}', ${t.amountCzk}, ${t.amountCoin}, '${dateStr}');\n`;
-            });
-
-            sql += `\nCREATE TABLE IF NOT EXISTS fund_transactions (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  type VARCHAR(32),\n  amount_czk DECIMAL(15,2),\n  amount_unit DECIMAL(18,4),\n  created_at DATETIME\n);\n\n`;
-            allFundTx.forEach(t => {
-                const dateStr = t.dateObj.toISOString().slice(0, 19).replace('T', ' ');
-                sql += `INSERT INTO fund_transactions (id, user_id, type, amount_czk, amount_unit, created_at) VALUES ('${t.id}', '${currentUser.uid}', '${t.type}', ${t.amountCzk}, ${t.amountUnit}, '${dateStr}');\n`;
             });
 
             const blob = new Blob([sql], { type: 'text/sql' });
@@ -1285,7 +1185,7 @@
             reader.onload = async (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    let txCount = 0, btcCount = 0, fundCount = 0;
+                    let txCount = 0, btcCount = 0;
 
                     if (data.transactions && Array.isArray(data.transactions)) {
                         for (const tx of data.transactions) {
@@ -1314,20 +1214,7 @@
                                 btcCount++;
                             }
                         }
-                        if (data.fund_transactions && Array.isArray(data.fund_transactions)) {
-                            for (const tx of data.fund_transactions) {
-                                let d = tx.createdAt ? new Date(tx.createdAt) : new Date();
-                                await addDoc(collection(db, "fund_transactions"), { 
-                                    userId: currentUser.uid, 
-                                    type: tx.type || "Nákup", 
-                                    amountCzk: parseFloat(tx.amountCzk) || 0, 
-                                    amountUnit: parseFloat(tx.amountUnit) || 0, 
-                                    createdAt: Timestamp.fromDate(d) 
-                                });
-                                fundCount++;
-                            }
-                        }
-                        alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů\n• ${fundCount} záznamů podílových fondů.`);
+                        alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů.`);
                     } else if (Array.isArray(data)) {
                         for (const tx of data) {
                             let d = new Date();
@@ -1362,7 +1249,8 @@
                 const data = await res.json();
                 if (data.bitcoin && data.bitcoin.czk) {
                     currentBtcPriceCzk = data.bitcoin.czk;
-                    document.getElementById('btc-current-rate').textContent = currentBtcPriceCzk.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
+                    const btcRateEl = document.getElementById('btc-current-rate');
+                    if(btcRateEl) btcRateEl.textContent = currentBtcPriceCzk.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
                     renderBtc();
                 }
             } catch (e) { console.error("Chyba při stahování ceny BTC:", e); }
@@ -1446,123 +1334,48 @@
         window.renderBtc = () => {
             let totalCzk = 0, totalBtc = 0;
             const tbody = document.getElementById('btcTableBody');
-            if(!tbody) return; tbody.innerHTML = "";
-
-            allBtcTx.forEach(t => {
-                const isBuy = t.type === "Nákup";
-                if (isBuy) { totalCzk += t.amountCzk; totalBtc += t.amountCoin; } else { totalCzk -= t.amountCzk; totalBtc -= t.amountCoin; }
-                tbody.innerHTML += `<tr class="hover:bg-slate-800/60 transition-colors">
-                    <td class="p-3 text-slate-400 text-xs font-mono">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
-                    <td class="p-3 font-medium ${isBuy ? 'text-emerald-400' : 'text-rose-400'}">${t.type}</td>
-                    <td class="p-3 text-right font-mono font-bold text-slate-200">${t.amountCzk.toLocaleString('cs-CZ')} Kč</td>
-                    <td class="p-3 text-right font-mono font-bold text-orange-400">${t.amountCoin.toFixed(8)}</td>
-                    <td class="p-3 text-center no-print"><button onclick="deleteBtcTx('${t.id}')" title="Smazat" class="p-1 hover:bg-rose-950/40 rounded-lg text-rose-500 hover:text-rose-400 transition">🗑️</button></td>
-                </tr>`;
-            });
+            if(tbody) {
+                tbody.innerHTML = "";
+                allBtcTx.forEach(t => {
+                    const isBuy = t.type === "Nákup";
+                    if (isBuy) { totalCzk += t.amountCzk; totalBtc += t.amountCoin; } else { totalCzk -= t.amountCzk; totalBtc -= t.amountCoin; }
+                    tbody.innerHTML += `<tr class="hover:bg-slate-800/60 transition-colors">
+                        <td class="p-3 text-slate-400 text-xs font-mono">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
+                        <td class="p-3 font-medium ${isBuy ? 'text-emerald-400' : 'text-rose-400'}">${t.type}</td>
+                        <td class="p-3 text-right font-mono font-bold text-slate-200">${t.amountCzk.toLocaleString('cs-CZ')} Kč</td>
+                        <td class="p-3 text-right font-mono font-bold text-orange-400">${t.amountCoin.toFixed(8)}</td>
+                        <td class="p-3 text-center no-print"><button onclick="deleteBtcTx('${t.id}')" title="Smazat" class="p-1 hover:bg-rose-950/40 rounded-lg text-rose-500 hover:text-rose-400 transition">🗑️</button></td>
+                    </tr>`;
+                });
+            } else {
+                allBtcTx.forEach(t => {
+                    if (t.type === "Nákup") { totalCzk += t.amountCzk; totalBtc += t.amountCoin; } else { totalCzk -= t.amountCzk; totalBtc -= t.amountCoin; }
+                });
+            }
             globalTotalBtc = totalBtc; globalTotalCzk = totalCzk;
             const currentValue = totalBtc * currentBtcPriceCzk; const profit = currentValue - totalCzk;
 
-            document.getElementById('btc-total-czk').textContent = totalCzk.toLocaleString('cs-CZ') + " Kč";
-            document.getElementById('btc-total-amount').textContent = totalBtc.toFixed(8);
-            document.getElementById('btc-current-value').textContent = currentValue.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
+            const btcTotalCzkEl = document.getElementById('btc-total-czk');
+            if(btcTotalCzkEl) btcTotalCzkEl.textContent = totalCzk.toLocaleString('cs-CZ') + " Kč";
+            const btcTotalAmountEl = document.getElementById('btc-total-amount');
+            if(btcTotalAmountEl) btcTotalAmountEl.textContent = totalBtc.toFixed(8);
+            const btcCurrentValEl = document.getElementById('btc-current-value');
+            if(btcCurrentValEl) btcCurrentValEl.textContent = currentValue.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
             const profitEl = document.getElementById('btc-profit');
-            profitEl.textContent = profit.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
-            profitEl.className = `text-lg md:text-xl font-mono font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-1`;
+            if(profitEl) {
+                profitEl.textContent = profit.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
+                profitEl.className = `text-lg md:text-xl font-mono font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-1`;
+            }
             updateCalculator();
-        };
 
-        // --- FOND LOGIKA ---
-        window.fetchFundPriceFromWeb = async (event) => {
-            try {
-                const btn = event.currentTarget;
-                const originalText = btn.innerHTML;
-                btn.innerHTML = "⏳ Hledám...";
-                
-                const targetUrl = encodeURIComponent('https://markets.ft.com/data/funds/tearsheet/summary?s=LU1603788220:CZK');
-                const proxyUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
-
-                const res = await fetch(proxyUrl);
-                const data = await res.json();
-                
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data.contents, "text/html");
-
-                const priceElement = doc.querySelector('.mod-tearsheet-overview__quote__bar .mod-ui-data-list__value');
-                
-                if (priceElement) {
-                    let priceText = priceElement.innerText.trim();
-                    let priceValue = parseFloat(priceText.replace(/,/g, ''));
-                    
-                    if (!isNaN(priceValue)) {
-                        currentFundPriceCzk = priceValue;
-                        localStorage.setItem('fundPriceCZK', currentFundPriceCzk);
-                        document.getElementById('fundManualPrice').value = currentFundPriceCzk;
-                        renderFund();
-                    }
-                } else {
-                    alert("Nepodařilo se automaticky načíst cenu fondu z webu. Zkuste prosím zadat kurz ručně.");
-                }
-                
-                btn.innerHTML = originalText;
-                
-            } catch (e) {
-                console.error("Chyba při auto-stahování kurzu fondu:", e);
-                alert("Automatická aktualizace selhala. Zkuste to ručně.");
+            // Aktualizace přehledového okénka BTC na hlavní záložce (tab-overview)
+            const overviewBtcVal = document.getElementById('overview-btc-value');
+            const overviewBtcRate = document.getElementById('overview-btc-rate');
+            if(overviewBtcVal) overviewBtcVal.textContent = currentValue.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
+            if(overviewBtcRate) {
+                const rateStr = currentBtcPriceCzk.toLocaleString('cs-CZ', {maximumFractionDigits: 0});
+                overviewBtcRate.innerHTML = `<span class="text-yellow-400 font-bold">Kurz: ${rateStr} Kč</span> • <span class="text-orange-300 font-bold">${totalBtc.toFixed(4)} BTC</span>`;
             }
-        };
-
-        window.saveFundPrice = () => {
-            const val = parseFloat(document.getElementById('fundManualPrice').value);
-            if(!isNaN(val) && val > 0) {
-                currentFundPriceCzk = val;
-                localStorage.setItem('fundPriceCZK', val);
-                renderFund();
-            } else {
-                alert('Zadejte platný kurz fondu.');
-            }
-        };
-
-        document.getElementById('btnAddFund').onclick = async () => {
-            const type = document.getElementById('fundType').value;
-            const amountCzk = parseFloat(document.getElementById('fundAmountCzk').value) || 0;
-            const amountUnit = parseFloat(document.getElementById('fundAmountUnit').value) || 0;
-            const txDate = new Date(document.getElementById('fundDateInput').value);
-            if (amountCzk <= 0 || amountUnit <= 0) return alert("Zadejte platné částky větší než nula.");
-            await addDoc(collection(db, "fund_transactions"), { userId: currentUser.uid, type: type, amountCzk: amountCzk, amountUnit: amountUnit, createdAt: Timestamp.fromDate(txDate) });
-            document.getElementById('fundAmountCzk').value = ""; document.getElementById('fundAmountUnit').value = "";
-        };
-
-        window.deleteFundTx = async (id) => { if(confirm("Opravdu smazat tento záznam o fondu?")) await deleteDoc(doc(db, "fund_transactions", id)); };
-
-        window.renderFund = () => {
-            let totalCzk = 0, totalUnits = 0;
-            const tbody = document.getElementById('fundTableBody');
-            if(!tbody) return; tbody.innerHTML = "";
-
-            allFundTx.forEach(t => {
-                const isBuy = t.type === "Nákup";
-                if (isBuy) { totalCzk += t.amountCzk; totalUnits += t.amountUnit; } else { totalCzk -= t.amountCzk; totalUnits -= t.amountUnit; }
-                tbody.innerHTML += `<tr class="hover:bg-slate-800/60 transition-colors">
-                    <td class="p-3 text-slate-400 text-xs font-mono">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
-                    <td class="p-3 font-medium ${isBuy ? 'text-emerald-400' : 'text-rose-400'}">${t.type}</td>
-                    <td class="p-3 text-right font-mono font-bold text-slate-200">${t.amountCzk.toLocaleString('cs-CZ')} Kč</td>
-                    <td class="p-3 text-right font-mono font-bold text-purple-400">${t.amountUnit.toFixed(4)}</td>
-                    <td class="p-3 text-center no-print"><button onclick="deleteFundTx('${t.id}')" title="Smazat" class="p-1 hover:bg-rose-950/40 rounded-lg text-rose-500 hover:text-rose-400 transition">🗑️</button></td>
-                </tr>`;
-            });
-
-            globalTotalFund = totalUnits; globalTotalFundCzk = totalCzk;
-            const currentValue = totalUnits * currentFundPriceCzk; 
-            const profit = currentValue - totalCzk;
-
-            document.getElementById('fund-current-rate').textContent = currentFundPriceCzk.toLocaleString('cs-CZ', {maximumFractionDigits: 2}) + " Kč";
-            document.getElementById('fund-total-czk').textContent = totalCzk.toLocaleString('cs-CZ') + " Kč";
-            document.getElementById('fund-total-amount').textContent = totalUnits.toFixed(4);
-            document.getElementById('fund-current-value').textContent = currentValue.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
-            
-            const profitEl = document.getElementById('fund-profit');
-            profitEl.textContent = profit.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
-            profitEl.className = `text-lg md:text-xl font-mono font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-1`;
         };
 
     </script>
