@@ -3,19 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Správa osobních financí</title>
+    <title>Správa osobních financí | PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        dark: {
+                            bg: '#090d16',
+                            card: 'rgba(15, 23, 42, 0.75)',
+                            border: 'rgba(51, 65, 85, 0.6)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at 10% 15%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 85%, rgba(147, 51, 234, 0.12) 0%, transparent 45%),
+                        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.9) 0%, #090d16 100%);
+            background-attachment: fixed;
+            color: #f3f4f6;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.8); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 1); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-content.block {
+            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Glassmorphism utility */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+        }
+
+        /* Print styles */
         @media print {
             @page { size: A4; margin: 15mm; }
             .no-print { display: none !important; }
             .print-only { display: block !important; color: black !important; }
             body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
-            .bg-gray-800, .bg-gray-900, .bg-gray-700 { background: white !important; border: 1px solid #eee !important; color: black !important; box-shadow: none !important; }
-            .text-white, .text-gray-100, .text-gray-300, .text-gray-400, .text-gray-500 { color: black !important; }
+            .glass-card, .bg-gray-800, .bg-gray-900, .bg-gray-700, .bg-slate-900, .bg-slate-800 { background: white !important; border: 1px solid #ddd !important; color: black !important; box-shadow: none !important; }
+            .text-white, .text-gray-100, .text-gray-300, .text-gray-400, .text-gray-500, .text-slate-300, .text-slate-400 { color: black !important; }
             .text-blue-400 { color: #2563eb !important; text-decoration: none !important; }
-            .border-gray-700 { border-color: #ddd !important; }
             #report-content { border: none !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
             canvas { max-width: 100% !important; height: auto !important; }
             table { font-size: 10pt !important; width: 100% !important; border: 1px solid #ddd !important; border-collapse: collapse !important; }
@@ -26,318 +87,583 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white font-sans min-h-screen">
+<body class="min-h-screen selection:bg-blue-500 selection:text-white pb-12">
 
-    <div id="login-section" class="flex flex-col items-center justify-center min-h-screen no-print">
-        <div class="bg-gray-800 p-8 rounded-xl shadow-lg w-96 border border-gray-700">
-            <h1 class="text-2xl font-bold mb-6 text-center text-blue-400">Bezpečnostní brána</h1>
-            <input id="email" type="email" placeholder="Email" class="w-full mb-4 p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 text-white">
-            <input id="password" type="password" placeholder="Heslo" class="w-full mb-6 p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-blue-500 text-white">
-            <button id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold mb-3 transition">Přihlásit se</button>
-            <button id="btnRegister" class="w-full bg-gray-600 hover:bg-gray-500 p-3 rounded font-bold transition">Vytvořit účet</button>
+    <!-- LOGIN SECTION -->
+    <div id="login-section" class="flex flex-col items-center justify-center min-h-screen no-print px-4">
+        <div class="glass-card p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30 text-2xl">
+                    💎
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-white bg-clip-text text-transparent">Finanční brána</h1>
+                    <p class="text-xs text-slate-400 font-medium">Správa a analýza osobního jmění</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 ml-1">E-mail</label>
+                    <input id="email" type="email" placeholder="vaše@adresa.cz" class="w-full p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-white placeholder-slate-500 transition-all text-sm font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 ml-1">Heslo</label>
+                    <input id="password" type="password" placeholder="••••••••" class="w-full p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-white placeholder-slate-500 transition-all text-sm font-medium">
+                </div>
+                <div class="pt-2 space-y-3">
+                    <button id="btnLogin" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 p-3.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/25 hover:shadow-blue-500/40 active:scale-[0.99] flex items-center justify-center gap-2">
+                        <span>Přihlásit se</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                    <button id="btnRegister" class="w-full bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 hover:text-white p-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.99]">
+                        Vytvořit nový účet
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="app-section" class="hidden max-w-6xl mx-auto p-4 md:p-6">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4 gap-4 no-print">
-            <h1 class="text-2xl font-bold text-blue-400">Správa financí</h1>
-            
-            <div class="flex flex-wrap gap-4 items-center justify-center">
-                <nav class="flex gap-4 mr-4 border-r border-gray-700 pr-4">
-                    <button onclick="switchTab('overview')" class="hover:text-blue-400 transition font-bold">Přehled</button>
-                    <button onclick="switchTab('analysis')" class="hover:text-blue-400 transition font-bold">Analýza</button>
-                    <button onclick="switchTab('recurring')" class="hover:text-blue-400 transition font-bold">Trvalé</button>
-                    <button onclick="switchTab('reports')" class="hover:text-blue-400 transition font-bold">Reporty</button>
-                    <button onclick="switchTab('investments')" class="hover:text-purple-400 transition font-bold text-purple-400">Investice</button>
-                    <button onclick="switchTab('settings')" class="hover:text-blue-400 transition font-bold text-gray-500">Nastavení</button>
+    <!-- APP SECTION -->
+    <div id="app-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        
+        <!-- TOP NAVBAR -->
+        <header class="glass-header rounded-2xl p-4 sm:p-5 mb-8 no-print shadow-xl">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center gap-3.5 w-full lg:w-auto justify-between lg:justify-start">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/30 text-xl font-bold">
+                            💼
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                                <span>Správa financí</span>
+                                <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full">PRO</span>
+                            </h1>
+                            <p id="navUserEmail" class="text-xs text-slate-400 font-medium truncate max-w-[200px]"></p>
+                        </div>
+                    </div>
+                    
+                    <button id="btnLogoutMobile" onclick="document.getElementById('btnLogout').click()" class="lg:hidden bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 px-3 py-1.5 rounded-lg text-xs font-semibold transition">
+                        Odhlásit
+                    </button>
+                </div>
+                
+                <!-- Navigation Tabs -->
+                <nav class="flex flex-wrap items-center justify-center gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800/80 w-full lg:w-auto overflow-x-auto">
+                    <button onclick="switchTab('overview')" data-tab="overview" class="px-3.5 py-2 rounded-lg font-bold text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition-all duration-200 flex items-center gap-1.5">
+                        <span>📊</span><span>Přehled</span>
+                    </button>
+                    <button onclick="switchTab('analysis')" data-tab="analysis" class="px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5">
+                        <span>📈</span><span>Analýza</span>
+                    </button>
+                    <button onclick="switchTab('recurring')" data-tab="recurring" class="px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5">
+                        <span>🔁</span><span>Trvalé</span>
+                    </button>
+                    <button onclick="switchTab('reports')" data-tab="reports" class="px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5">
+                        <span>📑</span><span>Reporty</span>
+                    </button>
+                    <button onclick="switchTab('investments')" data-tab="investments" class="px-3.5 py-2 rounded-lg font-medium text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-950/30 transition-all duration-200 flex items-center gap-1.5">
+                        <span>⚡</span><span>Investice</span>
+                    </button>
+                    <button onclick="switchTab('settings')" data-tab="settings" class="px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5">
+                        <span>⚙️</span><span>Data / DB</span>
+                    </button>
                 </nav>
 
-                <select id="globalPeriodFilter" class="p-1.5 rounded bg-gray-800 border border-gray-600 text-sm font-bold text-blue-300 outline-none">
-                    <option value="current_month" selected>Tento měsíc</option>
-                    <option value="last_month">Minulý měsíc</option>
-                    <option value="all">Celá historie</option>
-                </select>
+                <!-- Period Filter & Logout -->
+                <div class="flex flex-wrap items-center justify-end gap-3 w-full lg:w-auto">
+                    <!-- Smart Filter Container -->
+                    <div class="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800 w-full sm:w-auto justify-end">
+                        <span class="text-xs font-semibold text-slate-400 pl-2 hidden sm:inline">🗓️ Období:</span>
+                        
+                        <select id="globalPeriodFilter" class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-blue-300 outline-none focus:border-blue-500 cursor-pointer transition">
+                            <option value="current_month" selected>Tento měsíc</option>
+                            <option value="last_month">Minulý měsíc</option>
+                            <option value="last_3_months">Poslední 3 měsíce</option>
+                            <option value="last_6_months">Posledních 6 měsíců</option>
+                            <option value="current_year">Tento rok</option>
+                            <option value="last_year">Minulý rok</option>
+                            <option value="custom">📅 Vlastní rozmezí (Od–Do)...</option>
+                            <option value="all">Celá historie</option>
+                        </select>
 
-                <button id="btnLogout" class="bg-red-900/50 hover:bg-red-800 px-3 py-1.5 rounded text-xs transition border border-red-700">Odhlásit</button>
+                        <!-- Custom Date Range Pickers (hidden by default unless custom is selected) -->
+                        <div id="customDateRangeContainer" class="hidden flex items-center gap-1.5 pl-1 pr-1 border-l border-slate-700 animate-fadeIn">
+                            <input id="filterDateFrom" type="date" title="Od data" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs text-blue-300 font-medium focus:outline-none focus:border-blue-500 cursor-pointer">
+                            <span class="text-slate-500 text-xs font-bold">➔</span>
+                            <input id="filterDateTo" type="date" title="Do data" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs text-blue-300 font-medium focus:outline-none focus:border-blue-500 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <button id="btnLogout" class="hidden lg:flex items-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 px-3.5 py-2 rounded-xl text-xs font-semibold transition active:scale-95 shadow-sm">
+                        <span>Odhlásit</span>
+                    </button>
+                </div>
+
             </div>
-        </div>
+        </header>
 
+        <!-- TAB: OVERVIEW -->
         <div id="tab-overview" class="tab-content block">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                    <span class="text-gray-400 text-xs uppercase">Příjmy</span>
-                    <div id="summary-income" class="text-2xl font-bold text-green-400">0 Kč</div>
+            
+            <!-- Summary Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                <!-- Příjmy -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Celkové Příjmy</span>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">↗</div>
+                    </div>
+                    <div id="summary-income" class="text-3xl font-extrabold text-emerald-400 font-mono tracking-tight">0 Kč</div>
+                    <p class="text-[11px] text-slate-500 mt-2 font-medium">Součet za zvolené období</p>
                 </div>
-                <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                    <span class="text-gray-400 text-xs uppercase">Výdaje</span>
-                    <div id="summary-expense" class="text-2xl font-bold text-red-400">0 Kč</div>
+
+                <!-- Výdaje -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-rose-500/40 transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Celkové Výdaje</span>
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 font-bold">↘</div>
+                    </div>
+                    <div id="summary-expense" class="text-3xl font-extrabold text-rose-400 font-mono tracking-tight">0 Kč</div>
+                    <p class="text-[11px] text-slate-500 mt-2 font-medium">Součet za zvolené období</p>
                 </div>
-                <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 border-l-4 border-l-blue-500">
-                    <span class="text-gray-400 text-xs uppercase">Zůstatek</span>
-                    <div id="summary-balance" class="text-2xl font-bold text-blue-400">0 Kč</div>
+
+                <!-- Zůstatek -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-blue-500/40 transition-all duration-300 border-l-4 border-l-blue-500">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Čistý Zůstatek</span>
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold">💎</div>
+                    </div>
+                    <div id="summary-balance" class="text-3xl font-extrabold text-blue-400 font-mono tracking-tight">0 Kč</div>
+                    <p class="text-[11px] text-slate-500 mt-2 font-medium">Příjmy mínus výdaje</p>
                 </div>
             </div>
 
+            <!-- Main Layout Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 h-fit no-print">
-                    <h2 class="text-lg font-bold mb-4">Nová transakce</h2>
-                    <input type="hidden" id="editTxId">
-                    <input id="txDateInput" type="date" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white">
-                    <select id="txType" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold text-sm">
-                        <option value="Výdaj">Výdaj</option>
-                        <option value="Příjem">Příjem</option>
-                    </select>
-                    <select id="txCategorySelect" class="w-full mb-1 p-2 rounded bg-gray-700 border border-gray-600 text-white text-sm"></select>
-                    <input id="txCategoryCustom" type="text" placeholder="Vlastní název..." class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 hidden text-white text-sm">
-                    <input id="txAmount" type="number" placeholder="Částka (Kč)" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold">
-                    <input id="txNote" type="text" placeholder="Poznámka" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white text-sm">
-                    <div class="flex items-center mb-4 text-xs text-gray-400">
-                        <input id="txRecurring" type="checkbox" class="w-4 h-4 rounded">
-                        <label for="txRecurring" class="ml-2 text-gray-100">Opakovat měsíčně</label>
+                
+                <!-- Left: New/Edit Transaction Form -->
+                <div class="glass-card p-6 rounded-2xl col-span-1 h-fit no-print sticky top-28 shadow-xl border border-slate-800/80">
+                    <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-800">
+                        <h2 id="formTitle" class="text-base font-bold text-white flex items-center gap-2">
+                            <span>📝</span><span>Nová transakce</span>
+                        </h2>
+                        <span id="formBadge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 uppercase tracking-wider">Záznam</span>
                     </div>
-                    <button id="btnAddTx" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded font-bold transition">ULOŽIT</button>
-                    <button id="btnCancelEdit" class="hidden w-full bg-gray-600 p-2 rounded mt-2 font-bold text-sm">ZRUŠIT</button>
+                    
+                    <input type="hidden" id="editTxId">
+                    
+                    <div class="space-y-3.5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Datum transakce</label>
+                            <input id="txDateInput" type="date" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-blue-500 transition font-medium">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Typ pohybu</label>
+                            <select id="txType" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-bold text-sm focus:outline-none focus:border-blue-500 transition cursor-pointer">
+                                <option value="Výdaj">↘ Výdaj</option>
+                                <option value="Příjem">↗ Příjem</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Kategorie</label>
+                            <select id="txCategorySelect" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-medium focus:outline-none focus:border-blue-500 transition cursor-pointer"></select>
+                            <input id="txCategoryCustom" type="text" placeholder="Zadejte název vlastní kategorie..." class="w-full mt-2 p-2.5 rounded-xl bg-slate-900 border border-blue-500/60 hidden text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 animate-fadeIn">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Částka (Kč)</label>
+                            <div class="relative">
+                                <input id="txAmount" type="number" step="0.01" placeholder="0.00" class="w-full p-2.5 pr-12 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono font-bold text-base focus:outline-none focus:border-blue-500 transition">
+                                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold">Kč</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Poznámka / detail</label>
+                            <input id="txNote" type="text" placeholder="Např. nákup na víkend, nájem..." class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-blue-500 transition">
+                        </div>
+
+                        <div class="pt-1">
+                            <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:bg-slate-900 transition">
+                                <input id="txRecurring" type="checkbox" class="w-4 h-4 rounded text-blue-600 focus:ring-0 bg-slate-800 border-slate-600">
+                                <span class="text-xs font-medium text-slate-300">Trvalá platba (opakovat měsíčně)</span>
+                            </label>
+                        </div>
+
+                        <div class="pt-2">
+                            <button id="btnAddTx" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 p-3.5 rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/20 hover:shadow-emerald-500/40 active:scale-[0.99] flex items-center justify-center gap-2 text-white">
+                                <span>ULOŽIT TRANSKACI</span>
+                            </button>
+                            <button id="btnCancelEdit" class="hidden w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl mt-2 font-semibold text-xs text-slate-300 transition">
+                                ZRUŠIT ÚPRAVY
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-3">
-                    <div class="flex justify-between items-center mb-4 no-print">
-                        <h2 class="font-bold">Historie transakcí</h2>
-                        <button onclick="deleteSelected()" class="text-red-400 hover:text-red-300 text-xs font-bold border border-red-900 px-3 py-1 rounded">Smazat vybrané</button>
+                <!-- Right: Transactions Table -->
+                <div class="glass-card p-6 rounded-2xl col-span-1 lg:col-span-3 shadow-xl border border-slate-800/80">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800 no-print">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <span>📋</span><span>Historie transakcí</span>
+                            </h2>
+                            <p class="text-xs text-slate-400 mt-0.5">Zobrazuje položky odpovídající vybranému filtru nahoře</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="deleteSelected()" class="text-rose-400 hover:text-white bg-rose-950/40 hover:bg-rose-900/80 border border-rose-800/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                                <span>🗑️ Smazat vybrané</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="overflow-x-auto max-h-[500px]">
+
+                    <div class="overflow-x-auto max-h-[620px] rounded-xl border border-slate-800/80 bg-slate-900/40">
                         <table class="w-full text-left border-collapse">
-                            <thead class="sticky top-0 bg-gray-800">
-                                <tr class="border-b border-gray-700 text-gray-500 text-xs">
-                                    <th class="p-2 w-8 no-print"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-                                    <th class="p-2">Datum</th>
-                                    <th class="p-2">Kategorie</th>
-                                    <th class="p-2">Poznámka</th>
-                                    <th class="p-2 text-right">Částka</th>
-                                    <th class="p-2 text-center w-12 no-print">Akce</th>
+                            <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 border-b border-slate-800 text-slate-400 text-xs uppercase font-semibold">
+                                <tr>
+                                    <th class="p-3 w-10 text-center no-print">
+                                        <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" class="rounded bg-slate-800 border-slate-600 text-blue-600 focus:ring-0 cursor-pointer">
+                                    </th>
+                                    <th class="p-3">Datum</th>
+                                    <th class="p-3">Kategorie</th>
+                                    <th class="p-3">Poznámka</th>
+                                    <th class="p-3 text-right">Částka</th>
+                                    <th class="p-3 text-center w-20 no-print">Akce</th>
                                 </tr>
                             </thead>
-                            <tbody id="txTableBody"></tbody>
+                            <tbody id="txTableBody" class="divide-y divide-slate-800/60 text-sm"></tbody>
                         </table>
                     </div>
                 </div>
+
             </div>
         </div>
 
+        <!-- TAB: ANALYSIS -->
         <div id="tab-analysis" class="tab-content hidden">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 h-fit">
-                    <h3 id="analysisTitle" class="text-blue-400 font-bold mb-4 uppercase text-sm tracking-widest">Detail období</h3>
-                    <div id="analysisSummary" class="text-gray-300 font-mono text-sm whitespace-pre-wrap leading-relaxed"></div>
-                </div>
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 md:col-span-2 space-y-6">
-                    <div class="h-[300px]"><canvas id="expenseChart"></canvas></div>
-                    <div class="h-[300px]"><canvas id="trendChart"></canvas></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-recurring" class="tab-content hidden">
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
-                <h2 class="text-xl font-bold mb-4 text-blue-400">Správa trvalých plateb</h2>
-                <table class="w-full text-left border-collapse">
-                    <thead><tr class="border-b border-gray-700 text-gray-400 text-sm">
-                        <th class="p-2">Kategorie</th><th class="p-2 text-right">Částka</th><th class="p-2">Poznámka</th><th class="p-2 text-center">Akce</th>
-                    </tr></thead>
-                    <tbody id="recurringTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="tab-reports" class="tab-content hidden">
-            <div id="report-content" class="bg-gray-800 p-8 rounded-xl border border-gray-700 max-w-4xl mx-auto shadow-2xl">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-700 pb-4 gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-blue-400">Finanční report</h2>
-                        <p id="reportPeriodText" class="text-gray-300 text-sm font-bold"></p>
-                        <p id="reportUserEmail" class="text-gray-500 text-xs mt-1"></p>
+                <!-- Text Summary Left -->
+                <div class="glass-card p-6 rounded-2xl h-fit border border-slate-800/80 shadow-xl">
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                        <h3 id="analysisTitle" class="text-blue-400 font-bold uppercase text-xs tracking-widest flex items-center gap-1.5">
+                            <span>🔍 Detail období</span>
+                        </h3>
                     </div>
-                    <div class="flex items-center gap-4 no-print">
-                        <div class="flex items-center gap-2">
-                            <label for="topTxCount" class="text-sm text-gray-400">Počet top položek:</label>
-                            <input type="number" id="topTxCount" value="10" min="1" max="100" class="bg-gray-700 border border-gray-600 text-white px-2 py-1 rounded w-16 text-sm outline-none focus:border-blue-500">
+                    <div id="analysisSummary" class="text-slate-300 font-mono text-xs whitespace-pre-wrap leading-relaxed bg-slate-900/80 p-4 rounded-xl border border-slate-800"></div>
+                </div>
+
+                <!-- Charts Right -->
+                <div class="glass-card p-6 rounded-2xl col-span-1 md:col-span-2 space-y-8 border border-slate-800/80 shadow-xl">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider flex items-center gap-2">
+                            <span>🍩</span><span>Rozdělení výdajů podle kategorií</span>
+                        </h3>
+                        <div class="h-[300px] w-full flex items-center justify-center">
+                            <canvas id="expenseChart"></canvas>
                         </div>
-                        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-bold transition shadow-lg">Tisk do PDF</button>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-slate-800">
+                        <h3 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider flex items-center gap-2">
+                            <span>📊</span><span>Měsíční trend (Příjmy vs. Výdaje)</span>
+                        </h3>
+                        <div class="h-[320px] w-full">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: RECURRING -->
+        <div id="tab-recurring" class="tab-content hidden">
+            <div class="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800/80 shadow-xl max-w-5xl mx-auto">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <span>🔁</span><span>Správa trvalých plateb</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">Pravidelné platby si můžete jedním kliknutím zaúčtovat s dnešním datem</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/40">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-900 text-slate-400 text-xs uppercase font-semibold border-b border-slate-800">
+                            <tr>
+                                <th class="p-3.5">Kategorie</th>
+                                <th class="p-3.5 text-right">Částka</th>
+                                <th class="p-3.5">Poznámka</th>
+                                <th class="p-3.5 text-center">Akce</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recurringTableBody" class="divide-y divide-slate-800/60 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: REPORTS -->
+        <div id="tab-reports" class="tab-content hidden">
+            <div id="report-content" class="glass-card p-8 sm:p-10 rounded-3xl border border-slate-800/80 max-w-4xl mx-auto shadow-2xl">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b border-slate-800 gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 text-blue-400 font-bold uppercase text-xs tracking-wider mb-1">
+                            <span>📑 Finanční souhrn a výpis</span>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-white">Finanční Report</h2>
+                        <p id="reportPeriodText" class="text-slate-300 text-sm font-semibold mt-1"></p>
+                        <p id="reportUserEmail" class="text-slate-500 text-xs mt-0.5"></p>
+                    </div>
+                    
+                    <div class="flex flex-wrap items-center gap-3 no-print">
+                        <div class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800">
+                            <label for="topTxCount" class="text-xs text-slate-400 font-medium">Top položek:</label>
+                            <input type="number" id="topTxCount" value="10" min="1" max="100" class="bg-slate-800 border border-slate-700 text-white px-2 py-1 rounded-lg w-16 text-xs font-bold outline-none focus:border-blue-500">
+                        </div>
+                        <button onclick="window.print()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 px-6 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-600/20 flex items-center gap-2">
+                            <span>🖨️ Tisk do PDF</span>
+                        </button>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div class="p-3 bg-gray-900 rounded border border-gray-700"><div class="text-[10px] text-gray-500 uppercase">Příjmy</div><div id="rep-inc" class="font-bold text-green-400 text-lg"></div></div>
-                    <div class="p-3 bg-gray-900 rounded border border-gray-700"><div class="text-[10px] text-gray-500 uppercase">Výdaje</div><div id="rep-exp" class="font-bold text-red-400 text-lg"></div></div>
-                    <div class="p-3 bg-gray-900 rounded border border-gray-700"><div class="text-[10px] text-gray-500 uppercase">Zůstatek</div><div id="rep-bal" class="font-bold text-blue-400 text-lg"></div></div>
-                    <div class="p-3 bg-gray-900 rounded border border-gray-700"><div class="text-[10px] text-gray-500 uppercase">Transakcí</div><div id="rep-count" class="font-bold text-gray-300 text-lg"></div></div>
+                    <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">Celkové Příjmy</div>
+                        <div id="rep-inc" class="font-mono font-extrabold text-emerald-400 text-lg mt-1"></div>
+                    </div>
+                    <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">Celkové Výdaje</div>
+                        <div id="rep-exp" class="font-mono font-extrabold text-rose-400 text-lg mt-1"></div>
+                    </div>
+                    <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">Zůstatek</div>
+                        <div id="rep-bal" class="font-mono font-extrabold text-blue-400 text-lg mt-1"></div>
+                    </div>
+                    <div class="p-4 bg-slate-900/80 rounded-2xl border border-slate-800">
+                        <div class="text-[10px] text-slate-400 uppercase font-bold">Transakcí celkem</div>
+                        <div id="rep-count" class="font-mono font-extrabold text-slate-200 text-lg mt-1"></div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div>
-                        <h3 class="text-sm font-bold mb-4 uppercase text-gray-500 border-b border-gray-700 pb-1">Rozpis výdajů</h3>
+                        <h3 class="text-xs font-bold mb-3.5 uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">Rozpis výdajů podle kategorií</h3>
                         <div id="rep-cats" class="text-sm space-y-2 mb-6"></div>
 
-                        <h3 class="text-sm font-bold mb-4 uppercase text-gray-500 border-b border-gray-700 pb-1">Seznam příjmů</h3>
-                        <div id="rep-inc-list" class="text-xs space-y-1"></div>
+                        <h3 class="text-xs font-bold mb-3.5 uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">Seznam příjmů</h3>
+                        <div id="rep-inc-list" class="text-xs space-y-1.5 max-h-60 overflow-y-auto pr-1"></div>
                     </div>
                     <div>
-                        <h3 id="rep-top-title" class="text-sm font-bold mb-4 uppercase text-gray-500 border-b border-gray-700 pb-1">Top 10 transakcí</h3>
-                        <div id="rep-top" class="text-xs space-y-1"></div>
+                        <h3 id="rep-top-title" class="text-xs font-bold mb-3.5 uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">Top 10 transakcí</h3>
+                        <div id="rep-top" class="text-xs space-y-1.5 max-h-96 overflow-y-auto pr-1"></div>
                     </div>
                 </div>
                 
-                <div class="print-only hidden mt-8 text-[9px] text-gray-400 text-center italic">Vygenerováno aplikací Správa financí</div>
+                <div class="print-only hidden mt-12 pt-4 border-t border-slate-300 text-[10px] text-slate-500 text-center italic">
+                    Vygenerováno automaticky systémem Správa financí PRO • Osobní přehled
+                </div>
             </div>
         </div>
 
-        <div id="tab-investments" class="tab-content hidden">
+        <!-- TAB: INVESTMENTS -->
+        <div id="tab-investments" class="tab-content hidden space-y-12">
             
-            <div class="mb-12">
-                <h1 class="text-2xl font-bold text-orange-400 mb-6 border-b border-gray-700 pb-2">Kryptoměny: Bitcoin (BTC)</h1>
+            <!-- BITCOIN SECTION -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-800/80 shadow-xl">
+                <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 text-xl font-bold">₿</div>
+                        <div>
+                            <h1 class="text-xl font-extrabold text-white">Kryptoměny: Bitcoin (BTC)</h1>
+                            <p class="text-xs text-slate-400">Portfolio, nákupy, prodeje a vývoj kurzu</p>
+                        </div>
+                    </div>
+                    <button onclick="fetchBtcPrice()" class="text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-orange-300 px-3.5 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+                        <span>🔄 Akt. kurz</span>
+                    </button>
+                </div>
                 
-                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                        <span class="text-gray-400 text-xs uppercase">Kurz 1 BTC</span>
-                        <div id="btc-current-rate" class="text-xl md:text-2xl font-bold text-yellow-400">0 Kč</div>
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Aktuální kurz 1 BTC</span>
+                        <div id="btc-current-rate" class="text-lg md:text-xl font-mono font-bold text-yellow-400 mt-1">0 Kč</div>
                     </div>
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                        <span class="text-gray-400 text-xs uppercase">Celkem vloženo</span>
-                        <div id="btc-total-czk" class="text-xl md:text-2xl font-bold text-gray-300">0 Kč</div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Celkem vloženo</span>
+                        <div id="btc-total-czk" class="text-lg md:text-xl font-mono font-bold text-slate-300 mt-1">0 Kč</div>
                     </div>
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 border-l-4 border-l-orange-500">
-                        <span class="text-gray-400 text-xs uppercase">Množství BTC</span>
-                        <div id="btc-total-amount" class="text-xl md:text-2xl font-bold text-orange-400">0.00000000</div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 border-l-4 border-l-orange-500">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Množství v držení</span>
+                        <div id="btc-total-amount" class="text-lg md:text-xl font-mono font-bold text-orange-400 mt-1">0.00000000</div>
                     </div>
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                        <span class="text-gray-400 text-xs uppercase">Aktuální hodnota</span>
-                        <div id="btc-current-value" class="text-xl md:text-2xl font-bold text-blue-400">0 Kč</div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Tržní hodnota</span>
+                        <div id="btc-current-value" class="text-lg md:text-xl font-mono font-bold text-blue-400 mt-1">0 Kč</div>
                     </div>
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                        <span class="text-gray-400 text-xs uppercase">Zisk / Ztráta</span>
-                        <div id="btc-profit" class="text-xl md:text-2xl font-bold text-gray-300">0 Kč</div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Zisk / Ztráta</span>
+                        <div id="btc-profit" class="text-lg md:text-xl font-mono font-bold text-slate-300 mt-1">0 Kč</div>
                     </div>
                 </div>
 
-                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 mb-6 no-print">
+                <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 mb-8 no-print">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-orange-400">Vývoj ceny BTC (CZK)</h2>
-                        <select id="btcChartPeriod" class="p-1.5 rounded bg-gray-700 border border-gray-600 text-sm font-bold text-orange-300 outline-none">
+                        <h2 class="text-sm font-bold text-orange-400 uppercase tracking-wider">📈 Vývoj ceny BTC (CZK)</h2>
+                        <select id="btcChartPeriod" class="px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-orange-300 outline-none cursor-pointer">
                             <option value="1">1 Den</option>
                             <option value="7">1 Týden</option>
                             <option value="30" selected>1 Měsíc</option>
                             <option value="365">1 Rok</option>
                         </select>
                     </div>
-                    <div class="h-[250px]"><canvas id="btcChart"></canvas></div>
+                    <div class="h-[260px] w-full"><canvas id="btcChart"></canvas></div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 h-fit no-print">
-                        <h2 class="text-lg font-bold mb-4 text-orange-400">Nový záznam BTC</h2>
-                        <input id="btcDateInput" type="date" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white">
-                        <select id="btcType" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold text-sm">
-                            <option value="Nákup">Nákup</option>
-                            <option value="Prodej">Prodej</option>
-                        </select>
-                        <input id="btcAmountCzk" type="number" step="1" placeholder="Částka (Kč)" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold">
-                        <input id="btcAmountCoin" type="number" step="0.00000001" placeholder="Množství BTC" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold">
-                        <button id="btnAddBtc" class="w-full bg-orange-600 hover:bg-orange-700 p-3 rounded font-bold transition">ULOŽIT BTC</button>
+                    <!-- BTC Form & Calc -->
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 col-span-1 h-fit no-print">
+                        <h2 class="text-sm font-bold mb-4 text-orange-400 uppercase tracking-wider">➕ Nový záznam BTC</h2>
+                        
+                        <div class="space-y-3">
+                            <input id="btcDateInput" type="date" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-medium focus:outline-none focus:border-orange-500">
+                            <select id="btcType" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs focus:outline-none focus:border-orange-500">
+                                <option value="Nákup">🟢 Nákup</option>
+                                <option value="Prodej">🔴 Prodej</option>
+                            </select>
+                            <input id="btcAmountCzk" type="number" step="1" placeholder="Částka (Kč)" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs focus:outline-none focus:border-orange-500">
+                            <input id="btcAmountCoin" type="number" step="0.00000001" placeholder="Množství BTC" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs focus:outline-none focus:border-orange-500">
+                            <button id="btnAddBtc" class="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 p-3 rounded-xl font-bold text-xs text-white transition shadow-md shadow-orange-600/20">
+                                ULOŽIT BTC ZÁZNAM
+                            </button>
+                        </div>
 
-                        <div class="mt-8 border-t border-gray-700 pt-6">
-                            <h2 class="text-lg font-bold mb-4 text-yellow-400">Kalkulačka zisku</h2>
-                            <input id="btcCalcRate" type="number" step="1" placeholder="Hypotetický kurz (Kč)" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold outline-none focus:border-yellow-500">
-                            <div class="space-y-3">
-                                <div class="bg-gray-900 p-3 rounded border border-gray-700 flex justify-between items-center">
-                                    <span class="text-gray-500 text-[10px] uppercase">Hodnota</span>
-                                    <div id="btcCalcValue" class="font-bold text-blue-400">0 Kč</div>
+                        <div class="mt-6 border-t border-slate-800 pt-5">
+                            <h2 class="text-xs font-bold mb-3 text-yellow-400 uppercase tracking-wider">🧮 Kalkulačka budoucí hodnoty</h2>
+                            <input id="btcCalcRate" type="number" step="1" placeholder="Hypotetický kurz (Kč)" class="w-full mb-3 p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs outline-none focus:border-yellow-500">
+                            <div class="space-y-2">
+                                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                                    <span class="text-slate-500 text-[10px] uppercase font-bold">Hodnota</span>
+                                    <div id="btcCalcValue" class="font-mono font-bold text-blue-400">0 Kč</div>
                                 </div>
-                                <div class="bg-gray-900 p-3 rounded border border-gray-700 flex justify-between items-center">
-                                    <span class="text-gray-500 text-[10px] uppercase">Zisk</span>
-                                    <div id="btcCalcProfit" class="font-bold text-gray-300">0 Kč</div>
+                                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                                    <span class="text-slate-500 text-[10px] uppercase font-bold">Zisk</span>
+                                    <div id="btcCalcProfit" class="font-mono font-bold text-slate-300">0 Kč</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-3">
-                        <div class="flex justify-between items-center mb-4 no-print">
-                            <h2 class="font-bold text-orange-400">Historie BTC transakcí</h2>
-                            <button onclick="fetchBtcPrice()" class="text-gray-400 hover:text-white text-xs font-bold border border-gray-600 px-3 py-1 rounded transition">Aktualizovat kurz</button>
-                        </div>
-                        <div class="overflow-x-auto max-h-[500px]">
+                    <!-- BTC Table -->
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 col-span-1 lg:col-span-3">
+                        <h2 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">📜 Historie BTC transakcí</h2>
+                        <div class="overflow-x-auto max-h-[460px] rounded-xl border border-slate-800 bg-slate-950/40">
                             <table class="w-full text-left border-collapse">
-                                <thead class="sticky top-0 bg-gray-800">
-                                    <tr class="border-b border-gray-700 text-gray-500 text-xs">
-                                        <th class="p-2">Datum</th><th class="p-2">Typ</th><th class="p-2 text-right">Částka (Kč)</th><th class="p-2 text-right">Množství (BTC)</th><th class="p-2 text-center w-12 no-print">Akce</th>
+                                <thead class="sticky top-0 bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-3">Datum</th>
+                                        <th class="p-3">Typ</th>
+                                        <th class="p-3 text-right">Částka (Kč)</th>
+                                        <th class="p-3 text-right">Množství (BTC)</th>
+                                        <th class="p-3 text-center w-12 no-print">Akce</th>
                                     </tr>
                                 </thead>
-                                <tbody id="btcTableBody"></tbody>
+                                <tbody id="btcTableBody" class="divide-y divide-slate-800/60 text-xs"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div>
-                <div class="flex justify-between items-end mb-6 border-b border-gray-700 pb-2">
-                    <h1 class="text-2xl font-bold text-purple-400">Fondy: Invesco Global Consumer Trends</h1>
-                    <div class="flex gap-2">
-                        <input type="number" id="fundManualPrice" class="p-1.5 rounded bg-gray-700 border border-gray-600 text-white w-28 text-sm outline-none focus:border-purple-500" placeholder="Kurz fondu">
-                        <button onclick="saveFundPrice()" class="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded text-sm font-bold transition">Uložit ručně</button>
-                        <button onclick="fetchFundPriceFromWeb(event)" class="bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded text-sm font-bold transition flex items-center gap-1">
-                            <span>🔄 Auto</span>
+            <!-- FUNDS SECTION -->
+            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-800/80 shadow-xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 mb-6 border-b border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl font-bold">📈</div>
+                        <div>
+                            <h1 class="text-xl font-extrabold text-white">Podílové Fondy: Invesco Global Consumer Trends</h1>
+                            <p class="text-xs text-slate-400">Sledování investičních jednotek a vývoje investice</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="number" id="fundManualPrice" class="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono text-xs w-28 outline-none focus:border-purple-500" placeholder="Kurz fondu">
+                        <button onclick="saveFundPrice()" class="bg-purple-600 hover:bg-purple-500 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">Uložit ručně</button>
+                        <button onclick="fetchFundPriceFromWeb(event)" class="bg-emerald-600 hover:bg-emerald-500 px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                            <span>🔄 Auto kurz</span>
                         </button>
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                        <span class="text-gray-400 text-xs uppercase">Kurz 1 ks</span>
-                        <div id="fund-current-rate" class="text-xl md:text-2xl font-bold text-yellow-400">0 Kč</div>
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Kurz 1 ks</span>
+                        <div id="fund-current-rate" class="text-lg md:text-xl font-mono font-bold text-yellow-400 mt-1">0 Kč</div>
                     </div>
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                        <span class="text-gray-400 text-xs uppercase">Celkem vloženo</span>
-                        <div id="fund-total-czk" class="text-xl md:text-2xl font-bold text-gray-300">0 Kč</div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Celkem vloženo</span>
+                        <div id="fund-total-czk" class="text-lg md:text-xl font-mono font-bold text-slate-300 mt-1">0 Kč</div>
                     </div>
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700 border-l-4 border-l-purple-500">
-                        <span class="text-gray-400 text-xs uppercase">Množství ks</span>
-                        <div id="fund-total-amount" class="text-xl md:text-2xl font-bold text-purple-400">0.0000</div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 border-l-4 border-l-purple-500">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Množství ks</span>
+                        <div id="fund-total-amount" class="text-lg md:text-xl font-mono font-bold text-purple-400 mt-1">0.0000</div>
                     </div>
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                        <span class="text-gray-400 text-xs uppercase">Aktuální hodnota</span>
-                        <div id="fund-current-value" class="text-xl md:text-2xl font-bold text-blue-400">0 Kč</div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Aktuální hodnota</span>
+                        <div id="fund-current-value" class="text-lg md:text-xl font-mono font-bold text-blue-400 mt-1">0 Kč</div>
                     </div>
-                    <div class="bg-gray-800 p-5 rounded-xl border border-gray-700">
-                        <span class="text-gray-400 text-xs uppercase">Zisk / Ztráta</span>
-                        <div id="fund-profit" class="text-xl md:text-2xl font-bold text-gray-300">0 Kč</div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Zisk / Ztráta</span>
+                        <div id="fund-profit" class="text-lg md:text-xl font-mono font-bold text-slate-300 mt-1">0 Kč</div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 h-fit no-print">
-                        <h2 class="text-lg font-bold mb-4 text-purple-400">Nový záznam Fondu</h2>
-                        <input id="fundDateInput" type="date" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white">
-                        <select id="fundType" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold text-sm">
-                            <option value="Nákup">Nákup</option>
-                            <option value="Prodej">Prodej</option>
-                        </select>
-                        <input id="fundAmountCzk" type="number" step="0.01" placeholder="Částka (Kč)" class="w-full mb-3 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold">
-                        <input id="fundAmountUnit" type="number" step="0.0001" placeholder="Množství (ks)" class="w-full mb-4 p-2 rounded bg-gray-700 border border-gray-600 text-white font-bold">
-                        <button id="btnAddFund" class="w-full bg-purple-600 hover:bg-purple-700 p-3 rounded font-bold transition">ULOŽIT FOND</button>
+                    <!-- Fund Form -->
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 col-span-1 h-fit no-print">
+                        <h2 class="text-sm font-bold mb-4 text-purple-400 uppercase tracking-wider">➕ Nový záznam Fondu</h2>
+                        
+                        <div class="space-y-3">
+                            <input id="fundDateInput" type="date" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-medium focus:outline-none focus:border-purple-500">
+                            <select id="fundType" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs focus:outline-none focus:border-purple-500">
+                                <option value="Nákup">🟢 Nákup</option>
+                                <option value="Prodej">🔴 Prodej</option>
+                            </select>
+                            <input id="fundAmountCzk" type="number" step="0.01" placeholder="Částka (Kč)" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs focus:outline-none focus:border-purple-500">
+                            <input id="fundAmountUnit" type="number" step="0.0001" placeholder="Množství (ks)" class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs focus:outline-none focus:border-purple-500">
+                            <button id="btnAddFund" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 p-3 rounded-xl font-bold text-xs text-white transition shadow-md shadow-purple-600/20">
+                                ULOŽIT ZÁZNAM FONDU
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 col-span-1 lg:col-span-3">
-                        <div class="flex justify-between items-center mb-4 no-print">
-                            <h2 class="font-bold text-purple-400">Historie transakcí Fondu</h2>
-                        </div>
-                        <div class="overflow-x-auto max-h-[400px]">
+                    <!-- Fund Table -->
+                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 col-span-1 lg:col-span-3">
+                        <h2 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">📜 Historie transakcí fondu</h2>
+                        <div class="overflow-x-auto max-h-[400px] rounded-xl border border-slate-800 bg-slate-950/40">
                             <table class="w-full text-left border-collapse">
-                                <thead class="sticky top-0 bg-gray-800">
-                                    <tr class="border-b border-gray-700 text-gray-500 text-xs">
-                                        <th class="p-2">Datum</th><th class="p-2">Typ</th><th class="p-2 text-right">Částka (Kč)</th><th class="p-2 text-right">Množství (ks)</th><th class="p-2 text-center w-12 no-print">Akce</th>
+                                <thead class="sticky top-0 bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-3">Datum</th>
+                                        <th class="p-3">Typ</th>
+                                        <th class="p-3 text-right">Částka (Kč)</th>
+                                        <th class="p-3 text-right">Množství (ks)</th>
+                                        <th class="p-3 text-center w-12 no-print">Akce</th>
                                     </tr>
                                 </thead>
-                                <tbody id="fundTableBody"></tbody>
+                                <tbody id="fundTableBody" class="divide-y divide-slate-800/60 text-xs"></tbody>
                             </table>
                         </div>
                     </div>
@@ -345,13 +671,82 @@
             </div>
         </div>
 
-        <div id="tab-settings" class="tab-content hidden">
-            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 max-w-xl">
-                <h2 class="text-xl font-bold mb-4 text-blue-400">Import</h2>
-                <input type="file" id="importFile" accept=".json" class="mb-4 block w-full text-sm text-gray-400">
-                <button id="btnImport" class="bg-blue-600 px-6 py-2 rounded font-bold">Importovat JSON</button>
+        <!-- TAB: SETTINGS & DATABASE -->
+        <div id="tab-settings" class="tab-content hidden space-y-8 max-w-5xl mx-auto">
+            
+            <div class="glass-card p-8 rounded-3xl border border-slate-800 shadow-2xl">
+                <div class="flex items-center gap-3 pb-6 mb-6 border-b border-slate-800">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-2xl shadow-lg shadow-blue-500/20">
+                        ⚙️
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold text-white">Správa dat a Databáze (Export & Import)</h1>
+                        <p class="text-xs text-slate-400">Kompletní zálohování, exporty pro databáze (SQL / JSON / CSV) a obnova z lokálního souboru</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <!-- Export SQL -->
+                    <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-blue-500/40 transition">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center text-lg font-bold mb-3">
+                                🗄️
+                            </div>
+                            <h3 class="font-bold text-white text-base">Export do SQL databáze</h3>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Vygeneruje plnohodnotný SQL dump (CREATE TABLE & INSERT INTO) se všemi transakcemi pro snadný import do MySQL, SQLite či PostgreSQL.</p>
+                        </div>
+                        <button id="btnExportSql" class="mt-6 w-full bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 p-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
+                            <span>📥 Stáhnout SQL dump (.sql)</span>
+                        </button>
+                    </div>
+
+                    <!-- Export JSON -->
+                    <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-indigo-500/40 transition">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center text-lg font-bold mb-3">
+                                💾
+                            </div>
+                            <h3 class="font-bold text-white text-base">Kompletní JSON záloha</h3>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Uloží veškerá data (běžné transakce, Bitcoin i podílové fondy) do strukturovaného JSON souboru, který lze kdykoli obnovit přes Import níže.</p>
+                        </div>
+                        <button id="btnExportJson" class="mt-6 w-full bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 p-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
+                            <span>📥 Stáhnout JSON zálohu (.json)</span>
+                        </button>
+                    </div>
+
+                    <!-- Export CSV -->
+                    <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-emerald-500/40 transition">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-lg font-bold mb-3">
+                                📊
+                            </div>
+                            <h3 class="font-bold text-white text-base">Export do Excelu (CSV)</h3>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Vygeneruje přehlednou tabulku ve formátu CSV se správným kódováním UTF-8 s BOM pro snadné otevření v Excelu či Google Tabulkách.</p>
+                        </div>
+                        <button id="btnExportCsv" class="mt-6 w-full bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 p-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
+                            <span>📥 Stáhnout tabulku (.csv)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Import Section -->
+                <div class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800">
+                    <h3 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+                        <span>🔄</span><span>Import a obnova dat do databáze</span>
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-4">Podporuje jak kompletní zálohy ze systému (JSON s kolekcemi transakcí, BTC a fondů), tak i původní jednoduché pole transakcí.</p>
+                    
+                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                        <input type="file" id="importFile" accept=".json" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600/20 file:text-blue-400 hover:file:bg-blue-600/30 cursor-pointer bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                        <button id="btnImport" class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl font-bold text-xs text-white shadow-lg transition whitespace-nowrap">
+                            ⚡ Nahrát a importovat do DB
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
+
     </div>
 
     <script type="module">
@@ -371,7 +766,11 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const defaultCategories = { "Výdaj": ["Jídlo", "Bydlení", "Doprava", "Zábava", "Sport"], "Příjem": ["Mzda", "Investice", "Dar"] };
+        // Rozšířený seznam kategorií včetně Dar a Ostatní přímo ve volbě bez nutnosti ručního zadávání
+        const defaultCategories = { 
+            "Výdaj": ["Jídlo", "Bydlení", "Doprava", "Zábava", "Sport", "Dar", "Ostatní"], 
+            "Příjem": ["Mzda", "Investice", "Dar", "Ostatní"] 
+        };
         const monthNames = ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"];
 
         let currentUser = null, allTx = [], expChart = null, trendChart = null;
@@ -385,7 +784,18 @@
 
         window.switchTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
-            document.getElementById('tab-' + id).classList.remove('hidden');
+            const tabEl = document.getElementById('tab-' + id);
+            if(tabEl) tabEl.classList.remove('hidden');
+
+            // Aktivní styl tabů v navigaci
+            document.querySelectorAll('nav button').forEach(btn => {
+                if(btn.getAttribute('data-tab') === id) {
+                    btn.className = "px-3.5 py-2 rounded-lg font-bold text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition-all duration-200 flex items-center gap-1.5";
+                } else {
+                    btn.className = "px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5";
+                }
+            });
+
             render();
             if(id === 'investments') {
                 renderBtc(); 
@@ -399,20 +809,42 @@
 
         function setDefaultDate() { 
             const today = new Date().toISOString().split('T')[0];
+            const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+            
             document.getElementById('txDateInput').value = today; 
             document.getElementById('btcDateInput').value = today;
             document.getElementById('fundDateInput').value = today;
+            
+            const df = document.getElementById('filterDateFrom');
+            const dt = document.getElementById('filterDateTo');
+            if (df && !df.value) df.value = firstDayOfMonth;
+            if (dt && !dt.value) dt.value = today;
         }
 
         onAuthStateChanged(auth, (user) => {
-            if (user) { currentUser = user; document.getElementById('login-section').classList.add('hidden'); document.getElementById('app-section').classList.remove('hidden'); setDefaultDate(); init(); }
-            else { document.getElementById('login-section').classList.remove('hidden'); document.getElementById('app-section').classList.add('hidden'); }
+            if (user) { 
+                currentUser = user; 
+                document.getElementById('login-section').classList.add('hidden'); 
+                document.getElementById('app-section').classList.remove('hidden'); 
+                const navEmail = document.getElementById('navUserEmail');
+                if(navEmail) navEmail.textContent = user.email;
+                setDefaultDate(); 
+                init(); 
+            } else { 
+                document.getElementById('login-section').classList.remove('hidden'); 
+                document.getElementById('app-section').classList.add('hidden'); 
+            }
         });
 
         document.getElementById('btnLogin').onclick = async () => {
             try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); }
-            catch (e) { alert("Chyba přihlášení."); }
+            catch (e) { alert("Chyba přihlášení. Zkontrolujte e-mail a heslo."); }
         };
+        
+        document.getElementById('btnRegister').onclick = async () => {
+            alert("Pro vytvoření nového účtu prosím kontaktujte správce nebo použijte povolenou registraci ve Firebase.");
+        };
+
         document.getElementById('btnLogout').onclick = () => signOut(auth);
 
         function init() {
@@ -465,30 +897,64 @@
         }
 
         const txType = document.getElementById('txType'), catSel = document.getElementById('txCategorySelect'), catCust = document.getElementById('txCategoryCustom');
+        
         function updateCats() {
             catSel.innerHTML = "";
-            defaultCategories[txType.value].forEach(c => { let o = document.createElement("option"); o.value = c; o.textContent = c; catSel.appendChild(o); });
-            let o = document.createElement("option"); o.value = "Ostatní"; o.textContent = "Ostatní..."; catSel.appendChild(o);
+            defaultCategories[txType.value].forEach(c => { 
+                let o = document.createElement("option"); 
+                o.value = c; 
+                o.textContent = c; 
+                catSel.appendChild(o); 
+            });
+            // Jediná volba pro ruční zadání vlastního názvu, pokud by uživatel chtěl něco extra
+            let o = document.createElement("option"); 
+            o.value = "__custom__"; 
+            o.textContent = "➕ Vlastní kategorie..."; 
+            catSel.appendChild(o);
             checkCust();
         }
-        function checkCust() { catCust.classList.toggle("hidden", catSel.value !== "Ostatní"); }
-        txType.onchange = updateCats; catSel.onchange = checkCust;
+        
+        function checkCust() { 
+            catCust.classList.toggle("hidden", catSel.value !== "__custom__"); 
+        }
+        
+        txType.onchange = updateCats; 
+        catSel.onchange = checkCust;
 
         document.getElementById('btnAddTx').onclick = async () => {
             const editId = document.getElementById('editTxId').value;
             const amount = parseFloat(document.getElementById('txAmount').value);
-            const category = catSel.value === "Ostatní" ? catCust.value : catSel.value;
-            const txDate = new Date(document.getElementById('txDateInput').value);
-            const data = { userId: currentUser.uid, type: txType.value, category, amount, note: document.getElementById('txNote').value, recurring: document.getElementById('txRecurring').checked, createdAt: Timestamp.fromDate(txDate) };
-            if (editId) await updateDoc(doc(db, "transactions", editId), data);
-            else await addDoc(collection(db, "transactions"), data);
+            if (isNaN(amount) || amount <= 0) return alert("Zadejte prosím platnou částku.");
+            
+            const category = catSel.value === "__custom__" ? (catCust.value.trim() || "Ostatní") : catSel.value;
+            const txDateInputVal = document.getElementById('txDateInput').value;
+            const txDate = txDateInputVal ? new Date(txDateInputVal) : new Date();
+            
+            const data = { 
+                userId: currentUser.uid, 
+                type: txType.value, 
+                category, 
+                amount, 
+                note: document.getElementById('txNote').value.trim(), 
+                recurring: document.getElementById('txRecurring').checked, 
+                createdAt: Timestamp.fromDate(txDate) 
+            };
+            
+            if (editId) {
+                await updateDoc(doc(db, "transactions", editId), data);
+            } else {
+                await addDoc(collection(db, "transactions"), data);
+            }
             cancelEdit();
         };
 
-        window.deleteTx = async (id) => { if(confirm("Smazat?")) await deleteDoc(doc(db, "transactions", id)); };
+        window.deleteTx = async (id) => { 
+            if(confirm("Opravdu smazat tuto transakci?")) await deleteDoc(doc(db, "transactions", id)); 
+        };
+        
         window.deleteSelected = async () => {
             const selected = document.querySelectorAll('.tx-checkbox:checked');
-            if (!selected.length || !confirm("Smazat?")) return;
+            if (!selected.length || !confirm(`Smazat vybrané transakce (${selected.length} položek)?`)) return;
             const batch = writeBatch(db);
             selected.forEach(cb => batch.delete(doc(db, "transactions", cb.value)));
             await batch.commit();
@@ -496,28 +962,48 @@
 
         window.editTx = (id) => {
             const t = allTx.find(x => x.id === id);
+            if(!t) return;
             switchTab('overview');
             document.getElementById('editTxId').value = t.id;
             document.getElementById('txDateInput').value = t.dateObj.toISOString().split('T')[0];
-            txType.value = t.type; updateCats();
-            catSel.value = defaultCategories[t.type].includes(t.category) ? t.category : "Ostatní";
-            if (catSel.value === "Ostatní") { checkCust(); catCust.value = t.category; }
+            txType.value = t.type; 
+            updateCats();
+            
+            if (defaultCategories[t.type].includes(t.category)) {
+                catSel.value = t.category;
+            } else {
+                catSel.value = "__custom__";
+                checkCust();
+                catCust.value = t.category;
+            }
+            
             document.getElementById('txAmount').value = t.amount;
             document.getElementById('txNote').value = t.note || "";
             document.getElementById('txRecurring').checked = t.recurring;
-            document.getElementById('btnAddTx').textContent = "AKTUALIZOVAT";
+            
+            const btnAdd = document.getElementById('btnAddTx');
+            btnAdd.innerHTML = "<span>💾 AKTUALIZOVAT ZÁZNAM</span>";
+            btnAdd.className = "w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 p-3.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 text-white flex items-center justify-center gap-2";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
         };
 
         function cancelEdit() {
-            document.getElementById('editTxId').value = ""; document.getElementById('btnAddTx').textContent = "ULOŽIT";
+            document.getElementById('editTxId').value = ""; 
+            const btnAdd = document.getElementById('btnAddTx');
+            btnAdd.innerHTML = "<span>ULOŽIT TRANSKACI</span>";
+            btnAdd.className = "w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 p-3.5 rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/20 text-white flex items-center justify-center gap-2";
             document.getElementById('btnCancelEdit').classList.add('hidden');
-            document.getElementById('txAmount').value = ""; document.getElementById('txNote').value = ""; setDefaultDate();
+            document.getElementById('txAmount').value = ""; 
+            document.getElementById('txNote').value = ""; 
+            catCust.value = "";
+            setDefaultDate();
         }
         document.getElementById('btnCancelEdit').onclick = cancelEdit;
+        
         window.dupRec = async (id) => {
             const t = allTx.find(x => x.id === id);
-            await addDoc(collection(db, "transactions"), { ...t, id:null, createdAt: Timestamp.now() });
+            if(!t) return;
+            await addDoc(collection(db, "transactions"), { ...t, id: null, createdAt: Timestamp.now() });
         };
 
         function render() {
@@ -529,12 +1015,36 @@
             if (filter === 'current_month') {
                 filtered = allTx.filter(t => t.dateObj.getMonth() === now.getMonth() && t.dateObj.getFullYear() === now.getFullYear());
                 customPeriodLabel = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-            }
-            else if (filter === 'last_month') { 
+            } else if (filter === 'last_month') { 
                 let m = now.getMonth() - 1, y = now.getFullYear(); 
                 if (m < 0) { m = 11; y--; }
                 filtered = allTx.filter(t => t.dateObj.getMonth() === m && t.dateObj.getFullYear() === y);
                 customPeriodLabel = `${monthNames[m]} ${y}`;
+            } else if (filter === 'last_3_months') {
+                const d = new Date(); d.setMonth(now.getMonth() - 3);
+                filtered = allTx.filter(t => t.dateObj >= d && t.dateObj <= now);
+                customPeriodLabel = "Poslední 3 měsíce";
+            } else if (filter === 'last_6_months') {
+                const d = new Date(); d.setMonth(now.getMonth() - 6);
+                filtered = allTx.filter(t => t.dateObj >= d && t.dateObj <= now);
+                customPeriodLabel = "Posledních 6 měsíců";
+            } else if (filter === 'current_year') {
+                filtered = allTx.filter(t => t.dateObj.getFullYear() === now.getFullYear());
+                customPeriodLabel = `Rok ${now.getFullYear()}`;
+            } else if (filter === 'last_year') {
+                filtered = allTx.filter(t => t.dateObj.getFullYear() === (now.getFullYear() - 1));
+                customPeriodLabel = `Rok ${now.getFullYear() - 1}`;
+            } else if (filter === 'custom') {
+                const fromVal = document.getElementById('filterDateFrom').value;
+                const toVal = document.getElementById('filterDateTo').value;
+                const dFrom = fromVal ? new Date(fromVal) : new Date(1970, 0, 1);
+                const dTo = toVal ? new Date(toVal + 'T23:59:59') : new Date(2100, 0, 1);
+                filtered = allTx.filter(t => t.dateObj >= dFrom && t.dateObj <= dTo);
+                const fromStr = fromVal ? new Date(fromVal).toLocaleDateString('cs-CZ') : 'Počátek';
+                const toStr = toVal ? new Date(toVal).toLocaleDateString('cs-CZ') : 'Dnes';
+                customPeriodLabel = `${fromStr} – ${toStr}`;
+            } else if (filter === 'all') {
+                customPeriodLabel = "Celá historie";
             }
 
             let inc = 0, exp = 0, cats = {}, trend = {};
@@ -546,13 +1056,22 @@
                 if (isInc) inc += t.amount;
                 else { exp += t.amount; cats[t.category] = (cats[t.category] || 0) + t.amount; }
 
-                txBody.innerHTML += `<tr class="border-b border-gray-700 text-sm hover:bg-gray-800/50">
-                    <td class="p-2 text-center no-print"><input type="checkbox" value="${t.id}" class="tx-checkbox"></td>
-                    <td class="p-2 text-gray-400 text-xs">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
-                    <td class="p-2 font-medium">${t.category}</td>
-                    <td class="p-2 text-gray-500 text-xs italic">${t.note || '-'}</td>
-                    <td class="p-2 text-right font-bold ${isInc ? 'text-green-400':'text-red-400'}">${t.amount.toLocaleString()}</td>
-                    <td class="p-2 text-center no-print"><button onclick="editTx('${t.id}')">✏️</button></td></tr>`;
+                const catBadgeClass = isInc 
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+                    : "bg-slate-800 text-slate-300 border-slate-700/80";
+
+                txBody.innerHTML += `<tr class="hover:bg-slate-800/60 transition-colors">
+                    <td class="p-3 text-center no-print"><input type="checkbox" value="${t.id}" class="tx-checkbox rounded bg-slate-800 border-slate-600 text-blue-600 focus:ring-0 cursor-pointer"></td>
+                    <td class="p-3 text-slate-400 text-xs font-mono">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
+                    <td class="p-3 font-medium">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${catBadgeClass}">${t.category}</span>
+                    </td>
+                    <td class="p-3 text-slate-400 text-xs italic">${t.note || '-'}</td>
+                    <td class="p-3 text-right font-mono font-bold ${isInc ? 'text-emerald-400':'text-rose-400'}">${isInc ? '+' : '-'}${t.amount.toLocaleString('cs-CZ', {minimumFractionDigits: 0})} Kč</td>
+                    <td class="p-3 text-center no-print whitespace-nowrap">
+                        <button onclick="editTx('${t.id}')" title="Upravit" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">✏️</button>
+                        <button onclick="deleteTx('${t.id}')" title="Smazat" class="p-1.5 hover:bg-rose-950/40 rounded-lg text-rose-500 hover:text-rose-400 transition ml-1">🗑️</button>
+                    </td></tr>`;
             });
 
             allTx.forEach(t => {
@@ -562,85 +1081,276 @@
             });
 
             allTx.filter(t => t.recurring).forEach(t => {
-                recBody.innerHTML += `<tr class="border-b border-gray-700 text-sm">
-                    <td class="p-2">${t.category}</td><td class="p-2 text-right font-bold">${t.amount.toLocaleString()} Kč</td>
-                    <td class="p-2 text-gray-500 text-xs italic">${t.note || '-'}</td>
-                    <td class="p-2 text-center whitespace-nowrap"><button onclick="dupRec('${t.id}')" class="bg-green-800 px-2 py-1 rounded text-[10px] font-bold">+ DNES</button> <button onclick="deleteTx('${t.id}')" class="bg-red-900 px-2 py-1 rounded text-[10px] font-bold ml-1">ZRUŠIT</button></td></tr>`;
+                recBody.innerHTML += `<tr class="hover:bg-slate-800/60 transition-colors">
+                    <td class="p-3.5 font-medium"><span class="px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">${t.category}</span></td>
+                    <td class="p-3.5 text-right font-mono font-bold text-slate-200">${t.amount.toLocaleString('cs-CZ')} Kč</td>
+                    <td class="p-3.5 text-slate-400 text-xs italic">${t.note || '-'}</td>
+                    <td class="p-3.5 text-center whitespace-nowrap">
+                        <button onclick="dupRec('${t.id}')" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-3 py-1 rounded-lg text-xs font-bold text-white transition shadow-sm">+ DNES</button> 
+                        <button onclick="deleteTx('${t.id}')" class="bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 px-3 py-1 rounded-lg text-xs font-bold text-rose-300 ml-2 transition">ZRUŠIT</button>
+                    </td></tr>`;
             });
 
             const bal = inc - exp;
-            document.getElementById('summary-income').textContent = inc.toLocaleString() + " Kč";
-            document.getElementById('summary-expense').textContent = exp.toLocaleString() + " Kč";
-            document.getElementById('summary-balance').textContent = bal.toLocaleString() + " Kč";
+            document.getElementById('summary-income').textContent = inc.toLocaleString('cs-CZ') + " Kč";
+            document.getElementById('summary-expense').textContent = exp.toLocaleString('cs-CZ') + " Kč";
+            document.getElementById('summary-balance').textContent = bal.toLocaleString('cs-CZ') + " Kč";
 
-            document.getElementById('reportPeriodText').textContent = customPeriodLabel;
+            document.getElementById('reportPeriodText').textContent = `Období: ${customPeriodLabel}`;
             if (currentUser) document.getElementById('reportUserEmail').textContent = `Vygenerováno pro: ${currentUser.email}`;
-            document.getElementById('rep-inc').textContent = inc.toLocaleString() + " Kč";
-            document.getElementById('rep-exp').textContent = exp.toLocaleString() + " Kč";
-            document.getElementById('rep-bal').textContent = bal.toLocaleString() + " Kč";
+            document.getElementById('rep-inc').textContent = inc.toLocaleString('cs-CZ') + " Kč";
+            document.getElementById('rep-exp').textContent = exp.toLocaleString('cs-CZ') + " Kč";
+            document.getElementById('rep-bal').textContent = bal.toLocaleString('cs-CZ') + " Kč";
             document.getElementById('rep-count').textContent = filtered.length;
 
             const sortedCats = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
             const repCatsDiv = document.getElementById('rep-cats'); repCatsDiv.innerHTML = "";
             sortedCats.forEach(([name, value]) => {
                 const pct = exp > 0 ? ((value / exp) * 100).toFixed(1) : 0;
-                repCatsDiv.innerHTML += `<div class="flex justify-between border-b border-gray-800 py-1"><span>${name} <span class="text-gray-500 text-[10px]">(${pct}%)</span></span><span class="font-bold">${value.toLocaleString()} Kč</span></div>`;
+                repCatsDiv.innerHTML += `<div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800"><span><span class="font-semibold text-white">${name}</span> <span class="text-slate-500 text-xs ml-1 font-mono">(${pct}%)</span></span><span class="font-mono font-bold text-rose-400">${value.toLocaleString('cs-CZ')} Kč</span></div>`;
             });
 
             const incTx = filtered.filter(t => t.type === "Příjem").sort((a,b)=>b.dateObj - a.dateObj);
             const repIncListDiv = document.getElementById('rep-inc-list'); repIncListDiv.innerHTML = "";
+            if (incTx.length === 0) repIncListDiv.innerHTML = `<div class="text-slate-500 text-xs italic p-2">Žádné příjmy v tomto období.</div>`;
             incTx.forEach(t => {
-                repIncListDiv.innerHTML += `<div class="flex justify-between border-b border-gray-800 py-1"><span class="truncate pr-2">${t.dateObj.toLocaleDateString('cs-CZ')} - ${t.category}: <span class="text-gray-500 italic">${t.note||''}</span></span><span class="font-bold flex-shrink-0 text-green-400">${t.amount.toLocaleString()} Kč</span></div>`;
+                repIncListDiv.innerHTML += `<div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800"><span class="truncate pr-2 font-medium text-slate-300">${t.dateObj.toLocaleDateString('cs-CZ')} • ${t.category} ${t.note ? `<span class="text-slate-500 text-xs italic">(${t.note})</span>` : ''}</span><span class="font-mono font-bold flex-shrink-0 text-emerald-400">+${t.amount.toLocaleString('cs-CZ')} Kč</span></div>`;
             });
 
             const topCount = parseInt(document.getElementById('topTxCount').value) || 10;
-            document.getElementById('rep-top-title').textContent = `Top ${topCount} transakcí`;
+            document.getElementById('rep-top-title').textContent = `Top ${topCount} nejvyšších výdajů`;
             const topTx = filtered.filter(t => t.type === "Výdaj").sort((a,b)=>b.amount-a.amount).slice(0, topCount);
             const repTopDiv = document.getElementById('rep-top'); repTopDiv.innerHTML = "";
+            if (topTx.length === 0) repTopDiv.innerHTML = `<div class="text-slate-500 text-xs italic p-2">Žádné výdaje v tomto období.</div>`;
             topTx.forEach(t => {
-                repTopDiv.innerHTML += `<div class="flex justify-between border-b border-gray-800 py-1"><span class="truncate pr-2">${t.dateObj.toLocaleDateString('cs-CZ')} - ${t.category}: <span class="text-gray-500 italic">${t.note||''}</span></span><span class="font-bold flex-shrink-0">${t.amount.toLocaleString()} Kč</span></div>`;
+                repTopDiv.innerHTML += `<div class="flex justify-between items-center bg-slate-900/60 p-2.5 rounded-xl border border-slate-800"><span class="truncate pr-2 font-medium text-slate-300">${t.dateObj.toLocaleDateString('cs-CZ')} • ${t.category} ${t.note ? `<span class="text-slate-500 text-xs italic">(${t.note})</span>` : ''}</span><span class="font-mono font-bold flex-shrink-0 text-rose-400">-${t.amount.toLocaleString('cs-CZ')} Kč</span></div>`;
             });
 
-            document.getElementById('analysisTitle').textContent = `Detail: ${customPeriodLabel}`;
-            let s = `Zůstatek: ${bal.toLocaleString()} Kč\n\nPOŘADÍ VÝDAJŮ:\n`;
-            sortedCats.forEach(([c,v])=> s += `${c.padEnd(10)}: ${v.toLocaleString()} Kč\n`);
+            document.getElementById('analysisTitle').innerHTML = `<span>🔍 Detail zvoleného rozmezí: <strong class="text-white">${customPeriodLabel}</strong></span>`;
+            let s = `CELKOVÝ PŘEHLED OBDOBÍ:\n───────────────────────────────\n`;
+            s += `Celkové Příjmy : ${inc.toLocaleString('cs-CZ').padStart(12)} Kč\n`;
+            s += `Celkové Výdaje : ${exp.toLocaleString('cs-CZ').padStart(12)} Kč\n`;
+            s += `Čistý Zůstatek : ${bal.toLocaleString('cs-CZ').padStart(12)} Kč\n\n`;
+            s += `ROZPAD VÝDAJŮ DLE KATEGORIÍ:\n───────────────────────────────\n`;
+            if(sortedCats.length === 0) s += `Žádné výdaje v tomto období.\n`;
+            sortedCats.forEach(([c,v])=> {
+                const pct = exp > 0 ? ((v / exp) * 100).toFixed(1) : 0;
+                s += `${c.padEnd(14)} : ${v.toLocaleString('cs-CZ').padStart(10)} Kč (${pct.padStart(4)}%)\n`;
+            });
             document.getElementById('analysisSummary').textContent = s;
 
             if (expChart) expChart.destroy();
             expChart = new Chart(document.getElementById('expenseChart'), {
                 type: 'doughnut',
-                data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#9ca3af', font: { size: 12 } } } } }
+                data: { 
+                    labels: Object.keys(cats), 
+                    datasets: [{ 
+                        data: Object.values(cats), 
+                        backgroundColor: ['#3b82f6', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#64748b'], 
+                        borderWidth: 2,
+                        borderColor: '#0f172a'
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#cbd5e1', font: { family: 'Outfit', size: 12 } } } 
+                    } 
+                }
             });
 
             if (trendChart) trendChart.destroy();
             const sortedMonths = Object.keys(trend).sort();
             trendChart = new Chart(document.getElementById('trendChart'), {
                 type: 'bar',
-                data: { labels: sortedMonths, datasets: [{ label: 'Příjmy', data: sortedMonths.map(m=>trend[m].i), backgroundColor: '#10b981' }, { label: 'Výdaje', data: sortedMonths.map(m=>trend[m].e), backgroundColor: '#ef4444' }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: {color:'#9ca3af'} }, y: { ticks: {color:'#9ca3af'} } }, plugins: { legend: { labels: {color:'#fff'} } } }
+                data: { 
+                    labels: sortedMonths, 
+                    datasets: [
+                        { label: 'Příjmy', data: sortedMonths.map(m=>trend[m].i), backgroundColor: '#10b981', borderRadius: 6 }, 
+                        { label: 'Výdaje', data: sortedMonths.map(m=>trend[m].e), backgroundColor: '#f43f5e', borderRadius: 6 }
+                    ] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono' } } }, 
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono' } } } 
+                    }, 
+                    plugins: { legend: { labels: { color: '#cbd5e1', font: { family: 'Outfit', size: 12 } } } } 
+                }
             });
         }
 
-        document.getElementById('globalPeriodFilter').onchange = render;
+        document.getElementById('globalPeriodFilter').onchange = (e) => {
+            const customBox = document.getElementById('customDateRangeContainer');
+            if (customBox) {
+                if (e.target.value === 'custom') {
+                    customBox.classList.remove('hidden');
+                } else {
+                    customBox.classList.add('hidden');
+                }
+            }
+            render();
+        };
+
+        const df = document.getElementById('filterDateFrom');
+        const dt = document.getElementById('filterDateTo');
+        if (df) df.onchange = render;
+        if (dt) dt.onchange = render;
+
         document.getElementById('topTxCount').onchange = render;
         window.toggleSelectAll = (src) => document.querySelectorAll('.tx-checkbox').forEach(cb => cb.checked = src.checked);
 
+        // --- EXPORTY DATABÁZE A ZÁLOH (SQL, JSON, CSV) ---
+        document.getElementById('btnExportJson').onclick = () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            const data = {
+                exportDate: new Date().toISOString(),
+                userEmail: currentUser.email,
+                transactions: allTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
+                btc_transactions: allBtcTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
+                fund_transactions: allFundTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() }))
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `finance_backup_db_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        document.getElementById('btnExportSql').onclick = () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            let sql = `-- Export databáze Správa financí PRO\n-- Vygenerováno: ${new Date().toLocaleString('cs-CZ')}\n-- Uživatel: ${currentUser.email}\n\n`;
+            
+            sql += `CREATE TABLE IF NOT EXISTS transactions (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  type VARCHAR(32),\n  category VARCHAR(64),\n  amount DECIMAL(15,2),\n  note TEXT,\n  recurring BOOLEAN,\n  created_at DATETIME\n);\n\n`;
+            allTx.forEach(t => {
+                const noteEsc = (t.note || "").replace(/'/g, "''");
+                const dateStr = t.dateObj.toISOString().slice(0, 19).replace('T', ' ');
+                sql += `INSERT INTO transactions (id, user_id, type, category, amount, note, recurring, created_at) VALUES ('${t.id}', '${currentUser.uid}', '${t.type}', '${t.category}', ${t.amount}, '${noteEsc}', ${t.recurring ? 1 : 0}, '${dateStr}');\n`;
+            });
+
+            sql += `\nCREATE TABLE IF NOT EXISTS btc_transactions (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  type VARCHAR(32),\n  amount_czk DECIMAL(15,2),\n  amount_coin DECIMAL(18,8),\n  created_at DATETIME\n);\n\n`;
+            allBtcTx.forEach(t => {
+                const dateStr = t.dateObj.toISOString().slice(0, 19).replace('T', ' ');
+                sql += `INSERT INTO btc_transactions (id, user_id, type, amount_czk, amount_coin, created_at) VALUES ('${t.id}', '${currentUser.uid}', '${t.type}', ${t.amountCzk}, ${t.amountCoin}, '${dateStr}');\n`;
+            });
+
+            sql += `\nCREATE TABLE IF NOT EXISTS fund_transactions (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  type VARCHAR(32),\n  amount_czk DECIMAL(15,2),\n  amount_unit DECIMAL(18,4),\n  created_at DATETIME\n);\n\n`;
+            allFundTx.forEach(t => {
+                const dateStr = t.dateObj.toISOString().slice(0, 19).replace('T', ' ');
+                sql += `INSERT INTO fund_transactions (id, user_id, type, amount_czk, amount_unit, created_at) VALUES ('${t.id}', '${currentUser.uid}', '${t.type}', ${t.amountCzk}, ${t.amountUnit}, '${dateStr}');\n`;
+            });
+
+            const blob = new Blob([sql], { type: 'text/sql' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `finance_database_dump_${new Date().toISOString().split('T')[0]}.sql`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        document.getElementById('btnExportCsv').onclick = () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            let csv = "Datum;Typ;Kategorie;Částka (Kč);Poznámka;Opakovat měsíčně\n";
+            allTx.forEach(t => {
+                const noteEsc = (t.note || "").replace(/"/g, '""');
+                const dateStr = t.dateObj.toLocaleDateString('cs-CZ');
+                csv += `"${dateStr}";"${t.type}";"${t.category}";"${t.amount}";"${noteEsc}";"${t.recurring ? 'Ano' : 'Ne'}"\n`;
+            });
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `finance_export_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        // --- IMPORT Z JSON / ZÁLOHY ---
         document.getElementById('btnImport').onclick = () => {
             const fileInput = document.getElementById('importFile');
-            if (!fileInput.files.length) return alert("Vyberte soubor.");
+            if (!fileInput.files.length) return alert("Vyberte prosím soubor s JSON zálohou.");
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    for (const tx of data) {
-                        let d = new Date();
-                        if (tx.date) { const p = tx.date.split('.'); d = new Date(p[2], p[1]-1, p[0]); }
-                        await addDoc(collection(db, "transactions"), { userId: currentUser.uid, type: tx.type||"Výdaj", category: tx.category||"Ostatní", amount: parseFloat(tx.amount)||0, note: tx.note||"", recurring: tx.recurring === "Ano", createdAt: Timestamp.fromDate(d) });
+                    let txCount = 0, btcCount = 0, fundCount = 0;
+
+                    if (data.transactions && Array.isArray(data.transactions)) {
+                        for (const tx of data.transactions) {
+                            let d = tx.createdAt ? new Date(tx.createdAt) : new Date();
+                            await addDoc(collection(db, "transactions"), { 
+                                userId: currentUser.uid, 
+                                type: tx.type || "Výdaj", 
+                                category: tx.category || "Ostatní", 
+                                amount: parseFloat(tx.amount) || 0, 
+                                note: tx.note || "", 
+                                recurring: !!tx.recurring, 
+                                createdAt: Timestamp.fromDate(d) 
+                            });
+                            txCount++;
+                        }
+                        if (data.btc_transactions && Array.isArray(data.btc_transactions)) {
+                            for (const tx of data.btc_transactions) {
+                                let d = tx.createdAt ? new Date(tx.createdAt) : new Date();
+                                await addDoc(collection(db, "btc_transactions"), { 
+                                    userId: currentUser.uid, 
+                                    type: tx.type || "Nákup", 
+                                    amountCzk: parseFloat(tx.amountCzk) || 0, 
+                                    amountCoin: parseFloat(tx.amountCoin) || 0, 
+                                    createdAt: Timestamp.fromDate(d) 
+                                });
+                                btcCount++;
+                            }
+                        }
+                        if (data.fund_transactions && Array.isArray(data.fund_transactions)) {
+                            for (const tx of data.fund_transactions) {
+                                let d = tx.createdAt ? new Date(tx.createdAt) : new Date();
+                                await addDoc(collection(db, "fund_transactions"), { 
+                                    userId: currentUser.uid, 
+                                    type: tx.type || "Nákup", 
+                                    amountCzk: parseFloat(tx.amountCzk) || 0, 
+                                    amountUnit: parseFloat(tx.amountUnit) || 0, 
+                                    createdAt: Timestamp.fromDate(d) 
+                                });
+                                fundCount++;
+                            }
+                        }
+                        alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů\n• ${fundCount} záznamů podílových fondů.`);
+                    } else if (Array.isArray(data)) {
+                        for (const tx of data) {
+                            let d = new Date();
+                            if (tx.date) { const p = tx.date.split('.'); d = new Date(p[2], p[1]-1, p[0]); }
+                            else if (tx.createdAt) { d = new Date(tx.createdAt); }
+                            await addDoc(collection(db, "transactions"), { 
+                                userId: currentUser.uid, 
+                                type: tx.type || "Výdaj", 
+                                category: tx.category || "Ostatní", 
+                                amount: parseFloat(tx.amount) || 0, 
+                                note: tx.note || "", 
+                                recurring: tx.recurring === "Ano" || tx.recurring === true, 
+                                createdAt: Timestamp.fromDate(d) 
+                            });
+                            txCount++;
+                        }
+                        alert(`Import dokončen! Načteno ${txCount} transakcí.`);
+                    } else {
+                        alert("Neplatný formát záložního souboru.");
+                        return;
                     }
-                    alert("Import dokončen.");
                     switchTab('overview');
-                } catch (err) { alert("Chyba: " + err.message); }
+                } catch (err) { alert("Chyba při importu: " + err.message); }
             };
             reader.readAsText(fileInput.files[0]);
         };
@@ -673,8 +1383,29 @@
                 if (btcChartInstance) btcChartInstance.destroy();
                 btcChartInstance = new Chart(document.getElementById('btcChart'), {
                     type: 'line',
-                    data: { labels: labels, datasets: [{ label: 'Cena BTC (Kč)', data: values, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.1)', borderWidth: 2, fill: true, pointRadius: 0, pointHoverRadius: 6 }] },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#9ca3af', maxTicksLimit: 8, maxRotation: 0 } }, y: { ticks: {color: '#9ca3af'} } }, plugins: { legend: { display: false } }, interaction: { intersect: false, mode: 'index' } }
+                    data: { 
+                        labels: labels, 
+                        datasets: [{ 
+                            label: 'Cena BTC (Kč)', 
+                            data: values, 
+                            borderColor: '#f97316', 
+                            backgroundColor: 'rgba(249, 115, 22, 0.15)', 
+                            borderWidth: 2, 
+                            fill: true, 
+                            pointRadius: 0, 
+                            pointHoverRadius: 6 
+                        }] 
+                    },
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        scales: { 
+                            x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', maxTicksLimit: 8, font: { family: 'JetBrains Mono' } } }, 
+                            y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono' } } } 
+                        }, 
+                        plugins: { legend: { display: false } }, 
+                        interaction: { intersect: false, mode: 'index' } 
+                    }
                 });
             } catch (e) { console.error("Chyba při stahování grafu BTC:", e); }
         };
@@ -689,14 +1420,14 @@
             const profEl = document.getElementById('btcCalcProfit');
 
             if (isNaN(customRate) || customRate <= 0) {
-                valEl.textContent = "0 Kč"; profEl.textContent = "0 Kč"; profEl.className = "font-bold text-gray-300";
+                valEl.textContent = "0 Kč"; profEl.textContent = "0 Kč"; profEl.className = "font-mono font-bold text-slate-300";
                 return;
             }
             const potentialValue = globalTotalBtc * customRate;
             const potentialProfit = potentialValue - globalTotalCzk;
             valEl.textContent = potentialValue.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
             profEl.textContent = potentialProfit.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
-            profEl.className = `font-bold ${potentialProfit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            profEl.className = `font-mono font-bold ${potentialProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
         };
         document.getElementById('btcCalcRate').addEventListener('input', updateCalculator);
 
@@ -705,7 +1436,7 @@
             const amountCzk = parseFloat(document.getElementById('btcAmountCzk').value) || 0;
             const amountCoin = parseFloat(document.getElementById('btcAmountCoin').value) || 0;
             const txDate = new Date(document.getElementById('btcDateInput').value);
-            if (amountCzk <= 0 || amountCoin <= 0) return alert("Zadej platné částky větší než nula.");
+            if (amountCzk <= 0 || amountCoin <= 0) return alert("Zadejte platné částky větší než nula.");
             await addDoc(collection(db, "btc_transactions"), { userId: currentUser.uid, type: type, amountCzk: amountCzk, amountCoin: amountCoin, createdAt: Timestamp.fromDate(txDate) });
             document.getElementById('btcAmountCzk').value = ""; document.getElementById('btcAmountCoin').value = "";
         };
@@ -720,23 +1451,27 @@
             allBtcTx.forEach(t => {
                 const isBuy = t.type === "Nákup";
                 if (isBuy) { totalCzk += t.amountCzk; totalBtc += t.amountCoin; } else { totalCzk -= t.amountCzk; totalBtc -= t.amountCoin; }
-                tbody.innerHTML += `<tr class="border-b border-gray-700 text-sm hover:bg-gray-800/50"><td class="p-2 text-gray-400 text-xs">${t.dateObj.toLocaleDateString('cs-CZ')}</td><td class="p-2 font-medium ${isBuy ? 'text-green-400' : 'text-red-400'}">${t.type}</td><td class="p-2 text-right">${t.amountCzk.toLocaleString()} Kč</td><td class="p-2 text-right font-mono text-orange-400">${t.amountCoin.toFixed(8)}</td><td class="p-2 text-center no-print"><button onclick="deleteBtcTx('${t.id}')" class="text-red-500 hover:text-red-400">❌</button></td></tr>`;
+                tbody.innerHTML += `<tr class="hover:bg-slate-800/60 transition-colors">
+                    <td class="p-3 text-slate-400 text-xs font-mono">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
+                    <td class="p-3 font-medium ${isBuy ? 'text-emerald-400' : 'text-rose-400'}">${t.type}</td>
+                    <td class="p-3 text-right font-mono font-bold text-slate-200">${t.amountCzk.toLocaleString('cs-CZ')} Kč</td>
+                    <td class="p-3 text-right font-mono font-bold text-orange-400">${t.amountCoin.toFixed(8)}</td>
+                    <td class="p-3 text-center no-print"><button onclick="deleteBtcTx('${t.id}')" title="Smazat" class="p-1 hover:bg-rose-950/40 rounded-lg text-rose-500 hover:text-rose-400 transition">🗑️</button></td>
+                </tr>`;
             });
             globalTotalBtc = totalBtc; globalTotalCzk = totalCzk;
             const currentValue = totalBtc * currentBtcPriceCzk; const profit = currentValue - totalCzk;
 
-            document.getElementById('btc-total-czk').textContent = totalCzk.toLocaleString() + " Kč";
+            document.getElementById('btc-total-czk').textContent = totalCzk.toLocaleString('cs-CZ') + " Kč";
             document.getElementById('btc-total-amount').textContent = totalBtc.toFixed(8);
             document.getElementById('btc-current-value').textContent = currentValue.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
             const profitEl = document.getElementById('btc-profit');
             profitEl.textContent = profit.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
-            profitEl.className = `text-xl md:text-2xl font-bold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            profitEl.className = `text-lg md:text-xl font-mono font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-1`;
             updateCalculator();
         };
 
         // --- FOND LOGIKA ---
-        
-        // Nová funkce pro automatické stažení kurzu
         window.fetchFundPriceFromWeb = async (event) => {
             try {
                 const btn = event.currentTarget;
@@ -765,14 +1500,14 @@
                         renderFund();
                     }
                 } else {
-                    alert("Nepodařilo se najít cenu. Web FT.com možná změnil strukturu.");
+                    alert("Nepodařilo se automaticky načíst cenu fondu z webu. Zkuste prosím zadat kurz ručně.");
                 }
                 
                 btn.innerHTML = originalText;
                 
             } catch (e) {
                 console.error("Chyba při auto-stahování kurzu fondu:", e);
-                alert("Automatická aktualizace selhala. Zkus to ručně.");
+                alert("Automatická aktualizace selhala. Zkuste to ručně.");
             }
         };
 
@@ -783,7 +1518,7 @@
                 localStorage.setItem('fundPriceCZK', val);
                 renderFund();
             } else {
-                alert('Zadej platný kurz fondu.');
+                alert('Zadejte platný kurz fondu.');
             }
         };
 
@@ -792,7 +1527,7 @@
             const amountCzk = parseFloat(document.getElementById('fundAmountCzk').value) || 0;
             const amountUnit = parseFloat(document.getElementById('fundAmountUnit').value) || 0;
             const txDate = new Date(document.getElementById('fundDateInput').value);
-            if (amountCzk <= 0 || amountUnit <= 0) return alert("Zadej platné částky větší než nula.");
+            if (amountCzk <= 0 || amountUnit <= 0) return alert("Zadejte platné částky větší než nula.");
             await addDoc(collection(db, "fund_transactions"), { userId: currentUser.uid, type: type, amountCzk: amountCzk, amountUnit: amountUnit, createdAt: Timestamp.fromDate(txDate) });
             document.getElementById('fundAmountCzk').value = ""; document.getElementById('fundAmountUnit').value = "";
         };
@@ -807,12 +1542,13 @@
             allFundTx.forEach(t => {
                 const isBuy = t.type === "Nákup";
                 if (isBuy) { totalCzk += t.amountCzk; totalUnits += t.amountUnit; } else { totalCzk -= t.amountCzk; totalUnits -= t.amountUnit; }
-                tbody.innerHTML += `<tr class="border-b border-gray-700 text-sm hover:bg-gray-800/50">
-                    <td class="p-2 text-gray-400 text-xs">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
-                    <td class="p-2 font-medium ${isBuy ? 'text-green-400' : 'text-red-400'}">${t.type}</td>
-                    <td class="p-2 text-right">${t.amountCzk.toLocaleString()} Kč</td>
-                    <td class="p-2 text-right font-mono text-purple-400">${t.amountUnit.toFixed(4)}</td>
-                    <td class="p-2 text-center no-print"><button onclick="deleteFundTx('${t.id}')" class="text-red-500 hover:text-red-400">❌</button></td></tr>`;
+                tbody.innerHTML += `<tr class="hover:bg-slate-800/60 transition-colors">
+                    <td class="p-3 text-slate-400 text-xs font-mono">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
+                    <td class="p-3 font-medium ${isBuy ? 'text-emerald-400' : 'text-rose-400'}">${t.type}</td>
+                    <td class="p-3 text-right font-mono font-bold text-slate-200">${t.amountCzk.toLocaleString('cs-CZ')} Kč</td>
+                    <td class="p-3 text-right font-mono font-bold text-purple-400">${t.amountUnit.toFixed(4)}</td>
+                    <td class="p-3 text-center no-print"><button onclick="deleteFundTx('${t.id}')" title="Smazat" class="p-1 hover:bg-rose-950/40 rounded-lg text-rose-500 hover:text-rose-400 transition">🗑️</button></td>
+                </tr>`;
             });
 
             globalTotalFund = totalUnits; globalTotalFundCzk = totalCzk;
@@ -820,13 +1556,13 @@
             const profit = currentValue - totalCzk;
 
             document.getElementById('fund-current-rate').textContent = currentFundPriceCzk.toLocaleString('cs-CZ', {maximumFractionDigits: 2}) + " Kč";
-            document.getElementById('fund-total-czk').textContent = totalCzk.toLocaleString() + " Kč";
+            document.getElementById('fund-total-czk').textContent = totalCzk.toLocaleString('cs-CZ') + " Kč";
             document.getElementById('fund-total-amount').textContent = totalUnits.toFixed(4);
             document.getElementById('fund-current-value').textContent = currentValue.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
             
             const profitEl = document.getElementById('fund-profit');
             profitEl.textContent = profit.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč";
-            profitEl.className = `text-xl md:text-2xl font-bold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`;
+            profitEl.className = `text-lg md:text-xl font-mono font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-1`;
         };
 
     </script>
