@@ -365,39 +365,181 @@
         </div>
 
         <!-- TAB: ANALYSIS -->
-        <div id="tab-analysis" class="tab-content hidden">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Text Summary Left -->
-                <div class="glass-card p-6 rounded-2xl h-fit border border-slate-800/80 shadow-xl">
-                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
-                        <h3 id="analysisTitle" class="text-blue-400 font-bold uppercase text-xs tracking-widest flex items-center gap-1.5">
-                            <span>🔍 Detail období</span>
-                        </h3>
+        <div id="tab-analysis" class="tab-content hidden space-y-8 max-w-7xl mx-auto">
+            
+            <!-- ROW 1: Smart Analytical KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Míra úspor -->
+                <div class="glass-card p-5 rounded-2xl border border-slate-800/80 shadow-xl relative overflow-hidden group hover:border-emerald-500/40 transition">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Míra úspor (Savings Rate)</span>
+                        <span id="analysis-savings-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Zdravé</span>
                     </div>
-                    <div id="analysisSummary" class="text-slate-300 font-mono text-xs whitespace-pre-wrap leading-relaxed bg-slate-900/80 p-4 rounded-xl border border-slate-800"></div>
+                    <div id="analysis-savings-rate" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono">0.0 %</div>
+                    <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                        <div id="analysis-savings-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
                 </div>
 
-                <!-- Charts Right -->
-                <div class="glass-card p-6 rounded-2xl col-span-1 md:col-span-2 space-y-8 border border-slate-800/80 shadow-xl">
+                <!-- Průměrný denní výdaj -->
+                <div class="glass-card p-5 rounded-2xl border border-slate-800/80 shadow-xl relative overflow-hidden group hover:border-rose-500/40 transition">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Průměrný denní výdaj</span>
+                        <div class="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-xs font-bold">📅</div>
+                    </div>
+                    <div id="analysis-daily-exp" class="text-2xl sm:text-3xl font-extrabold text-rose-400 font-mono">0 Kč / den</div>
+                    <p id="analysis-period-days" class="text-[11px] text-slate-500 mt-2 font-medium">Za zvolené období</p>
+                </div>
+
+                <!-- Top výdajová kategorie -->
+                <div class="glass-card p-5 rounded-2xl border border-slate-800/80 shadow-xl relative overflow-hidden group hover:border-amber-500/40 transition">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Největší zátěž výdajů</span>
+                        <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xs font-bold">⚠️</div>
+                    </div>
+                    <div id="analysis-top-exp-cat" class="text-xl sm:text-2xl font-extrabold text-amber-400 truncate font-sans">-</div>
+                    <p id="analysis-top-exp-val" class="text-[11px] text-slate-400 mt-1 font-mono font-bold">0 Kč (0 %)</p>
+                </div>
+
+                <!-- Top zdroj příjmů -->
+                <div class="glass-card p-5 rounded-2xl border border-slate-800/80 shadow-xl relative overflow-hidden group hover:border-blue-500/40 transition">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Hlavní zdroj příjmu</span>
+                        <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-xs font-bold">💼</div>
+                    </div>
+                    <div id="analysis-top-inc-cat" class="text-xl sm:text-2xl font-extrabold text-blue-400 truncate font-sans">-</div>
+                    <p id="analysis-top-inc-val" class="text-[11px] text-slate-400 mt-1 font-mono font-bold">0 Kč (0 %)</p>
+                </div>
+            </div>
+
+            <!-- ROW 2: Doughnut Charts Side-by-Side (Analýza výdajů vs Analýza příjmů) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Rozdělení výdajů -->
+                <div class="glass-card p-6 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col justify-between">
                     <div>
-                        <h3 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider flex items-center gap-2">
+                        <h3 class="text-sm font-bold text-rose-400 mb-1 uppercase tracking-wider flex items-center gap-2">
                             <span>🍩</span><span>Rozdělení výdajů podle kategorií</span>
                         </h3>
-                        <div class="h-[300px] w-full flex items-center justify-center">
-                            <canvas id="expenseChart"></canvas>
-                        </div>
+                        <p class="text-xs text-slate-400 mb-5">Podíl jednotlivých kategorií na celkových výdajích vybraného období</p>
                     </div>
-                    
-                    <div class="pt-6 border-t border-slate-800">
-                        <h3 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider flex items-center gap-2">
-                            <span>📊</span><span>Měsíční trend (Příjmy vs. Výdaje)</span>
+                    <div class="h-[280px] w-full flex items-center justify-center">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                    <div id="expense-legend-list" class="mt-6 pt-4 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-xs max-h-36 overflow-y-auto pr-1"></div>
+                </div>
+
+                <!-- Rozdělení příjmů (Analýza příjmů) -->
+                <div class="glass-card p-6 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-emerald-400 mb-1 uppercase tracking-wider flex items-center gap-2">
+                            <span>💰</span><span>Analýza příjmů podle zdrojů</span>
                         </h3>
-                        <div class="h-[320px] w-full">
-                            <canvas id="trendChart"></canvas>
+                        <p class="text-xs text-slate-400 mb-5">Struktura peněžních přítoků, mezd, investic a ostatních příjmů</p>
+                    </div>
+                    <div class="h-[280px] w-full flex items-center justify-center">
+                        <canvas id="incomeChart"></canvas>
+                    </div>
+                    <div id="income-legend-list" class="mt-6 pt-4 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-xs max-h-36 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
+            <!-- ROW 3: Monthly Salary Comparison & Monthly Trend side-by-side -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Sloupečky výplat vedle sebe -->
+                <div class="glass-card p-6 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-sm font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-2">
+                                <span>💵</span><span>Srovnání výplat a příjmů po měsících</span>
+                            </h3>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300">Sloupečky vedle sebe</span>
                         </div>
+                        <p class="text-xs text-slate-400 mb-5">Porovnání mezd (výplat) vůči investicím a ostatním příjmům měsíc po měsíci</p>
+                    </div>
+                    <div class="h-[320px] w-full">
+                        <canvas id="incomeSalaryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Měsíční trend (Příjmy vs. Výdaje) -->
+                <div class="glass-card p-6 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-blue-400 mb-1 uppercase tracking-wider flex items-center gap-2">
+                            <span>📊</span><span>Celkový měsíční trend (Příjmy vs. Výdaje)</span>
+                        </h3>
+                        <p class="text-xs text-slate-400 mb-5">Vývoj celkových bilancí v čase pro identifikaci přebytků a deficitů</p>
+                    </div>
+                    <div class="h-[320px] w-full">
+                        <canvas id="trendChart"></canvas>
                     </div>
                 </div>
             </div>
+
+            <!-- ROW 4: AI Financial Health Meter & Diagnostics + Detail text -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- AI Diagnostika (2 cols) -->
+                <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-800/80 shadow-2xl col-span-1 lg:col-span-2 relative overflow-hidden">
+                    <div class="absolute -top-20 -right-20 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-5 mb-6 border-b border-slate-800">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-2xl shadow-lg shadow-blue-500/30">
+                                🤖
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-extrabold text-white">AI Finanční Analytik & Zdraví rozpočtu</h2>
+                                <p class="text-xs text-slate-400">Automatizovaná diagnostika cash flow, doporučení a dlouhodobé odhady</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 bg-slate-900/90 px-4 py-2 rounded-2xl border border-slate-800">
+                            <span class="text-xs font-semibold text-slate-400">Finanční skóre:</span>
+                            <span id="ai-health-score" class="text-xl font-extrabold font-mono text-emerald-400">0 / 100</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800/80 flex flex-col justify-between">
+                            <div>
+                                <span class="text-emerald-400 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 mb-2">
+                                    <span>💡 Zhodnocení cash flow</span>
+                                </span>
+                                <p id="ai-insight-cashflow" class="text-slate-300 leading-relaxed"></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800/80 flex flex-col justify-between">
+                            <div>
+                                <span class="text-amber-400 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 mb-2">
+                                    <span>⚠️ Optimalizace & rizika</span>
+                                </span>
+                                <p id="ai-insight-risks" class="text-slate-300 leading-relaxed"></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800/80 flex flex-col justify-between">
+                            <div>
+                                <span class="text-blue-400 font-bold uppercase tracking-wider text-[10px] flex items-center gap-1 mb-2">
+                                    <span>🚀 Roční projekce úspor</span>
+                                </span>
+                                <p id="ai-insight-projection" class="text-slate-300 leading-relaxed"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Detail (1 col) -->
+                <div class="glass-card p-6 rounded-3xl border border-slate-800/80 shadow-xl col-span-1 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                            <h3 id="analysisTitle" class="text-slate-300 font-bold uppercase text-xs tracking-wider flex items-center gap-1.5">
+                                <span>📋 Číselný souhrn</span>
+                            </h3>
+                        </div>
+                        <div id="analysisSummary" class="text-slate-300 font-mono text-xs whitespace-pre-wrap leading-relaxed bg-slate-900/90 p-4 rounded-2xl border border-slate-800 max-h-60 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- TAB: RECURRING -->
@@ -705,7 +847,7 @@
         };
         const monthNames = ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"];
 
-        let currentUser = null, allTx = [], expChart = null, trendChart = null;
+        let currentUser = null, allTx = [], expChart = null, incChart = null, salaryChart = null, trendChart = null;
         
         // BTC Proměnné
         let allBtcTx = [], currentBtcPriceCzk = 0, globalTotalBtc = 0, globalTotalCzk = 0;
@@ -954,14 +1096,19 @@
                 customPeriodLabel = "Celá historie";
             }
 
-            let inc = 0, exp = 0, cats = {}, trend = {};
+            let inc = 0, exp = 0, cats = {}, incCats = {}, trend = {}, salaryMonths = {};
             const txBody = document.getElementById('txTableBody'), recBody = document.getElementById('recurringTableBody');
             txBody.innerHTML = ""; recBody.innerHTML = "";
 
             filtered.forEach(t => {
                 const isInc = t.type === "Příjem";
-                if (isInc) inc += t.amount;
-                else { exp += t.amount; cats[t.category] = (cats[t.category] || 0) + t.amount; }
+                if (isInc) { 
+                    inc += t.amount; 
+                    incCats[t.category] = (incCats[t.category] || 0) + t.amount;
+                } else { 
+                    exp += t.amount; 
+                    cats[t.category] = (cats[t.category] || 0) + t.amount; 
+                }
 
                 const catBadgeClass = isInc 
                     ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
@@ -984,7 +1131,16 @@
             allTx.forEach(t => {
                 const mKey = t.dateObj.getFullYear() + "-" + (t.dateObj.getMonth()+1).toString().padStart(2,'0');
                 if(!trend[mKey]) trend[mKey] = {i:0, e:0};
-                t.type === "Příjem" ? trend[mKey].i += t.amount : trend[mKey].e += t.amount;
+                if(!salaryMonths[mKey]) salaryMonths[mKey] = { mzda: 0, investice: 0, ostatni: 0 };
+
+                if (t.type === "Příjem") {
+                    trend[mKey].i += t.amount;
+                    if (t.category === "Mzda") salaryMonths[mKey].mzda += t.amount;
+                    else if (t.category === "Investice") salaryMonths[mKey].investice += t.amount;
+                    else salaryMonths[mKey].ostatni += t.amount;
+                } else {
+                    trend[mKey].e += t.amount;
+                }
             });
 
             allTx.filter(t => t.recurring).forEach(t => {
@@ -1044,8 +1200,153 @@
                 const pct = exp > 0 ? ((v / exp) * 100).toFixed(1) : 0;
                 s += `${c.padEnd(14)} : ${v.toLocaleString('cs-CZ').padStart(10)} Kč (${pct.padStart(4)}%)\n`;
             });
+            s += `\nROZPAD PŘÍJMŮ DLE KATEGORIÍ:\n───────────────────────────────\n`;
+            const sortedIncCats = Object.entries(incCats).sort((a,b)=>b[1]-a[1]);
+            if(sortedIncCats.length === 0) s += `Žádné příjmy v tomto období.\n`;
+            sortedIncCats.forEach(([c,v])=> {
+                const pct = inc > 0 ? ((v / inc) * 100).toFixed(1) : 0;
+                s += `${c.padEnd(14)} : ${v.toLocaleString('cs-CZ').padStart(10)} Kč (${pct.padStart(4)}%)\n`;
+            });
             document.getElementById('analysisSummary').textContent = s;
 
+            // --- VÝPOČTY PRO POKROČILOU ANALÝZU ---
+            let daysInPeriod = 30;
+            if (filter === 'current_month') daysInPeriod = now.getDate();
+            else if (filter === 'last_month' || filter === 'last_3_months') daysInPeriod = filter === 'last_month' ? 30 : 90;
+            else if (filter === 'last_6_months') daysInPeriod = 180;
+            else if (filter === 'current_year') {
+                const startYear = new Date(now.getFullYear(), 0, 1);
+                daysInPeriod = Math.max(1, Math.ceil((now - startYear) / (1000 * 60 * 60 * 24)));
+            } else if (filter === 'last_year') daysInPeriod = 365;
+            else if (filter === 'custom') {
+                const dFrom = document.getElementById('filterDateFrom').value ? new Date(document.getElementById('filterDateFrom').value) : new Date(now.getFullYear(), now.getMonth(), 1);
+                const dTo = document.getElementById('filterDateTo').value ? new Date(document.getElementById('filterDateTo').value) : now;
+                daysInPeriod = Math.max(1, Math.ceil((dTo - dFrom) / (1000 * 60 * 60 * 24)) + 1);
+            } else if (filter === 'all') {
+                if (allTx.length > 0) {
+                    const minDate = new Date(Math.min(...allTx.map(t => t.dateObj)));
+                    daysInPeriod = Math.max(1, Math.ceil((now - minDate) / (1000 * 60 * 60 * 24)));
+                } else daysInPeriod = 30;
+            }
+            const avgDailyExp = exp / Math.max(1, daysInPeriod);
+            const savingsRate = inc > 0 ? ((inc - exp) / inc * 100) : 0;
+
+            // Row 1: KPI Cards
+            const savRateEl = document.getElementById('analysis-savings-rate');
+            const savBadgeEl = document.getElementById('analysis-savings-badge');
+            const savBarEl = document.getElementById('analysis-savings-bar');
+            if (savRateEl) savRateEl.textContent = savingsRate.toFixed(1) + " %";
+            if (savBarEl) savBarEl.style.width = Math.min(100, Math.max(0, savingsRate)) + "%";
+            if (savBadgeEl) {
+                if (savingsRate >= 25) { savBadgeEl.textContent = "🔥 Výborné"; savBadgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"; }
+                else if (savingsRate >= 10) { savBadgeEl.textContent = "🟢 Stabilní"; savBadgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30"; }
+                else if (savingsRate >= 0) { savBadgeEl.textContent = "🟡 Nízké úspory"; savBadgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30"; }
+                else { savBadgeEl.textContent = "🔴 Deficit"; savBadgeEl.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30"; }
+            }
+
+            const dailyExpEl = document.getElementById('analysis-daily-exp');
+            const periodDaysEl = document.getElementById('analysis-period-days');
+            if (dailyExpEl) dailyExpEl.textContent = avgDailyExp.toLocaleString('cs-CZ', {maximumFractionDigits: 0}) + " Kč / den";
+            if (periodDaysEl) periodDaysEl.textContent = `Průměr za ${daysInPeriod} dní`;
+
+            const topExpCatEl = document.getElementById('analysis-top-exp-cat');
+            const topExpValEl = document.getElementById('analysis-top-exp-val');
+            if (topExpCatEl && topExpValEl) {
+                if (sortedCats.length > 0) {
+                    const [cName, cVal] = sortedCats[0];
+                    const cPct = exp > 0 ? ((cVal / exp) * 100).toFixed(1) : 0;
+                    topExpCatEl.textContent = cName;
+                    topExpValEl.textContent = `${cVal.toLocaleString('cs-CZ')} Kč (${cPct} %)`;
+                } else {
+                    topExpCatEl.textContent = "Žádné výdaje";
+                    topExpValEl.textContent = "0 Kč (0 %)";
+                }
+            }
+
+            const topIncCatEl = document.getElementById('analysis-top-inc-cat');
+            const topIncValEl = document.getElementById('analysis-top-inc-val');
+            if (topIncCatEl && topIncValEl) {
+                if (sortedIncCats.length > 0) {
+                    const [cName, cVal] = sortedIncCats[0];
+                    const cPct = inc > 0 ? ((cVal / inc) * 100).toFixed(1) : 0;
+                    topIncCatEl.textContent = cName;
+                    topIncValEl.textContent = `${cVal.toLocaleString('cs-CZ')} Kč (${cPct} %)`;
+                } else {
+                    topIncCatEl.textContent = "Žádné příjmy";
+                    topIncValEl.textContent = "0 Kč (0 %)";
+                }
+            }
+
+            // Legendy pro koláčové grafy
+            const expLegendList = document.getElementById('expense-legend-list');
+            const incLegendList = document.getElementById('income-legend-list');
+            const expColors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#64748b'];
+            const incColors = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#06b6d4', '#14b8a6', '#6366f1'];
+
+            if (expLegendList) {
+                expLegendList.innerHTML = "";
+                if (sortedCats.length === 0) expLegendList.innerHTML = `<span class="text-slate-500 italic col-span-2">Žádné výdajové transakce.</span>`;
+                sortedCats.forEach(([name, val], idx) => {
+                    const pct = exp > 0 ? ((val / exp) * 100).toFixed(1) : 0;
+                    const color = expColors[idx % expColors.length];
+                    expLegendList.innerHTML += `<div class="flex items-center justify-between bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-800"><span class="flex items-center gap-1.5 truncate"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${color}"></span><span class="text-slate-300 font-medium truncate pr-1">${name}</span></span><span class="font-mono font-bold text-rose-400 flex-shrink-0">${pct} %</span></div>`;
+                });
+            }
+
+            if (incLegendList) {
+                incLegendList.innerHTML = "";
+                if (sortedIncCats.length === 0) incLegendList.innerHTML = `<span class="text-slate-500 italic col-span-2">Žádné příjmové transakce.</span>`;
+                sortedIncCats.forEach(([name, val], idx) => {
+                    const pct = inc > 0 ? ((val / inc) * 100).toFixed(1) : 0;
+                    const color = incColors[idx % incColors.length];
+                    incLegendList.innerHTML += `<div class="flex items-center justify-between bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-800"><span class="flex items-center gap-1.5 truncate"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${color}"></span><span class="text-slate-300 font-medium truncate pr-1">${name}</span></span><span class="font-mono font-bold text-emerald-400 flex-shrink-0">${pct} %</span></div>`;
+                });
+            }
+
+            // AI Finanční Analytik & Zdraví rozpočtu
+            let score = 50;
+            if (savingsRate >= 30) score += 30;
+            else if (savingsRate >= 15) score += 15;
+            else if (savingsRate < 0) score -= 30;
+
+            if (sortedCats.length > 0 && exp > 0 && (sortedCats[0][1] / exp) < 0.45) score += 10;
+            if (inc > exp && inc > 0) score += 10;
+            score = Math.min(100, Math.max(5, Math.round(score)));
+
+            const scoreEl = document.getElementById('ai-health-score');
+            if (scoreEl) {
+                scoreEl.textContent = `${score} / 100`;
+                scoreEl.className = `text-xl font-extrabold font-mono ${score >= 75 ? 'text-emerald-400' : score >= 50 ? 'text-blue-400' : score >= 30 ? 'text-amber-400' : 'text-rose-400'}`;
+            }
+
+            const cfEl = document.getElementById('ai-insight-cashflow');
+            const risksEl = document.getElementById('ai-insight-risks');
+            const projEl = document.getElementById('ai-insight-projection');
+
+            if (cfEl) {
+                if (inc === 0 && exp === 0) cfEl.textContent = "Zatím nebyly zaznamenány žádné transakce pro provedení analýzy cash flow.";
+                else if (inc >= exp) cfEl.textContent = `Vaše bilance je v přebytku +${(inc - exp).toLocaleString('cs-CZ')} Kč. Daří se vám odkládat ${savingsRate.toFixed(1)} % ze všech přitékajících příjmů.`;
+                else cfEl.textContent = `V tomto období převyšují výdaje vaše příjmy o ${(exp - inc).toLocaleString('cs-CZ')} Kč. Doporučujeme přezkoumat zbytné položky.`;
+            }
+
+            if (risksEl) {
+                if (sortedCats.length > 0) {
+                    const topCat = sortedCats[0];
+                    const topPct = exp > 0 ? ((topCat[1] / exp) * 100).toFixed(0) : 0;
+                    if (topPct > 45) risksEl.textContent = `Vysoká koncentrace výdajů v kategorii '${topCat[0]}' (${topPct} % z celku). Zkontrolujte, zda lze v této oblasti dosáhnout úspor.`;
+                    else risksEl.textContent = `Vaše výdaje jsou poměrně dobře rozložené mezi více kategorií. Největší položkou je '${topCat[0]}' (${topPct} %).`;
+                } else risksEl.textContent = "Žádné rizikové koncentrace výdajů nebyly detekovány.";
+            }
+
+            if (projEl) {
+                const monthlyNet = (inc - exp) * (30 / daysInPeriod);
+                const yearlyNet = monthlyNet * 12;
+                if (yearlyNet > 0) projEl.textContent = `Při udržení současného tempa a návyků uspoříte za 1 rok přibližně +${yearlyNet.toLocaleString('cs-CZ', {maximumFractionDigits: 0})} Kč.`;
+                else if (yearlyNet < 0) projEl.textContent = `Při pokračování současného trendu by roční deficit dosáhl cca ${yearlyNet.toLocaleString('cs-CZ', {maximumFractionDigits: 0})} Kč.`;
+                else projEl.textContent = `Vaše roční bilance se aktuálně pohybuje blízko nuly.`;
+            }
+
+            // GRAFY
             if (expChart) expChart.destroy();
             expChart = new Chart(document.getElementById('expenseChart'), {
                 type: 'doughnut',
@@ -1053,7 +1354,7 @@
                     labels: Object.keys(cats), 
                     datasets: [{ 
                         data: Object.values(cats), 
-                        backgroundColor: ['#3b82f6', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#64748b'], 
+                        backgroundColor: expColors, 
                         borderWidth: 2,
                         borderColor: '#0f172a'
                     }] 
@@ -1062,8 +1363,52 @@
                     responsive: true, 
                     maintainAspectRatio: false, 
                     plugins: { 
-                        legend: { position: 'right', labels: { color: '#cbd5e1', font: { family: 'Outfit', size: 12 } } } 
+                        legend: { position: 'right', labels: { color: '#cbd5e1', font: { family: 'Outfit', size: 11 } } } 
                     } 
+                }
+            });
+
+            if (incChart) incChart.destroy();
+            incChart = new Chart(document.getElementById('incomeChart'), {
+                type: 'doughnut',
+                data: { 
+                    labels: Object.keys(incCats), 
+                    datasets: [{ 
+                        data: Object.values(incCats), 
+                        backgroundColor: incColors, 
+                        borderWidth: 2,
+                        borderColor: '#0f172a'
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#cbd5e1', font: { family: 'Outfit', size: 11 } } } 
+                    } 
+                }
+            });
+
+            if (salaryChart) salaryChart.destroy();
+            const sortedSalaryMonths = Object.keys(salaryMonths).sort();
+            salaryChart = new Chart(document.getElementById('incomeSalaryChart'), {
+                type: 'bar',
+                data: { 
+                    labels: sortedSalaryMonths, 
+                    datasets: [
+                        { label: 'Mzda (Výplata)', data: sortedSalaryMonths.map(m=>salaryMonths[m].mzda), backgroundColor: '#10b981', borderRadius: 6 }, 
+                        { label: 'Investice & pasivní', data: sortedSalaryMonths.map(m=>salaryMonths[m].investice), backgroundColor: '#3b82f6', borderRadius: 6 },
+                        { label: 'Ostatní příjmy / Dar', data: sortedSalaryMonths.map(m=>salaryMonths[m].ostatni), backgroundColor: '#f59e0b', borderRadius: 6 }
+                    ] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono' } } }, 
+                        y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono' } } } 
+                    }, 
+                    plugins: { legend: { labels: { color: '#cbd5e1', font: { family: 'Outfit', size: 12 } } } } 
                 }
             });
 
@@ -1074,8 +1419,8 @@
                 data: { 
                     labels: sortedMonths, 
                     datasets: [
-                        { label: 'Příjmy', data: sortedMonths.map(m=>trend[m].i), backgroundColor: '#10b981', borderRadius: 6 }, 
-                        { label: 'Výdaje', data: sortedMonths.map(m=>trend[m].e), backgroundColor: '#f43f5e', borderRadius: 6 }
+                        { label: 'Celkové Příjmy', data: sortedMonths.map(m=>trend[m].i), backgroundColor: '#10b981', borderRadius: 6 }, 
+                        { label: 'Celkové Výdaje', data: sortedMonths.map(m=>trend[m].e), backgroundColor: '#f43f5e', borderRadius: 6 }
                     ] 
                 },
                 options: { 
