@@ -1212,19 +1212,23 @@
                     </div>
 
                     <!-- Hours and Quick buttons -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Odpracováno (hodin) *</label>
-                            <input id="workLogModalHours" type="number" step="0.25" min="0.05" max="24" placeholder="0.0" oninput="window.calculateWorkLogAmount()" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono font-bold text-sm focus:outline-none focus:border-indigo-500 transition">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Odpracováno *</label>
+                                <span id="workHoursHelper" class="text-[11px] font-mono font-bold text-indigo-400"></span>
+                            </div>
+                            <input id="workLogModalHours" type="text" placeholder="Např. 1:30 nebo 90" oninput="window.calculateWorkLogAmount()" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono font-bold text-sm focus:outline-none focus:border-indigo-500 transition">
+                            <span class="block text-[10px] text-slate-500 mt-1">Formát <strong>HH:MM</strong> (např. 1:30) nebo v <strong>minutách</strong> (např. 90)</span>
                         </div>
                         <div>
                             <span class="block text-[10px] text-slate-500 uppercase font-bold mb-1">Rychle přičíst:</span>
-                            <div class="flex items-center gap-1">
-                                <button type="button" onclick="window.setWorkHours(0.5)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+0.5h</button>
+                            <div class="flex items-center gap-1 flex-wrap pt-0.5">
+                                <button type="button" onclick="window.setWorkHours(0.25)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+15m</button>
+                                <button type="button" onclick="window.setWorkHours(0.5)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+30m</button>
                                 <button type="button" onclick="window.setWorkHours(1)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+1h</button>
                                 <button type="button" onclick="window.setWorkHours(2)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+2h</button>
                                 <button type="button" onclick="window.setWorkHours(4)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+4h</button>
-                                <button type="button" onclick="window.setWorkHours(8)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+8h</button>
                             </div>
                         </div>
                     </div>
@@ -2696,7 +2700,86 @@ match /work_logs/{docId} {
             renderWork();
         };
 
-        // --- ZÁZNAMY HODIN (LOGOVÁNÍ) ---
+        // --- ZÁZNAMY HODIN (LOGOVÁNÍ & PŘEPOČET ČASU) ---
+        function parseWorkHoursToDecimal(inputVal) {
+            if (inputVal === null || inputVal === undefined) return 0;
+            if (typeof inputVal === 'number') return isNaN(inputVal) ? 0 : inputVal;
+            const str = String(inputVal).trim();
+            if (!str) return 0;
+
+            // Formát HH:MM nebo H:MM nebo :MM (např. 1:30, 01:30, 0:45, :30)
+            if (str.includes(':')) {
+                const parts = str.split(':');
+                const h = parseInt(parts[0], 10) || 0;
+                const m = parseInt(parts[1], 10) || 0;
+                return Math.round((h + (m / 60)) * 100) / 100;
+            }
+
+            // Formát 1h 30m nebo 1h30m
+            const hmMatch = str.match(/^(\d+(?:[.,]\d+)?)\s*h(?:od)?\s*(\d+)?\s*m(?:in)?$/i);
+            if (hmMatch) {
+                const h = parseFloat(hmMatch[1].replace(',', '.')) || 0;
+                const m = parseInt(hmMatch[2], 10) || 0;
+                return Math.round((h + (m / 60)) * 100) / 100;
+            }
+
+            // Explicitní minuty: např. "90m" nebo "90 min"
+            if (/^\d+\s*m(?:in)?$/i.test(str)) {
+                const m = parseInt(str.replace(/[^\d]/g, ''), 10) || 0;
+                return Math.round((m / 60) * 100) / 100;
+            }
+
+            // Explicitní hodiny: např. "2h" nebo "1.5h"
+            if (/^\d+(?:[.,]\d+)?\s*h(?:od)?$/i.test(str)) {
+                const h = parseFloat(str.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+                return Math.round(h * 100) / 100;
+            }
+
+            // Desetinné číslo s tečkou nebo čárkou (např. 1.5 nebo 1,5) -> hodiny
+            if (str.includes('.') || str.includes(',')) {
+                const h = parseFloat(str.replace(',', '.'));
+                return isNaN(h) ? 0 : Math.round(h * 100) / 100;
+            }
+
+            // Celé číslo (např. 90, 45, 120, 15, 30) -> dle zadání v minutách!
+            if (/^\d+$/.test(str)) {
+                const mins = parseInt(str, 10);
+                return Math.round((mins / 60) * 100) / 100;
+            }
+
+            const fallback = parseFloat(str.replace(',', '.'));
+            return isNaN(fallback) ? 0 : fallback;
+        }
+
+        function formatDecimalHoursToHHMM(decHours) {
+            if (decHours === null || decHours === undefined || isNaN(decHours) || decHours <= 0) return "";
+            const totalMinutes = Math.round(decHours * 60);
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            return `${h}:${String(m).padStart(2, '0')}`;
+        }
+
+        function updateWorkHoursHelperText(rawVal, decHours) {
+            const helperEl = document.getElementById('workHoursHelper');
+            if (!helperEl) return;
+            const str = String(rawVal || '').trim();
+            if (!str || decHours <= 0) {
+                helperEl.textContent = "";
+                return;
+            }
+            const totalMinutes = Math.round(decHours * 60);
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            
+            if (/^\d+$/.test(str)) {
+                helperEl.textContent = `= ${decHours} h (${h > 0 ? h + 'h ' : ''}${m}m)`;
+            } else if (str.includes(':')) {
+                helperEl.textContent = `= ${decHours} h (${totalMinutes} min)`;
+            } else {
+                helperEl.textContent = `= ${h}:${String(m).padStart(2, '0')} (${totalMinutes} min)`;
+            }
+        }
+
         window.openWorkLogModal = (projectId = null, logId = null, prefillDate = null, prefillTimeFrom = null, prefillTimeTo = null, prefillHours = null, prefillDesc = null, prefillRate = null) => {
             const sel = document.getElementById('workLogModalProject');
             sel.innerHTML = "";
@@ -2735,7 +2818,8 @@ match /work_logs/{docId} {
                 dateInput.value = log.date || (log.dateObj ? log.dateObj.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
                 if (timeFromInput) timeFromInput.value = log.timeFrom || "";
                 if (timeToInput) timeToInput.value = log.timeTo || "";
-                hoursInput.value = log.hours;
+                const h = parseFloat(log.hours) || 0;
+                hoursInput.value = formatDecimalHoursToHHMM(h) || (log.hours || "");
                 rateInput.value = log.hourlyRate || 0;
                 descInput.value = log.description || "";
                 billedInput.checked = !!log.isBilled;
@@ -2752,7 +2836,17 @@ match /work_logs/{docId} {
                 dateInput.value = prefillDate || new Date().toISOString().split('T')[0];
                 if (timeFromInput) timeFromInput.value = prefillTimeFrom || "";
                 if (timeToInput) timeToInput.value = prefillTimeTo || "";
-                hoursInput.value = prefillHours !== null && prefillHours !== undefined ? prefillHours : "";
+                
+                if (prefillHours !== null && prefillHours !== undefined && prefillHours !== "") {
+                    if (typeof prefillHours === 'string' && prefillHours.includes(':')) {
+                        hoursInput.value = prefillHours;
+                    } else {
+                        const numH = parseFloat(prefillHours);
+                        hoursInput.value = isNaN(numH) ? prefillHours : formatDecimalHoursToHHMM(numH);
+                    }
+                } else {
+                    hoursInput.value = "";
+                }
                 descInput.value = prefillDesc || "";
                 billedInput.checked = false;
                 
@@ -2797,8 +2891,9 @@ match /work_logs/{docId} {
                 let diffMins = (h2 * 60 + m2) - (h1 * 60 + m1);
                 if (diffMins < 0) diffMins += 24 * 60; // Přes půlnoc
                 if (diffMins > 0) {
-                    const calculatedHours = Math.round((diffMins / 60) * 100) / 100;
-                    document.getElementById('workLogModalHours').value = calculatedHours;
+                    const hh = Math.floor(diffMins / 60);
+                    const mm = diffMins % 60;
+                    document.getElementById('workLogModalHours').value = `${hh}:${String(mm).padStart(2, '0')}`;
                     window.calculateWorkLogAmount();
                 }
             }
@@ -2806,19 +2901,22 @@ match /work_logs/{docId} {
 
         window.setWorkHours = (h) => {
             const hoursInput = document.getElementById('workLogModalHours');
-            const cur = parseFloat(hoursInput.value) || 0;
-            hoursInput.value = (cur + h).toFixed(2).replace(/\.00$/, '').replace(/(\.[1-9])0$/, '$1');
+            const cur = parseWorkHoursToDecimal(hoursInput.value);
+            const newHours = Math.max(0, Math.round((cur + h) * 100) / 100);
+            hoursInput.value = formatDecimalHoursToHHMM(newHours) || "0:00";
             window.calculateWorkLogAmount();
         };
 
         window.calculateWorkLogAmount = () => {
-            const hours = parseFloat(document.getElementById('workLogModalHours').value) || 0;
+            const hoursInputVal = document.getElementById('workLogModalHours').value;
+            const hours = parseWorkHoursToDecimal(hoursInputVal);
             const rate = parseFloat(document.getElementById('workLogModalRate').value) || 0;
-            const amount = hours * rate;
+            const amount = Math.round(hours * rate);
             const previewEl = document.getElementById('workLogCalcPreview');
             if (previewEl) {
                 previewEl.textContent = `${amount.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} Kč`;
             }
+            updateWorkHoursHelperText(hoursInputVal, hours);
         };
 
         window.saveWorkLog = async () => {
@@ -2832,8 +2930,9 @@ match /work_logs/{docId} {
             const dateObj = dateVal ? new Date(dateVal) : new Date();
             const timeFrom = document.getElementById('workLogModalTimeFrom')?.value.trim() || '';
             const timeTo = document.getElementById('workLogModalTimeTo')?.value.trim() || '';
-            const hours = parseFloat(document.getElementById('workLogModalHours').value);
-            if (isNaN(hours) || hours <= 0) return alert("Zadejte platný počet odpracovaných hodin.");
+            const hoursInputVal = document.getElementById('workLogModalHours').value;
+            const hours = parseWorkHoursToDecimal(hoursInputVal);
+            if (isNaN(hours) || hours <= 0) return alert("Zadejte platný počet odpracovaných hodin (např. 1:30 nebo v minutách např. 90).");
             
             const hourlyRate = parseFloat(document.getElementById('workLogModalRate').value) || (project ? (project.hourlyRate || 0) : 0);
             const description = document.getElementById('workLogModalDesc').value.trim();
