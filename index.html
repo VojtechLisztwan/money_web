@@ -370,6 +370,25 @@
         <!-- TAB: WORK & PROJECTS -->
         <div id="tab-work" class="tab-content hidden space-y-8 max-w-7xl mx-auto">
             
+            <!-- Notice pro Firebase pravidla při lokálním režimu -->
+            <div id="workStorageNotice" class="hidden bg-amber-950/40 border border-amber-500/40 p-4 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs animate-fadeIn">
+                <div class="flex items-center gap-3 text-amber-300">
+                    <span class="text-xl">⚠️</span>
+                    <div>
+                        <span class="font-bold text-amber-200">Režim lokálního úložiště:</span> Ve Firebase Firestore zatím nemáte povolena pravidla pro kolekce <code class="bg-slate-900 px-1.5 py-0.5 rounded text-amber-300 font-mono">work_projects</code> a <code class="bg-slate-900 px-1.5 py-0.5 rounded text-amber-300 font-mono">work_logs</code>.
+                        <p class="text-slate-400 text-[11px] mt-0.5">Aplikace nyní ukládá data spolehlivě v prohlížeči (včetně zálohování a exportu). Pro cloudovou synchronizaci stačí vložit pravidla do Firebase Console.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button onclick="window.syncWorkToCloud()" class="px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 font-bold border border-emerald-500/40 whitespace-nowrap transition text-xs shadow-sm flex items-center gap-1.5">
+                        <span>🔄</span><span>Nahrát do cloudu</span>
+                    </button>
+                    <button onclick="window.showFirebaseRulesModal()" class="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold border border-amber-500/40 whitespace-nowrap transition text-xs shadow-sm">
+                        📋 Návod na pravidla
+                    </button>
+                </div>
+            </div>
+
             <!-- Summary KPI Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- Odpracováno v období -->
@@ -1183,12 +1202,53 @@
             </div>
         </div>
 
+        <!-- MODAL: NÁVOD NA FIREBASE PRAVIDLA -->
+        <div id="modalFirebaseRules" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto" onclick="if(event.target === this) window.closeFirebaseRulesModal()">
+            <div class="glass-card border border-slate-700/80 rounded-3xl p-6 sm:p-8 max-w-lg w-full relative shadow-2xl animate-fadeIn">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <span>🛡️</span><span>Povolení kolekcí ve Firebase</span>
+                    </h3>
+                    <button onclick="window.closeFirebaseRulesModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 text-sm">✕</button>
+                </div>
+                
+                <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                    Ve vaší <strong>Firebase Console</strong> přejděte do <strong>Firestore Database</strong> ➔ záložka <strong>Rules (Pravidla)</strong> a vložte následující pravidla:
+                </p>
+
+                <div class="relative bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400 leading-relaxed mb-4 selection:bg-emerald-600 selection:text-white">
+                    <pre id="firebaseRulesSnippet">match /work_projects/{docId} {
+  allow read, write: if request.auth != null;
+}
+match /work_logs/{docId} {
+  allow read, write: if request.auth != null;
+}</pre>
+                    <button id="btnCopyRules" onclick="window.copyFirebaseRules()" class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-sans font-medium transition flex items-center gap-1 shadow-sm">
+                        <span>📋</span><span>Kopírovat</span>
+                    </button>
+                </div>
+
+                <p class="text-[11px] text-slate-400 mb-6 leading-relaxed">
+                    Po uložení v Firebase Console (tlačítko <em>Publish</em>) stačí obnovit stránku v prohlížeči (F5). Data se budou ukládat do Firebase cloudu a synchronizovat napříč všemi vašimi zařízeními.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <button onclick="window.syncWorkToCloud()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-1.5">
+                        <span>🔄</span><span>Zkusit nahrát data do cloudu</span>
+                    </button>
+                    <button onclick="window.closeFirebaseRulesModal()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+                        Zavřít
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, doc, deleteDoc, updateDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, setDoc, query, where, onSnapshot, orderBy, doc, deleteDoc, updateDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDOODjOh7NNc1pJyLgr68MNTDH1V4ep57k",
@@ -1218,6 +1278,95 @@
         // Práce & Projekty Proměnné
         let allProjects = [], allWorkLogs = [], activeWorkProjectFilter = 'all';
         let currentNotesProjectId = null, editingNoteId = null;
+        let workStorageMode = 'cloud'; // 'cloud' | 'local'
+
+        function getLocalProjects() {
+            try {
+                const uid = currentUser ? currentUser.uid : 'default';
+                const raw = localStorage.getItem(`work_projects_${uid}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) { return []; }
+        }
+
+        function saveLocalProjects(projects) {
+            try {
+                const uid = currentUser ? currentUser.uid : 'default';
+                localStorage.setItem(`work_projects_${uid}`, JSON.stringify(projects));
+            } catch(e) {}
+        }
+
+        function getLocalWorkLogs() {
+            try {
+                const uid = currentUser ? currentUser.uid : 'default';
+                const raw = localStorage.getItem(`work_logs_${uid}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) { return []; }
+        }
+
+        function saveLocalWorkLogs(logs) {
+            try {
+                const uid = currentUser ? currentUser.uid : 'default';
+                localStorage.setItem(`work_logs_${uid}`, JSON.stringify(logs));
+            } catch(e) {}
+        }
+
+        function updateWorkStorageNotice(show) {
+            const el = document.getElementById('workStorageNotice');
+            if (el) el.classList.toggle('hidden', !show);
+        }
+
+        window.showFirebaseRulesModal = () => {
+            const m = document.getElementById('modalFirebaseRules');
+            if (m) m.classList.remove('hidden');
+        };
+
+        window.closeFirebaseRulesModal = () => {
+            const m = document.getElementById('modalFirebaseRules');
+            if (m) m.classList.add('hidden');
+        };
+
+        window.copyFirebaseRules = () => {
+            const snippet = document.getElementById('firebaseRulesSnippet');
+            if (!snippet) return;
+            navigator.clipboard.writeText(snippet.textContent.trim()).then(() => {
+                const btn = document.getElementById('btnCopyRules');
+                if (btn) {
+                    btn.innerHTML = "<span>✅</span><span>Zkopírováno!</span>";
+                    setTimeout(() => { btn.innerHTML = "<span>📋</span><span>Kopírovat</span>"; }, 2000);
+                }
+            });
+        };
+
+        window.syncWorkToCloud = async () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            const localProj = getLocalProjects();
+            const localLogs = getLocalWorkLogs();
+            if (!localProj.length && !localLogs.length) return alert("Nemáte žádná lokální data k synchronizaci.");
+            
+            try {
+                let pCount = 0, lCount = 0;
+                for (const p of localProj) {
+                    const { id, dateObj, ...data } = p;
+                    data.userId = currentUser.uid;
+                    data.updatedAt = Timestamp.now();
+                    data.createdAt = p.createdAt ? Timestamp.fromDate(new Date(p.createdAt)) : Timestamp.now();
+                    await setDoc(doc(db, "work_projects", id), data);
+                    pCount++;
+                }
+                for (const l of localLogs) {
+                    const { id, dateObj, ...data } = l;
+                    data.userId = currentUser.uid;
+                    data.createdAt = l.date ? Timestamp.fromDate(new Date(l.date)) : Timestamp.now();
+                    await setDoc(doc(db, "work_logs", id), data);
+                    lCount++;
+                }
+                workStorageMode = 'cloud';
+                updateWorkStorageNotice(false);
+                alert(`✅ Synchronizace úspěšná!\nNahráno do cloudu: ${pCount} projektů a ${lCount} záznamů práce.`);
+            } catch(e) {
+                alert(`❌ Synchronizace do Firebase cloudu se nezdařila:\n${e.message}\n\nUjistěte se, že jste v Firebase Console vložili a publikovali pravidla (Rules).`);
+            }
+        };
 
         const projectColorThemes = {
             indigo: {
@@ -1365,13 +1514,44 @@
 
             // Projekty
             const wpQ = query(collection(db, "work_projects"), where("userId", "==", currentUser.uid));
-            onSnapshot(wpQ, (snap) => {
-                allProjects = [];
+            onSnapshot(wpQ, async (snap) => {
+                workStorageMode = 'cloud';
+                updateWorkStorageNotice(false);
+                const cloudProjects = [];
                 snap.forEach(d => {
                     let data = d.data(); data.id = d.id;
                     data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
-                    allProjects.push(data);
+                    cloudProjects.push(data);
                 });
+                if (cloudProjects.length === 0) {
+                    const local = getLocalProjects();
+                    if (local.length > 0) {
+                        for (const p of local) {
+                            try {
+                                const { id, dateObj, ...data } = p;
+                                data.userId = currentUser.uid;
+                                data.updatedAt = Timestamp.now();
+                                data.createdAt = p.createdAt ? Timestamp.fromDate(new Date(p.createdAt)) : Timestamp.now();
+                                await setDoc(doc(db, "work_projects", id), data);
+                            } catch(e) {}
+                        }
+                        return;
+                    }
+                }
+                allProjects = cloudProjects;
+                allProjects.sort((a,b) => (b.dateObj || 0) - (a.dateObj || 0));
+                saveLocalProjects(allProjects);
+                renderWork();
+                if (currentNotesProjectId) {
+                    const curProj = allProjects.find(p => p.id === currentNotesProjectId);
+                    if (curProj) renderProjectNotesList(curProj);
+                }
+            }, (err) => {
+                console.warn("Firestore work_projects není povolen v Security Rules (permission-denied). Používám lokální úložiště:", err.message);
+                workStorageMode = 'local';
+                updateWorkStorageNotice(true);
+                const local = getLocalProjects();
+                allProjects = local.map(p => ({ ...p, dateObj: p.createdAt ? new Date(p.createdAt) : new Date() }));
                 allProjects.sort((a,b) => (b.dateObj || 0) - (a.dateObj || 0));
                 renderWork();
                 if (currentNotesProjectId) {
@@ -1382,13 +1562,42 @@
 
             // Záznamy odpracovaných hodin
             const wlQ = query(collection(db, "work_logs"), where("userId", "==", currentUser.uid));
-            onSnapshot(wlQ, (snap) => {
-                allWorkLogs = [];
+            onSnapshot(wlQ, async (snap) => {
+                workStorageMode = 'cloud';
+                const cloudLogs = [];
                 snap.forEach(d => {
                     let data = d.data(); data.id = d.id;
                     data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
-                    allWorkLogs.push(data);
+                    cloudLogs.push(data);
                 });
+                if (cloudLogs.length === 0) {
+                    const local = getLocalWorkLogs();
+                    if (local.length > 0) {
+                        for (const l of local) {
+                            try {
+                                const { id, dateObj, ...data } = l;
+                                data.userId = currentUser.uid;
+                                data.createdAt = l.date ? Timestamp.fromDate(new Date(l.date)) : Timestamp.now();
+                                await setDoc(doc(db, "work_logs", id), data);
+                            } catch(e) {}
+                        }
+                        return;
+                    }
+                }
+                allWorkLogs = cloudLogs;
+                allWorkLogs.sort((a,b) => {
+                    const dateA = a.date ? new Date(a.date) : a.dateObj;
+                    const dateB = b.date ? new Date(b.date) : b.dateObj;
+                    return (dateB || 0) - (dateA || 0);
+                });
+                saveLocalWorkLogs(allWorkLogs);
+                renderWork();
+            }, (err) => {
+                console.warn("Firestore work_logs není povolen v Security Rules (permission-denied). Používám lokální úložiště:", err.message);
+                workStorageMode = 'local';
+                updateWorkStorageNotice(true);
+                const local = getLocalWorkLogs();
+                allWorkLogs = local.map(l => ({ ...l, dateObj: l.createdAt ? new Date(l.createdAt) : new Date() }));
                 allWorkLogs.sort((a,b) => {
                     const dateA = a.date ? new Date(a.date) : a.dateObj;
                     const dateB = b.date ? new Date(b.date) : b.dateObj;
@@ -2214,24 +2423,74 @@
             const status = document.getElementById('projectModalStatus').value;
             const color = document.getElementById('projectModalColor').value;
             const description = document.getElementById('projectModalDesc').value.trim();
+            const now = new Date();
             
-            const data = {
-                userId: currentUser.uid,
-                name,
-                client,
-                hourlyRate,
-                status,
-                color,
-                description,
-                updatedAt: Timestamp.now()
-            };
-            
+            if (workStorageMode === 'cloud') {
+                try {
+                    const data = {
+                        userId: currentUser.uid,
+                        name,
+                        client,
+                        hourlyRate,
+                        status,
+                        color,
+                        description,
+                        updatedAt: Timestamp.now()
+                    };
+                    if (editId) {
+                        await updateDoc(doc(db, "work_projects", editId), data);
+                    } else {
+                        data.notes = [];
+                        data.createdAt = Timestamp.now();
+                        await addDoc(collection(db, "work_projects"), data);
+                    }
+                    window.closeProjectModal();
+                    return;
+                } catch (e) {
+                    console.warn("Firestore saveProject selhal, ukládám lokálně:", e.message);
+                    workStorageMode = 'local';
+                    updateWorkStorageNotice(true);
+                }
+            }
+
+            // Lokální režim (localStorage)
             if (editId) {
-                await updateDoc(doc(db, "work_projects", editId), data);
+                allProjects = allProjects.map(p => {
+                    if (p.id === editId) {
+                        return {
+                            ...p,
+                            name,
+                            client,
+                            hourlyRate,
+                            status,
+                            color,
+                            description,
+                            updatedAt: now.toISOString()
+                        };
+                    }
+                    return p;
+                });
             } else {
-                data.notes = [];
-                data.createdAt = Timestamp.now();
-                await addDoc(collection(db, "work_projects"), data);
+                const newProj = {
+                    id: 'wp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    userId: currentUser.uid,
+                    name,
+                    client,
+                    hourlyRate,
+                    status,
+                    color,
+                    description,
+                    notes: [],
+                    createdAt: now.toISOString(),
+                    dateObj: now
+                };
+                allProjects.unshift(newProj);
+            }
+            saveLocalProjects(allProjects);
+            renderWork();
+            if (currentNotesProjectId) {
+                const curProj = allProjects.find(p => p.id === currentNotesProjectId);
+                if (curProj) renderProjectNotesList(curProj);
             }
             window.closeProjectModal();
         };
@@ -2245,7 +2504,21 @@
                 msg += ` Projekt obsahuje ${notesCount} poznámek, které budou také smazány.`;
             }
             if (!confirm(msg)) return;
-            await deleteDoc(doc(db, "work_projects", projectId));
+
+            if (workStorageMode === 'cloud') {
+                try {
+                    await deleteDoc(doc(db, "work_projects", projectId));
+                    return;
+                } catch (e) {
+                    console.warn("Firestore deleteProject selhal, odstraňuji lokálně:", e.message);
+                    workStorageMode = 'local';
+                    updateWorkStorageNotice(true);
+                }
+            }
+
+            allProjects = allProjects.filter(x => x.id !== projectId);
+            saveLocalProjects(allProjects);
+            renderWork();
         };
 
         // --- ZÁZNAMY HODIN (LOGOVÁNÍ) ---
@@ -2360,36 +2633,111 @@
             const description = document.getElementById('workLogModalDesc').value.trim();
             const isBilled = document.getElementById('workLogModalBilled').checked;
             
-            const data = {
-                userId: currentUser.uid,
-                projectId: projId === '__none__' ? '' : projId,
-                projectName,
-                hours,
-                hourlyRate,
-                description,
-                isBilled,
-                date: dateVal,
-                createdAt: Timestamp.fromDate(dateObj)
-            };
-            
-            if (editId) {
-                await updateDoc(doc(db, "work_logs", editId), data);
-            } else {
-                await addDoc(collection(db, "work_logs"), data);
+            if (workStorageMode === 'cloud') {
+                try {
+                    const data = {
+                        userId: currentUser.uid,
+                        projectId: projId === '__none__' ? '' : projId,
+                        projectName,
+                        hours,
+                        hourlyRate,
+                        description,
+                        isBilled,
+                        date: dateVal,
+                        createdAt: Timestamp.fromDate(dateObj)
+                    };
+                    if (editId) {
+                        await updateDoc(doc(db, "work_logs", editId), data);
+                    } else {
+                        await addDoc(collection(db, "work_logs"), data);
+                    }
+                    window.closeWorkLogModal();
+                    return;
+                } catch (e) {
+                    console.warn("Firestore saveWorkLog selhal, ukládám lokálně:", e.message);
+                    workStorageMode = 'local';
+                    updateWorkStorageNotice(true);
+                }
             }
+
+            // Lokální režim
+            if (editId) {
+                allWorkLogs = allWorkLogs.map(l => {
+                    if (l.id === editId) {
+                        return {
+                            ...l,
+                            projectId: projId === '__none__' ? '' : projId,
+                            projectName,
+                            hours,
+                            hourlyRate,
+                            description,
+                            isBilled,
+                            date: dateVal,
+                            dateObj: dateObj
+                        };
+                    }
+                    return l;
+                });
+            } else {
+                const newLog = {
+                    id: 'wl_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    userId: currentUser.uid,
+                    projectId: projId === '__none__' ? '' : projId,
+                    projectName,
+                    hours,
+                    hourlyRate,
+                    description,
+                    isBilled,
+                    date: dateVal,
+                    createdAt: dateObj.toISOString(),
+                    dateObj: dateObj
+                };
+                allWorkLogs.unshift(newLog);
+            }
+            allWorkLogs.sort((a,b) => {
+                const dateA = a.date ? new Date(a.date) : (a.dateObj || 0);
+                const dateB = b.date ? new Date(b.date) : (b.dateObj || 0);
+                return (dateB || 0) - (dateA || 0);
+            });
+            saveLocalWorkLogs(allWorkLogs);
+            renderWork();
             window.closeWorkLogModal();
         };
 
         window.deleteWorkLog = async (logId) => {
-            if (confirm("Opravdu smazat tento záznam odpracovaných hodin?")) {
-                await deleteDoc(doc(db, "work_logs", logId));
+            if (!confirm("Opravdu smazat tento záznam odpracovaných hodin?")) return;
+            if (workStorageMode === 'cloud') {
+                try {
+                    await deleteDoc(doc(db, "work_logs", logId));
+                    return;
+                } catch (e) {
+                    console.warn("Firestore deleteWorkLog selhal, odstraňuji lokálně:", e.message);
+                    workStorageMode = 'local';
+                    updateWorkStorageNotice(true);
+                }
             }
+            allWorkLogs = allWorkLogs.filter(l => l.id !== logId);
+            saveLocalWorkLogs(allWorkLogs);
+            renderWork();
         };
 
         window.toggleWorkLogBilled = async (logId) => {
             const log = allWorkLogs.find(l => l.id === logId);
             if (!log) return;
-            await updateDoc(doc(db, "work_logs", log.id), { isBilled: !log.isBilled });
+            const newBilledState = !log.isBilled;
+            if (workStorageMode === 'cloud') {
+                try {
+                    await updateDoc(doc(db, "work_logs", log.id), { isBilled: newBilledState });
+                    return;
+                } catch (e) {
+                    console.warn("Firestore toggleWorkLogBilled selhal, ukládám lokálně:", e.message);
+                    workStorageMode = 'local';
+                    updateWorkStorageNotice(true);
+                }
+            }
+            log.isBilled = newBilledState;
+            saveLocalWorkLogs(allWorkLogs);
+            renderWork();
         };
 
         window.transferWorkLogToIncome = async (logId) => {
@@ -2417,7 +2765,18 @@
             });
 
             // Označit jako vyfakturováno
-            await updateDoc(doc(db, "work_logs", log.id), { isBilled: true });
+            log.isBilled = true;
+            if (workStorageMode === 'cloud') {
+                try {
+                    await updateDoc(doc(db, "work_logs", log.id), { isBilled: true });
+                } catch(e) {
+                    saveLocalWorkLogs(allWorkLogs);
+                    renderWork();
+                }
+            } else {
+                saveLocalWorkLogs(allWorkLogs);
+                renderWork();
+            }
             alert(`Výdělek ${amount.toLocaleString('cs-CZ')} Kč byl úspěšně zaúčtován do Příjmů!`);
         };
 
@@ -2554,7 +2913,23 @@
                 notes.unshift(newNote);
             }
             
-            await updateDoc(doc(db, "work_projects", project.id), { notes });
+            project.notes = notes;
+
+            if (workStorageMode === 'cloud') {
+                try {
+                    await updateDoc(doc(db, "work_projects", project.id), { notes });
+                } catch (e) {
+                    console.warn("Firestore saveProjectNote selhal, ukládám lokálně:", e.message);
+                    workStorageMode = 'local';
+                    updateWorkStorageNotice(true);
+                    saveLocalProjects(allProjects);
+                }
+            } else {
+                saveLocalProjects(allProjects);
+            }
+
+            renderProjectNotesList(project);
+            renderWork();
             
             document.getElementById('editingNoteId').value = "";
             document.getElementById('projectNoteInput').value = "";
@@ -2588,7 +2963,23 @@
             if (!confirm("Opravdu smazat tuto poznámku?")) return;
             
             const notes = (project.notes || []).filter(n => n.id !== noteId);
-            await updateDoc(doc(db, "work_projects", project.id), { notes });
+            project.notes = notes;
+
+            if (workStorageMode === 'cloud') {
+                try {
+                    await updateDoc(doc(db, "work_projects", project.id), { notes });
+                } catch (e) {
+                    console.warn("Firestore deleteProjectNote selhal, ukládám lokálně:", e.message);
+                    workStorageMode = 'local';
+                    updateWorkStorageNotice(true);
+                    saveLocalProjects(allProjects);
+                }
+            } else {
+                saveLocalProjects(allProjects);
+            }
+
+            renderProjectNotesList(project);
+            renderWork();
         };
 
         window.exportWorkCsv = () => {
@@ -2768,7 +3159,7 @@
                         if (data.work_projects && Array.isArray(data.work_projects)) {
                             for (const p of data.work_projects) {
                                 let d = p.createdAt ? new Date(p.createdAt) : new Date();
-                                await addDoc(collection(db, "work_projects"), {
+                                const pData = {
                                     userId: currentUser.uid,
                                     name: p.name || "Bez názvu",
                                     client: p.client || "",
@@ -2778,14 +3169,31 @@
                                     description: p.description || "",
                                     notes: Array.isArray(p.notes) ? p.notes : [],
                                     createdAt: Timestamp.fromDate(d)
-                                });
-                                projCount++;
+                                };
+                                if (workStorageMode === 'cloud') {
+                                    try {
+                                        await addDoc(collection(db, "work_projects"), pData);
+                                        projCount++;
+                                    } catch (err) {
+                                        workStorageMode = 'local';
+                                        updateWorkStorageNotice(true);
+                                        allProjects.push({ ...pData, id: p.id || ('wp_' + Date.now() + '_' + projCount), dateObj: d });
+                                        projCount++;
+                                    }
+                                } else {
+                                    allProjects.push({ ...pData, id: p.id || ('wp_' + Date.now() + '_' + projCount), dateObj: d });
+                                    projCount++;
+                                }
+                            }
+                            if (workStorageMode === 'local') {
+                                saveLocalProjects(allProjects);
+                                renderWork();
                             }
                         }
                         if (data.work_logs && Array.isArray(data.work_logs)) {
                             for (const l of data.work_logs) {
                                 let d = l.createdAt ? new Date(l.createdAt) : new Date();
-                                await addDoc(collection(db, "work_logs"), {
+                                const lData = {
                                     userId: currentUser.uid,
                                     projectId: l.projectId || "",
                                     projectName: l.projectName || "Obecné",
@@ -2795,8 +3203,25 @@
                                     isBilled: !!l.isBilled,
                                     date: l.date || d.toISOString().split('T')[0],
                                     createdAt: Timestamp.fromDate(d)
-                                });
-                                workCount++;
+                                };
+                                if (workStorageMode === 'cloud') {
+                                    try {
+                                        await addDoc(collection(db, "work_logs"), lData);
+                                        workCount++;
+                                    } catch (err) {
+                                        workStorageMode = 'local';
+                                        updateWorkStorageNotice(true);
+                                        allWorkLogs.push({ ...lData, id: l.id || ('wl_' + Date.now() + '_' + workCount), dateObj: d });
+                                        workCount++;
+                                    }
+                                } else {
+                                    allWorkLogs.push({ ...lData, id: l.id || ('wl_' + Date.now() + '_' + workCount), dateObj: d });
+                                    workCount++;
+                                }
+                            }
+                            if (workStorageMode === 'local') {
+                                saveLocalWorkLogs(allWorkLogs);
+                                renderWork();
                             }
                         }
                         alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů\n• ${projCount} projektů\n• ${workCount} záznamů odpracovaných hodin.`);
