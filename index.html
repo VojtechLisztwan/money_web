@@ -159,6 +159,9 @@
                     <button onclick="switchTab('overview')" data-tab="overview" class="px-3.5 py-2 rounded-lg font-bold text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition-all duration-200 flex items-center gap-1.5">
                         <span>📊</span><span>Přehled</span>
                     </button>
+                    <button onclick="switchTab('work')" data-tab="work" class="px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5">
+                        <span>💼</span><span>Práce</span>
+                    </button>
                     <button onclick="switchTab('analysis')" data-tab="analysis" class="px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5">
                         <span>📈</span><span>Analýza</span>
                     </button>
@@ -362,6 +365,134 @@
                 </div>
 
             </div>
+        </div>
+
+        <!-- TAB: WORK & PROJECTS -->
+        <div id="tab-work" class="tab-content hidden space-y-8 max-w-7xl mx-auto">
+            
+            <!-- Summary KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Odpracováno v období -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-indigo-500/40 transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Odpracováno v období</span>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold">⏱️</div>
+                    </div>
+                    <div id="work-kpi-period-hours" class="text-2xl sm:text-3xl font-extrabold text-indigo-400 font-mono tracking-tight">0.0 h</div>
+                    <p id="work-kpi-period-label" class="text-[11px] text-slate-500 mt-2 font-medium">Za zvolené období</p>
+                </div>
+
+                <!-- Výdělek / Hodnota práce -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Hodnota práce (Období)</span>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">💰</div>
+                    </div>
+                    <div id="work-kpi-period-earnings" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono tracking-tight">0 Kč</div>
+                    <p class="text-[11px] text-slate-500 mt-2 font-medium">Dle hodinových sazeb projektů</p>
+                </div>
+
+                <!-- K vyfakturování / Čeká -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-amber-500/40 transition-all duration-300 border-l-4 border-l-amber-500">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">K vyfakturování</span>
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold">⏳</div>
+                    </div>
+                    <div id="work-kpi-unbilled-earnings" class="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono tracking-tight">0 Kč</div>
+                    <p id="work-kpi-unbilled-hours" class="text-[11px] text-slate-400 mt-2 font-mono font-medium">0.0 h nevyfakturováno</p>
+                </div>
+
+                <!-- Aktivní projekty -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden group hover:border-blue-500/40 transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"></div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Aktivní projekty</span>
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold">📁</div>
+                    </div>
+                    <div id="work-kpi-active-projects" class="text-2xl sm:text-3xl font-extrabold text-blue-400 font-mono tracking-tight">0</div>
+                    <p id="work-kpi-total-hours" class="text-[11px] text-slate-500 mt-2 font-medium">0.0 h odpracováno celkem</p>
+                </div>
+            </div>
+
+            <!-- Header Action & Filter Bar -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🔍</span><span>Filtr projektů:</span>
+                    </span>
+                    <select id="workFilterProjectSelect" onchange="window.filterWorkProject(this.value)" class="px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold text-indigo-300 outline-none focus:border-indigo-500 cursor-pointer transition">
+                        <option value="all">📂 Všechny projekty</option>
+                    </select>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
+                    <button onclick="window.exportWorkCsv()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 font-semibold text-xs transition flex items-center gap-1.5 shadow-sm">
+                        <span>📥</span><span>Export CSV</span>
+                    </button>
+                    <button onclick="window.openProjectModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 hover:text-white border border-indigo-500/40 font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+                        <span>➕</span><span>Nový projekt</span>
+                    </button>
+                    <button onclick="window.openWorkLogModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-indigo-600/25 flex items-center gap-1.5">
+                        <span>⏱️</span><span>Zalogovat hodiny</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Projects Grid Section -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <span>📁</span><span>Správa projektů a poznámky</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Klikněte na "Poznámky" pro zobrazení/přidání víceřádkového textu nebo "+ Hodiny" pro rychlý zápis času</p>
+                    </div>
+                    <span id="workProjectCountBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">0 projektů</span>
+                </div>
+                
+                <div id="workProjectsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Dynamic project cards rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Timesheet / Work Logs Table Section -->
+            <div class="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800/80 shadow-xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <span>⏱️</span><span>Historie odpracovaného času (Timesheet)</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">Záznamy práce s možností okamžitého zaúčtování do Příjmů (Mzda)</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <span id="workLogsCountBadge" class="text-xs font-mono font-bold text-slate-400 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800">0 záznamů</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto max-h-[580px] rounded-xl border border-slate-800/80 bg-slate-900/40">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 border-b border-slate-800 text-slate-400 text-xs uppercase font-semibold">
+                            <tr>
+                                <th class="p-3.5">Datum</th>
+                                <th class="p-3.5">Projekt</th>
+                                <th class="p-3.5">Popis činnosti</th>
+                                <th class="p-3.5 text-right">Hodiny</th>
+                                <th class="p-3.5 text-right">Částka (Kč)</th>
+                                <th class="p-3.5 text-center">Fakturace</th>
+                                <th class="p-3.5 text-center w-36 no-print">Akce</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workLogsTableBody" class="divide-y divide-slate-800/60 text-sm">
+                            <!-- Dynamic rows rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
 
         <!-- TAB: ANALYSIS -->
@@ -821,6 +952,237 @@
             </div>
         </div>
 
+        <!-- MODAL: PROJEKT (Nový / Úprava) -->
+        <div id="modalProject" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto" onclick="if(event.target === this) window.closeProjectModal()">
+            <div class="glass-card border border-slate-700/80 rounded-3xl p-6 sm:p-8 max-w-lg w-full relative shadow-2xl animate-fadeIn">
+                <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-800">
+                    <h3 id="modalProjectTitle" class="text-lg font-bold text-white flex items-center gap-2">
+                        <span>📁</span><span>Nový projekt</span>
+                    </h3>
+                    <button onclick="window.closeProjectModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 text-sm">✕</button>
+                </div>
+                
+                <input type="hidden" id="projectModalId">
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Název projektu *</label>
+                        <input id="projectModalName" type="text" placeholder="Např. Vývoj webu, Redesign aplikace..." class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-indigo-500 transition font-medium">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Klient / Zadavatel</label>
+                        <input id="projectModalClient" type="text" placeholder="Např. ACME Corp, Vlastní projekt..." class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-indigo-500 transition">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Hodinová sazba (Kč/h)</label>
+                            <input id="projectModalRate" type="number" min="0" step="50" placeholder="0" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono font-bold text-sm focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Stav projektu</label>
+                            <select id="projectModalStatus" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-semibold focus:outline-none focus:border-indigo-500 transition cursor-pointer">
+                                <option value="active">🟢 Aktivní</option>
+                                <option value="paused">🟡 Pozastaveno</option>
+                                <option value="completed">⚪ Dokončeno</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Barevné téma</label>
+                        <select id="projectModalColor" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-medium focus:outline-none focus:border-indigo-500 transition cursor-pointer">
+                            <option value="indigo">🟣 Fialová / Indigo</option>
+                            <option value="blue">🔵 Modrá</option>
+                            <option value="emerald">🟢 Zelená (Emerald)</option>
+                            <option value="amber">🟠 Jantarová / Oranžová</option>
+                            <option value="rose">🔴 Růžová / Červená</option>
+                            <option value="cyan">🩵 Tyrkysová (Cyan)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Stručný popis / zadání</label>
+                        <textarea id="projectModalDesc" rows="2" placeholder="Krátká charakteristika projektu..." class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-indigo-500 transition font-sans"></textarea>
+                    </div>
+                </div>
+
+                <div class="pt-6 mt-6 border-t border-slate-800 flex items-center justify-end gap-3">
+                    <button onclick="window.closeProjectModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+                        Zrušit
+                    </button>
+                    <button onclick="window.saveProject()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-indigo-600/30">
+                        Uložit projekt
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: ZÁZNAM HODIN (Nový / Úprava) -->
+        <div id="modalWorkLog" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto" onclick="if(event.target === this) window.closeWorkLogModal()">
+            <div class="glass-card border border-slate-700/80 rounded-3xl p-6 sm:p-8 max-w-lg w-full relative shadow-2xl animate-fadeIn">
+                <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-800">
+                    <h3 id="modalWorkLogTitle" class="text-lg font-bold text-white flex items-center gap-2">
+                        <span>⏱️</span><span>Záznam odpracovaných hodin</span>
+                    </h3>
+                    <button onclick="window.closeWorkLogModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 text-sm">✕</button>
+                </div>
+
+                <input type="hidden" id="workLogModalId">
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Projekt *</label>
+                        <select id="workLogModalProject" onchange="window.onWorkLogProjectChange()" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-semibold focus:outline-none focus:border-indigo-500 transition cursor-pointer"></select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Datum práce</label>
+                            <input id="workLogModalDate" type="date" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-indigo-500 transition font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Odpracováno (hodin) *</label>
+                            <input id="workLogModalHours" type="number" step="0.25" min="0.1" max="24" placeholder="0.0" oninput="window.calculateWorkLogAmount()" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono font-bold text-sm focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                    </div>
+
+                    <!-- Quick buttons pro hodiny -->
+                    <div class="flex items-center gap-1.5 pt-0.5">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold mr-1">Rychle:</span>
+                        <button type="button" onclick="window.setWorkHours(0.5)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+0.5h</button>
+                        <button type="button" onclick="window.setWorkHours(1)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+1h</button>
+                        <button type="button" onclick="window.setWorkHours(2)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+2h</button>
+                        <button type="button" onclick="window.setWorkHours(4)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+4h</button>
+                        <button type="button" onclick="window.setWorkHours(8)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+8h</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 items-center">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Hodinová sazba (Kč/h)</label>
+                            <input id="workLogModalRate" type="number" min="0" step="50" placeholder="0" oninput="window.calculateWorkLogAmount()" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono font-bold text-sm focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                        <div class="pt-4">
+                            <div class="bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-center">
+                                <span class="text-[10px] text-slate-500 uppercase font-bold block">Hodnota záznamu</span>
+                                <span id="workLogCalcPreview" class="text-emerald-400 font-mono font-bold text-sm">0 Kč</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Popis práce / úkolu</label>
+                        <textarea id="workLogModalDesc" rows="3" placeholder="Např. Implementace nové funkce, oprava chyb, schůzka se zákazníkem..." class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-indigo-500 transition font-sans"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:bg-slate-900 transition">
+                            <input id="workLogModalBilled" type="checkbox" class="w-4 h-4 rounded text-indigo-600 focus:ring-0 bg-slate-800 border-slate-600">
+                            <span class="text-xs font-medium text-slate-300">Označit jako již vyfakturováno</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-6 mt-6 border-t border-slate-800 flex items-center justify-end gap-3">
+                    <button onclick="window.closeWorkLogModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+                        Zrušit
+                    </button>
+                    <button onclick="window.saveWorkLog()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-indigo-600/30">
+                        Uložit hodiny
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: SEZNAM POZNÁMEK K PROJEKTU -->
+        <div id="modalProjectNotes" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto" onclick="if(event.target === this) window.closeProjectNotesModal()">
+            <div class="glass-card border border-slate-700/80 rounded-3xl p-6 sm:p-8 max-w-3xl w-full relative shadow-2xl animate-fadeIn max-h-[90vh] flex flex-col">
+                
+                <!-- Modal Header -->
+                <div class="flex items-start justify-between pb-4 mb-4 border-b border-slate-800 flex-shrink-0">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">📝 Poznámky k projektu</span>
+                            <span id="projectNotesStatusBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold"></span>
+                        </div>
+                        <h2 id="projectNotesModalTitle" class="text-xl sm:text-2xl font-extrabold text-white"></h2>
+                        <p id="projectNotesModalSubtitle" class="text-xs text-slate-400 mt-0.5"></p>
+                    </div>
+                    <button onclick="window.closeProjectNotesModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 text-lg">✕</button>
+                </div>
+
+                <!-- Stats banner & Quick Log button -->
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 mb-5 flex-shrink-0">
+                    <div class="flex items-center gap-4 text-xs font-mono">
+                        <div>
+                            <span class="text-[10px] text-slate-500 uppercase font-bold block">Odpracováno</span>
+                            <span id="projectNotesModalHours" class="text-indigo-300 font-bold text-sm">0.0 h</span>
+                        </div>
+                        <div class="border-l border-slate-800 pl-4">
+                            <span class="text-[10px] text-slate-500 uppercase font-bold block">Sazba</span>
+                            <span id="projectNotesModalRate" class="text-slate-200 font-bold text-sm">0 Kč/h</span>
+                        </div>
+                        <div class="border-l border-slate-800 pl-4">
+                            <span class="text-[10px] text-slate-500 uppercase font-bold block">Celková hodnota</span>
+                            <span id="projectNotesModalAmount" class="text-emerald-400 font-bold text-sm">0 Kč</span>
+                        </div>
+                    </div>
+                    <button onclick="window.logHoursFromNotesModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-1.5">
+                        <span>⏱️</span><span>+ Zalogovat hodiny</span>
+                    </button>
+                </div>
+
+                <!-- Scrollable Body -->
+                <div class="overflow-y-auto pr-1 space-y-6 flex-grow">
+                    
+                    <!-- Add Note Input Box -->
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
+                            <span>✏️ Nová textová poznámka (víc řádků):</span>
+                            <span class="text-[10px] text-slate-500 font-normal">Podporuje odrážky, kód, mezery</span>
+                        </label>
+                        <input type="hidden" id="editingNoteId">
+                        <textarea id="projectNoteInput" rows="4" placeholder="Sem napište libovolný text poznámky na víc řádků...&#10;Např.:&#10;• Požadavky a zadání od klienta&#10;• Přístupové údaje a odkazy na repozitář&#10;• Zápisky z meetingu a schůzek&#10;• Seznam TODO úkolů" class="w-full p-3.5 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition font-sans leading-relaxed"></textarea>
+                        
+                        <div class="flex items-center justify-between mt-3 pt-2">
+                            <span class="text-[11px] text-slate-500">Poznámka se automaticky uloží k tomuto projektu v databázi</span>
+                            <div class="flex items-center gap-2">
+                                <button id="btnCancelEditNote" onclick="window.cancelEditNote()" class="hidden px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+                                    Zrušit úpravu
+                                </button>
+                                <button id="btnSaveNote" onclick="window.saveProjectNote()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-md shadow-indigo-600/25 flex items-center gap-1.5">
+                                    <span>➕</span><span>Přidat poznámku</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes List -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                                <span>📋</span><span>Uložené poznámky</span>
+                                <span id="projectNotesCount" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">0</span>
+                            </h3>
+                        </div>
+                        <div id="projectNotesList" class="space-y-3">
+                            <!-- Dynamic notes rendered by JS -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="pt-4 mt-4 border-t border-slate-800 flex justify-end flex-shrink-0">
+                    <button onclick="window.closeProjectNotesModal()" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+                        Zavřít
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
     <script type="module">
@@ -853,6 +1215,59 @@
         let allBtcTx = [], currentBtcPriceCzk = 0, globalTotalBtc = 0, globalTotalCzk = 0;
         let btcChartInstance = null, btcChartLoaded = false;
 
+        // Práce & Projekty Proměnné
+        let allProjects = [], allWorkLogs = [], activeWorkProjectFilter = 'all';
+        let currentNotesProjectId = null, editingNoteId = null;
+
+        const projectColorThemes = {
+            indigo: {
+                border: "border-indigo-500/40 hover:border-indigo-500/70",
+                badge: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
+                dot: "bg-indigo-500",
+                text: "text-indigo-400"
+            },
+            blue: {
+                border: "border-blue-500/40 hover:border-blue-500/70",
+                badge: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+                dot: "bg-blue-500",
+                text: "text-blue-400"
+            },
+            emerald: {
+                border: "border-emerald-500/40 hover:border-emerald-500/70",
+                badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+                dot: "bg-emerald-500",
+                text: "text-emerald-400"
+            },
+            amber: {
+                border: "border-amber-500/40 hover:border-amber-500/70",
+                badge: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+                dot: "bg-amber-500",
+                text: "text-amber-400"
+            },
+            rose: {
+                border: "border-rose-500/40 hover:border-rose-500/70",
+                badge: "bg-rose-500/15 text-rose-300 border-rose-500/30",
+                dot: "bg-rose-500",
+                text: "text-rose-400"
+            },
+            cyan: {
+                border: "border-cyan-500/40 hover:border-cyan-500/70",
+                badge: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
+                dot: "bg-cyan-500",
+                text: "text-cyan-400"
+            }
+        };
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text.toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         window.switchTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
             const tabEl = document.getElementById('tab-' + id);
@@ -875,6 +1290,9 @@
                     btcChartLoaded = true;
                 }
             }
+            if(id === 'work') {
+                renderWork();
+            }
         };
 
         function setDefaultDate() { 
@@ -883,6 +1301,8 @@
             
             document.getElementById('txDateInput').value = today; 
             document.getElementById('btcDateInput').value = today;
+            const workDate = document.getElementById('workLogModalDate');
+            if (workDate && !workDate.value) workDate.value = today;
             
             const df = document.getElementById('filterDateFrom');
             const dt = document.getElementById('filterDateTo');
@@ -941,6 +1361,40 @@
                     allBtcTx.push(data);
                 });
                 renderBtc();
+            });
+
+            // Projekty
+            const wpQ = query(collection(db, "work_projects"), where("userId", "==", currentUser.uid));
+            onSnapshot(wpQ, (snap) => {
+                allProjects = [];
+                snap.forEach(d => {
+                    let data = d.data(); data.id = d.id;
+                    data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
+                    allProjects.push(data);
+                });
+                allProjects.sort((a,b) => (b.dateObj || 0) - (a.dateObj || 0));
+                renderWork();
+                if (currentNotesProjectId) {
+                    const curProj = allProjects.find(p => p.id === currentNotesProjectId);
+                    if (curProj) renderProjectNotesList(curProj);
+                }
+            });
+
+            // Záznamy odpracovaných hodin
+            const wlQ = query(collection(db, "work_logs"), where("userId", "==", currentUser.uid));
+            onSnapshot(wlQ, (snap) => {
+                allWorkLogs = [];
+                snap.forEach(d => {
+                    let data = d.data(); data.id = d.id;
+                    data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
+                    allWorkLogs.push(data);
+                });
+                allWorkLogs.sort((a,b) => {
+                    const dateA = a.date ? new Date(a.date) : a.dateObj;
+                    const dateB = b.date ? new Date(b.date) : b.dateObj;
+                    return (dateB || 0) - (dateA || 0);
+                });
+                renderWork();
             });
 
             fetchBtcPrice(); 
@@ -1435,6 +1889,733 @@
             });
         }
 
+        // =========================================================================
+        // --- PRÁCE, PROJEKTY, POZNÁMKY A LOGOVÁNÍ HODIN ---
+        // =========================================================================
+
+        window.filterWorkProject = (pId) => {
+            activeWorkProjectFilter = pId;
+            renderWork();
+        };
+
+        window.renderWork = () => {
+            const filterEl = document.getElementById('globalPeriodFilter');
+            const filter = filterEl ? filterEl.value : 'current_month';
+            const now = new Date();
+            let periodLogs = allWorkLogs;
+            let customPeriodLabel = filterEl && filterEl.selectedIndex >= 0 ? filterEl.options[filterEl.selectedIndex].text : "Tento měsíc";
+
+            if (filter === 'current_month') {
+                periodLogs = allWorkLogs.filter(l => {
+                    const d = l.date ? new Date(l.date) : (l.dateObj || new Date());
+                    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+                });
+                customPeriodLabel = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+            } else if (filter === 'last_month') {
+                let m = now.getMonth() - 1, y = now.getFullYear();
+                if (m < 0) { m = 11; y--; }
+                periodLogs = allWorkLogs.filter(l => {
+                    const d = l.date ? new Date(l.date) : (l.dateObj || new Date());
+                    return d.getMonth() === m && d.getFullYear() === y;
+                });
+                customPeriodLabel = `${monthNames[m]} ${y}`;
+            } else if (filter === 'last_3_months') {
+                const d = new Date(); d.setMonth(now.getMonth() - 3);
+                periodLogs = allWorkLogs.filter(l => {
+                    const ld = l.date ? new Date(l.date) : (l.dateObj || new Date());
+                    return ld >= d && ld <= now;
+                });
+                customPeriodLabel = "Poslední 3 měsíce";
+            } else if (filter === 'last_6_months') {
+                const d = new Date(); d.setMonth(now.getMonth() - 6);
+                periodLogs = allWorkLogs.filter(l => {
+                    const ld = l.date ? new Date(l.date) : (l.dateObj || new Date());
+                    return ld >= d && ld <= now;
+                });
+                customPeriodLabel = "Posledních 6 měsíců";
+            } else if (filter === 'current_year') {
+                periodLogs = allWorkLogs.filter(l => {
+                    const d = l.date ? new Date(l.date) : (l.dateObj || new Date());
+                    return d.getFullYear() === now.getFullYear();
+                });
+                customPeriodLabel = `Rok ${now.getFullYear()}`;
+            } else if (filter === 'last_year') {
+                periodLogs = allWorkLogs.filter(l => {
+                    const d = l.date ? new Date(l.date) : (l.dateObj || new Date());
+                    return d.getFullYear() === (now.getFullYear() - 1);
+                });
+                customPeriodLabel = `Rok ${now.getFullYear() - 1}`;
+            } else if (filter === 'custom') {
+                const dfEl = document.getElementById('filterDateFrom');
+                const dtEl = document.getElementById('filterDateTo');
+                const fromVal = dfEl ? dfEl.value : null;
+                const toVal = dtEl ? dtEl.value : null;
+                const dFrom = fromVal ? new Date(fromVal) : new Date(1970, 0, 1);
+                const dTo = toVal ? new Date(toVal + 'T23:59:59') : new Date(2100, 0, 1);
+                periodLogs = allWorkLogs.filter(l => {
+                    const d = l.date ? new Date(l.date) : (l.dateObj || new Date());
+                    return d >= dFrom && d <= dTo;
+                });
+                const fromStr = fromVal ? new Date(fromVal).toLocaleDateString('cs-CZ') : 'Počátek';
+                const toStr = toVal ? new Date(toVal).toLocaleDateString('cs-CZ') : 'Dnes';
+                customPeriodLabel = `${fromStr} – ${toStr}`;
+            } else if (filter === 'all') {
+                customPeriodLabel = "Celá historie";
+            }
+
+            // Výpočty KPI
+            let periodHours = 0, periodEarnings = 0, allTimeHours = 0, unbilledHours = 0, unbilledEarnings = 0;
+            
+            periodLogs.forEach(l => {
+                const h = parseFloat(l.hours) || 0;
+                const r = parseFloat(l.hourlyRate) || 0;
+                periodHours += h;
+                periodEarnings += h * r;
+            });
+
+            allWorkLogs.forEach(l => {
+                const h = parseFloat(l.hours) || 0;
+                const r = parseFloat(l.hourlyRate) || 0;
+                allTimeHours += h;
+                if (!l.isBilled) {
+                    unbilledHours += h;
+                    unbilledEarnings += h * r;
+                }
+            });
+
+            const activeProjectsCount = allProjects.filter(p => p.status === 'active').length;
+
+            const kpiPerHours = document.getElementById('work-kpi-period-hours');
+            if (kpiPerHours) kpiPerHours.textContent = periodHours.toFixed(1) + " h";
+            const kpiPerLabel = document.getElementById('work-kpi-period-label');
+            if (kpiPerLabel) kpiPerLabel.textContent = `Za období: ${customPeriodLabel}`;
+            const kpiPerEarn = document.getElementById('work-kpi-period-earnings');
+            if (kpiPerEarn) kpiPerEarn.textContent = periodEarnings.toLocaleString('cs-CZ', { maximumFractionDigits: 0 }) + " Kč";
+            const kpiUnbEarn = document.getElementById('work-kpi-unbilled-earnings');
+            if (kpiUnbEarn) kpiUnbEarn.textContent = unbilledEarnings.toLocaleString('cs-CZ', { maximumFractionDigits: 0 }) + " Kč";
+            const kpiUnbHours = document.getElementById('work-kpi-unbilled-hours');
+            if (kpiUnbHours) kpiUnbHours.textContent = `${unbilledHours.toFixed(1)} h nevyfakturováno`;
+            const kpiActProj = document.getElementById('work-kpi-active-projects');
+            if (kpiActProj) kpiActProj.textContent = `${activeProjectsCount}`;
+            const kpiTotHours = document.getElementById('work-kpi-total-hours');
+            if (kpiTotHours) kpiTotHours.textContent = `${allTimeHours.toFixed(1)} h odpracováno celkem`;
+
+            const projBadge = document.getElementById('workProjectCountBadge');
+            if (projBadge) projBadge.textContent = `${allProjects.length} projektů`;
+
+            // Aktualizace výběru filtru projektů
+            const filterSel = document.getElementById('workFilterProjectSelect');
+            if (filterSel) {
+                const prevVal = activeWorkProjectFilter;
+                filterSel.innerHTML = `<option value="all">📂 Všechny projekty (${allProjects.length})</option>`;
+                allProjects.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = `${p.name} ${p.client ? '(' + p.client + ')' : ''}`;
+                    filterSel.appendChild(opt);
+                });
+                const optNone = document.createElement('option');
+                optNone.value = "__none__";
+                optNone.textContent = "Bez projektu (Obecné)";
+                filterSel.appendChild(optNone);
+                filterSel.value = prevVal;
+            }
+
+            // Vykreslení karet projektů
+            const gridEl = document.getElementById('workProjectsGrid');
+            if (gridEl) {
+                if (allProjects.length === 0) {
+                    gridEl.innerHTML = `
+                        <div class="col-span-full py-12 px-6 rounded-3xl bg-slate-900/40 border border-slate-800/80 text-center">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-3xl">📁</div>
+                            <h3 class="text-base font-bold text-white mb-1">Zatím nemáte vytvořené žádné projekty</h3>
+                            <p class="text-xs text-slate-400 max-w-md mx-auto mb-5">Vytvořte si projekty pro sledování práce. K projektu můžete přiřadit hodinovou sazbu, seznam podrobných poznámek na více řádků i odpracované hodiny.</p>
+                            <button onclick="window.openProjectModal()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-indigo-600/30">
+                                ➕ Vytvořit první projekt
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    gridEl.innerHTML = "";
+                    const statusConfig = {
+                        active: { text: "🟢 Aktivní", badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+                        paused: { text: "🟡 Pozastaveno", badge: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+                        completed: { text: "⚪ Dokončeno", badge: "bg-slate-800 text-slate-300 border-slate-700" }
+                    };
+
+                    allProjects.forEach(p => {
+                        const theme = projectColorThemes[p.color] || projectColorThemes.indigo;
+                        const statusObj = statusConfig[p.status] || statusConfig.active;
+                        
+                        // Statistiky pro tento projekt
+                        const pLogs = allWorkLogs.filter(l => l.projectId === p.id);
+                        const pPeriodLogs = periodLogs.filter(l => l.projectId === p.id);
+                        const pTotalHours = pLogs.reduce((acc, l) => acc + (parseFloat(l.hours) || 0), 0);
+                        const pPeriodHours = pPeriodLogs.reduce((acc, l) => acc + (parseFloat(l.hours) || 0), 0);
+                        const pRate = parseFloat(p.hourlyRate) || 0;
+                        const pTotalAmount = pTotalHours * pRate;
+                        const pNotesCount = (p.notes || []).length;
+
+                        const card = document.createElement('div');
+                        card.className = `glass-card p-5 sm:p-6 rounded-2xl border ${theme.border} transition-all shadow-xl relative overflow-hidden group flex flex-col justify-between`;
+                        card.innerHTML = `
+                            <div>
+                                <div class="flex items-start justify-between gap-2 mb-3">
+                                    <div class="flex items-center gap-2 truncate">
+                                        <span class="w-2.5 h-2.5 rounded-full ${theme.dot} flex-shrink-0"></span>
+                                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 truncate">${escapeHtml(p.client || 'Vlastní projekt')}</span>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border flex-shrink-0 ${statusObj.badge}">${statusObj.text}</span>
+                                </div>
+                                
+                                <h3 class="text-base sm:text-lg font-extrabold text-white mb-1.5 group-hover:${theme.text} transition">${escapeHtml(p.name)}</h3>
+                                
+                                ${p.description ? `<p class="text-xs text-slate-400 mb-4 line-clamp-2 leading-relaxed">${escapeHtml(p.description)}</p>` : '<div class="h-2"></div>'}
+                                
+                                <div class="grid grid-cols-2 gap-2 p-3 bg-slate-900/80 rounded-xl border border-slate-800/80 mb-4 text-xs font-mono">
+                                    <div>
+                                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Odpracováno</span>
+                                        <span class="text-slate-200 font-bold text-sm">${pTotalHours.toFixed(1)} h</span>
+                                        <span class="text-[10px] text-slate-500 block">(${pPeriodHours.toFixed(1)} h v období)</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] text-slate-500 block uppercase font-bold">Hodnota / Sazba</span>
+                                        <span class="text-emerald-400 font-bold text-sm">${pTotalAmount.toLocaleString('cs-CZ')} Kč</span>
+                                        <span class="text-[10px] text-slate-500 block">${pRate > 0 ? pRate + ' Kč/h' : 'Bez sazby'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <button onclick="window.openWorkLogModal('${p.id}')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-1.5">
+                                        <span>⏱️</span><span>+ Hodiny</span>
+                                    </button>
+                                    <button onclick="window.openProjectNotesModal('${p.id}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5">
+                                        <span>📝</span><span>Poznámky</span>
+                                        <span class="px-1.5 py-0.2 rounded-full bg-slate-900 text-[10px] font-bold text-indigo-300">${pNotesCount}</span>
+                                    </button>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="window.openProjectModal('${p.id}')" title="Upravit projekt" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition">✏️</button>
+                                    <button onclick="window.deleteProject('${p.id}')" title="Smazat projekt" class="p-1.5 rounded-lg hover:bg-rose-950/40 text-rose-500 hover:text-rose-400 transition">🗑️</button>
+                                </div>
+                            </div>
+                        `;
+                        gridEl.appendChild(card);
+                    });
+                }
+            }
+
+            // Vykreslení tabulky časových záznamů
+            const tbody = document.getElementById('workLogsTableBody');
+            if (tbody) {
+                tbody.innerHTML = "";
+                let displayLogs = periodLogs;
+                if (activeWorkProjectFilter !== 'all') {
+                    displayLogs = displayLogs.filter(l => activeWorkProjectFilter === '__none__' ? !l.projectId : l.projectId === activeWorkProjectFilter);
+                }
+
+                const badgeLogs = document.getElementById('workLogsCountBadge');
+                if (badgeLogs) badgeLogs.textContent = `${displayLogs.length} záznamů`;
+
+                if (displayLogs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 text-xs italic">Žádné odpracované hodiny ve zvoleném období nebo projektu. Klikněte na "+ Zalogovat hodiny".</td></tr>`;
+                } else {
+                    displayLogs.forEach(l => {
+                        const proj = allProjects.find(x => x.id === l.projectId);
+                        const pName = l.projectName || (proj ? proj.name : 'Obecné');
+                        const theme = proj && projectColorThemes[proj.color] ? projectColorThemes[proj.color] : projectColorThemes.indigo;
+                        const hours = parseFloat(l.hours) || 0;
+                        const rate = parseFloat(l.hourlyRate) || 0;
+                        const amount = hours * rate;
+
+                        const dateStr = l.date ? new Date(l.date).toLocaleDateString('cs-CZ') : (l.dateObj ? l.dateObj.toLocaleDateString('cs-CZ') : '-');
+
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-800/60 transition-colors">
+                                <td class="p-3.5 text-slate-400 text-xs font-mono whitespace-nowrap">${dateStr}</td>
+                                <td class="p-3.5 font-medium whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${theme.badge}">
+                                        <span class="w-1.5 h-1.5 rounded-full ${theme.dot}"></span>
+                                        <span>${escapeHtml(pName)}</span>
+                                    </span>
+                                </td>
+                                <td class="p-3.5 text-slate-300 text-xs leading-relaxed max-w-xs">${escapeHtml(l.description || '-')}</td>
+                                <td class="p-3.5 text-right font-mono font-bold text-indigo-300 whitespace-nowrap">+${hours.toFixed(2).replace(/\.00$/, '')} h</td>
+                                <td class="p-3.5 text-right font-mono font-bold text-emerald-400 whitespace-nowrap">${amount > 0 ? amount.toLocaleString('cs-CZ') + ' Kč' : '-'}</td>
+                                <td class="p-3.5 text-center whitespace-nowrap">
+                                    ${l.isBilled 
+                                        ? `<button onclick="window.toggleWorkLogBilled('${l.id}')" title="Kliknutím přepnete na nevyfakturováno" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition">✓ Vyfakturováno</button>`
+                                        : `<button onclick="window.toggleWorkLogBilled('${l.id}')" title="Kliknutím přepnete na vyfakturováno" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 transition">⏳ K fakturaci</button>`
+                                    }
+                                </td>
+                                <td class="p-3.5 text-center whitespace-nowrap no-print">
+                                    ${amount > 0 ? `<button onclick="window.transferWorkLogToIncome('${l.id}')" title="Zaúčtovat výdělek do Příjmů jako Mzda" class="px-2 py-1 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-800/60 text-emerald-300 text-xs font-bold transition mr-1">💰 Do příjmů</button>` : ''}
+                                    <button onclick="window.openWorkLogModal(null, '${l.id}')" title="Upravit" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">✏️</button>
+                                    <button onclick="window.deleteWorkLog('${l.id}')" title="Smazat" class="p-1.5 hover:bg-rose-950/40 rounded-lg text-rose-500 hover:text-rose-400 transition ml-0.5">🗑️</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+        };
+
+        // --- SPRÁVA PROJEKTŮ ---
+        window.openProjectModal = (projectId = null) => {
+            const idInput = document.getElementById('projectModalId');
+            const nameInput = document.getElementById('projectModalName');
+            const clientInput = document.getElementById('projectModalClient');
+            const rateInput = document.getElementById('projectModalRate');
+            const statusInput = document.getElementById('projectModalStatus');
+            const colorInput = document.getElementById('projectModalColor');
+            const descInput = document.getElementById('projectModalDesc');
+            const titleEl = document.getElementById('modalProjectTitle');
+            
+            if (projectId) {
+                const p = allProjects.find(x => x.id === projectId);
+                if (!p) return;
+                titleEl.innerHTML = "<span>✏️</span><span>Upravit projekt</span>";
+                idInput.value = p.id;
+                nameInput.value = p.name || "";
+                clientInput.value = p.client || "";
+                rateInput.value = p.hourlyRate || "";
+                statusInput.value = p.status || "active";
+                colorInput.value = p.color || "indigo";
+                descInput.value = p.description || "";
+            } else {
+                titleEl.innerHTML = "<span>📁</span><span>Nový projekt</span>";
+                idInput.value = "";
+                nameInput.value = "";
+                clientInput.value = "";
+                rateInput.value = "";
+                statusInput.value = "active";
+                colorInput.value = "indigo";
+                descInput.value = "";
+            }
+            
+            document.getElementById('modalProject').classList.remove('hidden');
+            nameInput.focus();
+        };
+
+        window.closeProjectModal = () => {
+            document.getElementById('modalProject').classList.add('hidden');
+        };
+
+        window.saveProject = async () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            const editId = document.getElementById('projectModalId').value;
+            const name = document.getElementById('projectModalName').value.trim();
+            if (!name) return alert("Zadejte prosím název projektu.");
+            
+            const client = document.getElementById('projectModalClient').value.trim();
+            const hourlyRate = parseFloat(document.getElementById('projectModalRate').value) || 0;
+            const status = document.getElementById('projectModalStatus').value;
+            const color = document.getElementById('projectModalColor').value;
+            const description = document.getElementById('projectModalDesc').value.trim();
+            
+            const data = {
+                userId: currentUser.uid,
+                name,
+                client,
+                hourlyRate,
+                status,
+                color,
+                description,
+                updatedAt: Timestamp.now()
+            };
+            
+            if (editId) {
+                await updateDoc(doc(db, "work_projects", editId), data);
+            } else {
+                data.notes = [];
+                data.createdAt = Timestamp.now();
+                await addDoc(collection(db, "work_projects"), data);
+            }
+            window.closeProjectModal();
+        };
+
+        window.deleteProject = async (projectId) => {
+            const p = allProjects.find(x => x.id === projectId);
+            if (!p) return;
+            const notesCount = (p.notes || []).length;
+            let msg = `Opravdu chcete smazat projekt "${p.name}"?`;
+            if (notesCount > 0) {
+                msg += ` Projekt obsahuje ${notesCount} poznámek, které budou také smazány.`;
+            }
+            if (!confirm(msg)) return;
+            await deleteDoc(doc(db, "work_projects", projectId));
+        };
+
+        // --- ZÁZNAMY HODIN (LOGOVÁNÍ) ---
+        window.openWorkLogModal = (projectId = null, logId = null) => {
+            const sel = document.getElementById('workLogModalProject');
+            sel.innerHTML = "";
+            
+            if (allProjects.length === 0) {
+                sel.innerHTML = `<option value="__none__">Bez projektu (Obecné)</option>`;
+            } else {
+                allProjects.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = `${p.name} ${p.client ? '(' + p.client + ')' : ''} - ${p.hourlyRate ? p.hourlyRate + ' Kč/h' : '0 Kč/h'}`;
+                    sel.appendChild(opt);
+                });
+                const optNone = document.createElement('option');
+                optNone.value = "__none__";
+                optNone.textContent = "Bez projektu (Obecná práce)";
+                sel.appendChild(optNone);
+            }
+            
+            const titleEl = document.getElementById('modalWorkLogTitle');
+            const idInput = document.getElementById('workLogModalId');
+            const hoursInput = document.getElementById('workLogModalHours');
+            const rateInput = document.getElementById('workLogModalRate');
+            const dateInput = document.getElementById('workLogModalDate');
+            const descInput = document.getElementById('workLogModalDesc');
+            const billedInput = document.getElementById('workLogModalBilled');
+            
+            if (logId) {
+                const log = allWorkLogs.find(l => l.id === logId);
+                if (!log) return;
+                titleEl.innerHTML = "<span>✏️</span><span>Upravit záznam odpracovaných hodin</span>";
+                idInput.value = log.id;
+                sel.value = log.projectId || "__none__";
+                dateInput.value = log.date || (log.dateObj ? log.dateObj.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
+                hoursInput.value = log.hours;
+                rateInput.value = log.hourlyRate || 0;
+                descInput.value = log.description || "";
+                billedInput.checked = !!log.isBilled;
+            } else {
+                titleEl.innerHTML = "<span>⏱️</span><span>Záznam odpracovaných hodin</span>";
+                idInput.value = "";
+                if (projectId && allProjects.some(p => p.id === projectId)) {
+                    sel.value = projectId;
+                } else if (allProjects.length > 0) {
+                    sel.value = allProjects[0].id;
+                } else {
+                    sel.value = "__none__";
+                }
+                dateInput.value = new Date().toISOString().split('T')[0];
+                hoursInput.value = "";
+                descInput.value = "";
+                billedInput.checked = false;
+                
+                // Auto-fill sazby
+                const curProj = allProjects.find(p => p.id === sel.value);
+                rateInput.value = curProj ? (curProj.hourlyRate || 0) : 0;
+            }
+            
+            window.calculateWorkLogAmount();
+            document.getElementById('modalWorkLog').classList.remove('hidden');
+        };
+
+        window.closeWorkLogModal = () => {
+            document.getElementById('modalWorkLog').classList.add('hidden');
+        };
+
+        window.onWorkLogProjectChange = () => {
+            const sel = document.getElementById('workLogModalProject');
+            const curProj = allProjects.find(p => p.id === sel.value);
+            const rateInput = document.getElementById('workLogModalRate');
+            if (curProj && rateInput) {
+                rateInput.value = curProj.hourlyRate || 0;
+            } else if (sel.value === "__none__" && rateInput) {
+                rateInput.value = 0;
+            }
+            window.calculateWorkLogAmount();
+        };
+
+        window.setWorkHours = (h) => {
+            const hoursInput = document.getElementById('workLogModalHours');
+            const cur = parseFloat(hoursInput.value) || 0;
+            hoursInput.value = (cur + h).toFixed(2).replace(/\.00$/, '').replace(/(\.[1-9])0$/, '$1');
+            window.calculateWorkLogAmount();
+        };
+
+        window.calculateWorkLogAmount = () => {
+            const hours = parseFloat(document.getElementById('workLogModalHours').value) || 0;
+            const rate = parseFloat(document.getElementById('workLogModalRate').value) || 0;
+            const amount = hours * rate;
+            const previewEl = document.getElementById('workLogCalcPreview');
+            if (previewEl) {
+                previewEl.textContent = `${amount.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} Kč`;
+            }
+        };
+
+        window.saveWorkLog = async () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            const editId = document.getElementById('workLogModalId').value;
+            const projId = document.getElementById('workLogModalProject').value;
+            const project = allProjects.find(p => p.id === projId);
+            const projectName = project ? project.name : (projId === '__none__' ? 'Bez projektu' : 'Obecné');
+            
+            const dateVal = document.getElementById('workLogModalDate').value;
+            const dateObj = dateVal ? new Date(dateVal) : new Date();
+            const hours = parseFloat(document.getElementById('workLogModalHours').value);
+            if (isNaN(hours) || hours <= 0) return alert("Zadejte platný počet odpracovaných hodin.");
+            
+            const hourlyRate = parseFloat(document.getElementById('workLogModalRate').value) || (project ? (project.hourlyRate || 0) : 0);
+            const description = document.getElementById('workLogModalDesc').value.trim();
+            const isBilled = document.getElementById('workLogModalBilled').checked;
+            
+            const data = {
+                userId: currentUser.uid,
+                projectId: projId === '__none__' ? '' : projId,
+                projectName,
+                hours,
+                hourlyRate,
+                description,
+                isBilled,
+                date: dateVal,
+                createdAt: Timestamp.fromDate(dateObj)
+            };
+            
+            if (editId) {
+                await updateDoc(doc(db, "work_logs", editId), data);
+            } else {
+                await addDoc(collection(db, "work_logs"), data);
+            }
+            window.closeWorkLogModal();
+        };
+
+        window.deleteWorkLog = async (logId) => {
+            if (confirm("Opravdu smazat tento záznam odpracovaných hodin?")) {
+                await deleteDoc(doc(db, "work_logs", logId));
+            }
+        };
+
+        window.toggleWorkLogBilled = async (logId) => {
+            const log = allWorkLogs.find(l => l.id === logId);
+            if (!log) return;
+            await updateDoc(doc(db, "work_logs", log.id), { isBilled: !log.isBilled });
+        };
+
+        window.transferWorkLogToIncome = async (logId) => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            const log = allWorkLogs.find(l => l.id === logId);
+            if (!log) return;
+            const hours = parseFloat(log.hours) || 0;
+            const rate = parseFloat(log.hourlyRate) || 0;
+            const amount = Math.round(hours * rate);
+            
+            if (amount <= 0) return alert("Tento záznam nemá nastavenou částku (sazba je 0 Kč/h).");
+            
+            const pName = log.projectName || "Práce";
+            if (!confirm(`Opravdu zaúčtovat výdělek ${amount.toLocaleString('cs-CZ')} Kč z projektu "${pName}" (${hours} h) jako nový Příjem (Mzda) do hlavní evidence financí?`)) return;
+            
+            const logDate = log.date ? new Date(log.date) : (log.dateObj || new Date());
+            await addDoc(collection(db, "transactions"), {
+                userId: currentUser.uid,
+                type: "Příjem",
+                category: "Mzda",
+                amount: amount,
+                note: `Práce: ${pName} (${hours}h)${log.description ? ' - ' + log.description : ''}`,
+                recurring: false,
+                createdAt: Timestamp.fromDate(logDate)
+            });
+
+            // Označit jako vyfakturováno
+            await updateDoc(doc(db, "work_logs", log.id), { isBilled: true });
+            alert(`Výdělek ${amount.toLocaleString('cs-CZ')} Kč byl úspěšně zaúčtován do Příjmů!`);
+        };
+
+        // --- POZNÁMKY K PROJEKTU (VÍCEŘÁDKOVÝ TEXT) ---
+        window.openProjectNotesModal = (projectId) => {
+            currentNotesProjectId = projectId;
+            editingNoteId = null;
+            const project = allProjects.find(p => p.id === projectId);
+            if (!project) return;
+            
+            document.getElementById('projectNotesModalTitle').textContent = project.name;
+            document.getElementById('projectNotesModalSubtitle').textContent = project.client ? `Klient / Zadavatel: ${project.client}` : 'Vlastní projekt';
+            
+            const statusBadges = {
+                active: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
+                paused: "bg-amber-500/15 text-amber-400 border border-amber-500/30",
+                completed: "bg-slate-700 text-slate-300 border border-slate-600"
+            };
+            const statusTexts = { active: "🟢 Aktivní", paused: "🟡 Pozastaveno", completed: "⚪ Dokončeno" };
+            const badgeEl = document.getElementById('projectNotesStatusBadge');
+            if (badgeEl) {
+                badgeEl.className = `px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusBadges[project.status] || statusBadges.active}`;
+                badgeEl.textContent = statusTexts[project.status] || "Aktivní";
+            }
+            
+            // Statistiky pro tento projekt
+            const projLogs = allWorkLogs.filter(l => l.projectId === projectId);
+            const totalHours = projLogs.reduce((acc, l) => acc + (parseFloat(l.hours) || 0), 0);
+            const totalAmount = totalHours * (parseFloat(project.hourlyRate) || 0);
+            
+            const hoursEl = document.getElementById('projectNotesModalHours');
+            if (hoursEl) hoursEl.textContent = `${totalHours.toFixed(1)} h`;
+            const rateEl = document.getElementById('projectNotesModalRate');
+            if (rateEl) rateEl.textContent = project.hourlyRate ? `${project.hourlyRate} Kč/h` : '0 Kč/h';
+            const amountEl = document.getElementById('projectNotesModalAmount');
+            if (amountEl) amountEl.textContent = `${totalAmount.toLocaleString('cs-CZ')} Kč`;
+            
+            // Reset formuláře poznámky
+            document.getElementById('editingNoteId').value = "";
+            document.getElementById('projectNoteInput').value = "";
+            document.getElementById('btnSaveNote').innerHTML = "<span>➕</span><span>Přidat poznámku</span>";
+            document.getElementById('btnCancelEditNote').classList.add('hidden');
+            
+            renderProjectNotesList(project);
+            document.getElementById('modalProjectNotes').classList.remove('hidden');
+        };
+
+        window.closeProjectNotesModal = () => {
+            document.getElementById('modalProjectNotes').classList.add('hidden');
+            currentNotesProjectId = null;
+            editingNoteId = null;
+        };
+
+        window.logHoursFromNotesModal = () => {
+            const pId = currentNotesProjectId;
+            window.closeProjectNotesModal();
+            window.openWorkLogModal(pId);
+        };
+
+        function renderProjectNotesList(project) {
+            const listEl = document.getElementById('projectNotesList');
+            const countEl = document.getElementById('projectNotesCount');
+            const notes = project.notes || [];
+            if (countEl) countEl.textContent = notes.length;
+            
+            if (notes.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-8 text-slate-500 bg-slate-950/40 rounded-2xl border border-slate-800/80 p-6">
+                        <span class="text-3xl block mb-2">📝</span>
+                        <p class="font-medium text-sm text-slate-300">Zatím žádné poznámky k tomuto projektu.</p>
+                        <p class="text-xs text-slate-500 mt-1">Napište libovolnou víceřádkovou textovou poznámku do pole výše a klikněte na "Přidat poznámku".</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            listEl.innerHTML = "";
+            notes.forEach(note => {
+                const d = note.createdAt ? new Date(note.createdAt) : new Date();
+                const dateStr = d.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' }) + ' ' + d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+                const updatedStr = note.updatedAt ? `<span class="text-[10px] text-slate-500 ml-1 italic">(upraveno ${new Date(note.updatedAt).toLocaleDateString('cs-CZ')})</span>` : '';
+                
+                const card = document.createElement('div');
+                card.className = "bg-slate-950/70 p-4 rounded-2xl border border-slate-800/80 hover:border-slate-700 transition space-y-2.5";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-800/60">
+                        <div class="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
+                            <span>🕒</span><span>${dateStr}</span>${updatedStr}
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button class="btn-copy px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition flex items-center gap-1" title="Kopírovat do schránky">
+                                <span>📋</span><span>Kopírovat</span>
+                            </button>
+                            <button class="btn-edit px-2 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-blue-400 hover:text-blue-300 text-xs transition" title="Upravit poznámku">✏️</button>
+                            <button class="btn-del px-2 py-1 rounded-lg bg-rose-950/30 hover:bg-rose-900/60 border border-rose-800/40 text-rose-400 hover:text-rose-300 text-xs transition" title="Smazat poznámku">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="whitespace-pre-wrap font-sans text-sm text-slate-200 leading-relaxed p-1">${escapeHtml(note.text)}</div>
+                `;
+                
+                const copyBtn = card.querySelector('.btn-copy');
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(note.text).then(() => {
+                        copyBtn.innerHTML = "<span>✅</span><span>Zkopírováno!</span>";
+                        setTimeout(() => { copyBtn.innerHTML = "<span>📋</span><span>Kopírovat</span>"; }, 1500);
+                    });
+                };
+                card.querySelector('.btn-edit').onclick = () => window.editProjectNote(note.id);
+                card.querySelector('.btn-del').onclick = () => window.deleteProjectNote(note.id);
+                
+                listEl.appendChild(card);
+            });
+        }
+
+        window.saveProjectNote = async () => {
+            if (!currentNotesProjectId) return;
+            const project = allProjects.find(p => p.id === currentNotesProjectId);
+            if (!project) return;
+            
+            const noteText = document.getElementById('projectNoteInput').value.trim();
+            if (!noteText) return alert("Napište prosím text poznámky.");
+            
+            const editId = document.getElementById('editingNoteId').value;
+            let notes = [...(project.notes || [])];
+            
+            if (editId) {
+                notes = notes.map(n => n.id === editId ? { ...n, text: noteText, updatedAt: new Date().toISOString() } : n);
+            } else {
+                const newNote = {
+                    id: 'n_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    text: noteText,
+                    createdAt: new Date().toISOString()
+                };
+                notes.unshift(newNote);
+            }
+            
+            await updateDoc(doc(db, "work_projects", project.id), { notes });
+            
+            document.getElementById('editingNoteId').value = "";
+            document.getElementById('projectNoteInput').value = "";
+            document.getElementById('btnSaveNote').innerHTML = "<span>➕</span><span>Přidat poznámku</span>";
+            document.getElementById('btnCancelEditNote').classList.add('hidden');
+        };
+
+        window.editProjectNote = (noteId) => {
+            const project = allProjects.find(p => p.id === currentNotesProjectId);
+            if (!project) return;
+            const note = (project.notes || []).find(n => n.id === noteId);
+            if (!note) return;
+            
+            document.getElementById('editingNoteId').value = note.id;
+            document.getElementById('projectNoteInput').value = note.text;
+            document.getElementById('btnSaveNote').innerHTML = "<span>💾</span><span>Uložit úpravu</span>";
+            document.getElementById('btnCancelEditNote').classList.remove('hidden');
+            document.getElementById('projectNoteInput').focus();
+        };
+
+        window.cancelEditNote = () => {
+            document.getElementById('editingNoteId').value = "";
+            document.getElementById('projectNoteInput').value = "";
+            document.getElementById('btnSaveNote').innerHTML = "<span>➕</span><span>Přidat poznámku</span>";
+            document.getElementById('btnCancelEditNote').classList.add('hidden');
+        };
+
+        window.deleteProjectNote = async (noteId) => {
+            const project = allProjects.find(p => p.id === currentNotesProjectId);
+            if (!project) return;
+            if (!confirm("Opravdu smazat tuto poznámku?")) return;
+            
+            const notes = (project.notes || []).filter(n => n.id !== noteId);
+            await updateDoc(doc(db, "work_projects", project.id), { notes });
+        };
+
+        window.exportWorkCsv = () => {
+            if (!allWorkLogs.length) return alert("Zatím nejsou k dispozici žádné odpracované hodiny k exportu.");
+            let csv = "Datum;Projekt;Klient;Popis činnosti;Odpracováno (hodiny);Sazba (Kč/h);Částka (Kč);Vyfakturováno\n";
+            allWorkLogs.forEach(l => {
+                const p = allProjects.find(x => x.id === l.projectId);
+                const pName = l.projectName || (p ? p.name : "Obecné");
+                const client = p ? (p.client || "") : "";
+                const descEsc = (l.description || "").replace(/"/g, '""');
+                const rate = parseFloat(l.hourlyRate) || 0;
+                const hours = parseFloat(l.hours) || 0;
+                const total = hours * rate;
+                const dateStr = l.date || (l.dateObj ? l.dateObj.toLocaleDateString('cs-CZ') : "");
+                csv += `"${dateStr}";"${pName.replace(/"/g, '""')}";"${client.replace(/"/g, '""')}";"${descEsc}";"${hours}";"${rate}";"${total}";"${l.isBilled ? 'Ano' : 'Ne'}"\n`;
+            });
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vykaz_prace_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
         document.getElementById('globalPeriodFilter').onchange = (e) => {
             const customBox = document.getElementById('customDateRangeContainer');
             if (customBox) {
@@ -1445,12 +2626,13 @@
                 }
             }
             render();
+            renderWork();
         };
 
         const df = document.getElementById('filterDateFrom');
         const dt = document.getElementById('filterDateTo');
-        if (df) df.onchange = render;
-        if (dt) dt.onchange = render;
+        if (df) df.onchange = () => { render(); renderWork(); };
+        if (dt) dt.onchange = () => { render(); renderWork(); };
 
         document.getElementById('topTxCount').onchange = render;
         window.toggleSelectAll = (src) => document.querySelectorAll('.tx-checkbox').forEach(cb => cb.checked = src.checked);
@@ -1462,7 +2644,9 @@
                 exportDate: new Date().toISOString(),
                 userEmail: currentUser.email,
                 transactions: allTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
-                btc_transactions: allBtcTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() }))
+                btc_transactions: allBtcTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
+                work_projects: allProjects.map(p => ({ ...p, createdAt: p.dateObj.toISOString() })),
+                work_logs: allWorkLogs.map(l => ({ ...l, createdAt: l.dateObj.toISOString() }))
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -1479,6 +2663,7 @@
             if (!currentUser) return alert("Musíte být přihlášeni.");
             let sql = `-- Export databáze Správa financí PRO\n-- Vygenerováno: ${new Date().toLocaleString('cs-CZ')}\n-- Uživatel: ${currentUser.email}\n\n`;
             
+            // Běžné finance
             sql += `CREATE TABLE IF NOT EXISTS transactions (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  type VARCHAR(32),\n  category VARCHAR(64),\n  amount DECIMAL(15,2),\n  note TEXT,\n  recurring BOOLEAN,\n  created_at DATETIME\n);\n\n`;
             allTx.forEach(t => {
                 const noteEsc = (t.note || "").replace(/'/g, "''");
@@ -1486,10 +2671,31 @@
                 sql += `INSERT INTO transactions (id, user_id, type, category, amount, note, recurring, created_at) VALUES ('${t.id}', '${currentUser.uid}', '${t.type}', '${t.category}', ${t.amount}, '${noteEsc}', ${t.recurring ? 1 : 0}, '${dateStr}');\n`;
             });
 
+            // Bitcoin
             sql += `\nCREATE TABLE IF NOT EXISTS btc_transactions (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  type VARCHAR(32),\n  amount_czk DECIMAL(15,2),\n  amount_coin DECIMAL(18,8),\n  created_at DATETIME\n);\n\n`;
             allBtcTx.forEach(t => {
                 const dateStr = t.dateObj.toISOString().slice(0, 19).replace('T', ' ');
                 sql += `INSERT INTO btc_transactions (id, user_id, type, amount_czk, amount_coin, created_at) VALUES ('${t.id}', '${currentUser.uid}', '${t.type}', ${t.amountCzk}, ${t.amountCoin}, '${dateStr}');\n`;
+            });
+
+            // Projekty
+            sql += `\nCREATE TABLE IF NOT EXISTS work_projects (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  name VARCHAR(128),\n  client VARCHAR(128),\n  hourly_rate DECIMAL(15,2),\n  status VARCHAR(32),\n  color VARCHAR(32),\n  description TEXT,\n  notes JSON,\n  created_at DATETIME\n);\n\n`;
+            allProjects.forEach(p => {
+                const nameEsc = (p.name || "").replace(/'/g, "''");
+                const clientEsc = (p.client || "").replace(/'/g, "''");
+                const descEsc = (p.description || "").replace(/'/g, "''");
+                const notesEsc = JSON.stringify(p.notes || []).replace(/'/g, "''");
+                const dateStr = p.dateObj.toISOString().slice(0, 19).replace('T', ' ');
+                sql += `INSERT INTO work_projects (id, user_id, name, client, hourly_rate, status, color, description, notes, created_at) VALUES ('${p.id}', '${currentUser.uid}', '${nameEsc}', '${clientEsc}', ${p.hourlyRate || 0}, '${p.status || 'active'}', '${p.color || 'indigo'}', '${descEsc}', '${notesEsc}', '${dateStr}');\n`;
+            });
+
+            // Odpracované hodiny
+            sql += `\nCREATE TABLE IF NOT EXISTS work_logs (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  project_id VARCHAR(64),\n  project_name VARCHAR(128),\n  hours DECIMAL(8,2),\n  hourly_rate DECIMAL(15,2),\n  description TEXT,\n  is_billed BOOLEAN,\n  date VARCHAR(32),\n  created_at DATETIME\n);\n\n`;
+            allWorkLogs.forEach(l => {
+                const pNameEsc = (l.projectName || "").replace(/'/g, "''");
+                const descEsc = (l.description || "").replace(/'/g, "''");
+                const dateStr = l.dateObj.toISOString().slice(0, 19).replace('T', ' ');
+                sql += `INSERT INTO work_logs (id, user_id, project_id, project_name, hours, hourly_rate, description, is_billed, date, created_at) VALUES ('${l.id}', '${currentUser.uid}', '${l.projectId || ''}', '${pNameEsc}', ${l.hours || 0}, ${l.hourlyRate || 0}, '${descEsc}', ${l.isBilled ? 1 : 0}, '${l.date || ''}', '${dateStr}');\n`;
             });
 
             const blob = new Blob([sql], { type: 'text/sql' });
@@ -1530,7 +2736,7 @@
             reader.onload = async (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    let txCount = 0, btcCount = 0;
+                    let txCount = 0, btcCount = 0, projCount = 0, workCount = 0;
 
                     if (data.transactions && Array.isArray(data.transactions)) {
                         for (const tx of data.transactions) {
@@ -1559,7 +2765,41 @@
                                 btcCount++;
                             }
                         }
-                        alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů.`);
+                        if (data.work_projects && Array.isArray(data.work_projects)) {
+                            for (const p of data.work_projects) {
+                                let d = p.createdAt ? new Date(p.createdAt) : new Date();
+                                await addDoc(collection(db, "work_projects"), {
+                                    userId: currentUser.uid,
+                                    name: p.name || "Bez názvu",
+                                    client: p.client || "",
+                                    hourlyRate: parseFloat(p.hourlyRate) || 0,
+                                    status: p.status || "active",
+                                    color: p.color || "indigo",
+                                    description: p.description || "",
+                                    notes: Array.isArray(p.notes) ? p.notes : [],
+                                    createdAt: Timestamp.fromDate(d)
+                                });
+                                projCount++;
+                            }
+                        }
+                        if (data.work_logs && Array.isArray(data.work_logs)) {
+                            for (const l of data.work_logs) {
+                                let d = l.createdAt ? new Date(l.createdAt) : new Date();
+                                await addDoc(collection(db, "work_logs"), {
+                                    userId: currentUser.uid,
+                                    projectId: l.projectId || "",
+                                    projectName: l.projectName || "Obecné",
+                                    hours: parseFloat(l.hours) || 0,
+                                    hourlyRate: parseFloat(l.hourlyRate) || 0,
+                                    description: l.description || "",
+                                    isBilled: !!l.isBilled,
+                                    date: l.date || d.toISOString().split('T')[0],
+                                    createdAt: Timestamp.fromDate(d)
+                                });
+                                workCount++;
+                            }
+                        }
+                        alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů\n• ${projCount} projektů\n• ${workCount} záznamů odpracovaných hodin.`);
                     } else if (Array.isArray(data)) {
                         for (const tx of data) {
                             let d = new Date();
