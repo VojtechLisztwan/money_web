@@ -179,8 +179,15 @@
                     </button>
                 </nav>
 
-                <!-- Period Filter & Logout -->
+                <!-- Period Filter, Timer & Logout -->
                 <div class="flex flex-wrap items-center justify-end gap-3 w-full lg:w-auto">
+                    <!-- Header Active Timer Badge (visible when stopwatch is running) -->
+                    <div id="headerActiveTimer" onclick="switchTab('overview'); const el = document.getElementById('dashboardTimerCard'); if(el) el.scrollIntoView({behavior: 'smooth'})" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-950/80 border border-indigo-500/50 text-xs font-mono font-bold text-indigo-300 hover:border-indigo-400 transition cursor-pointer shadow-lg shadow-indigo-500/10" title="Kliknutím přejdete na stopky na Dashboardu">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span id="headerTimerText">00:00:00</span>
+                        <span id="headerTimerProject" class="text-slate-400 font-sans text-[11px] truncate max-w-[90px] hidden sm:inline"></span>
+                    </div>
+
                     <!-- Smart Filter Container -->
                     <div class="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800 w-full sm:w-auto justify-end">
                         <span class="text-xs font-semibold text-slate-400 pl-2 hidden sm:inline">🗓️ Období:</span>
@@ -261,6 +268,58 @@
                     <p id="overview-btc-rate" class="text-[11px] text-slate-400 mt-2 font-mono flex items-center gap-1 truncate">
                         Kurz: 0 Kč / BTC
                     </p>
+                </div>
+            </div>
+
+            <!-- LIVE TRACKER / STOPKY NA DASHBOARDU -->
+            <div id="dashboardTimerCard" class="glass-card p-5 sm:p-6 rounded-2xl border border-indigo-500/30 mb-8 bg-gradient-to-r from-slate-900/95 via-indigo-950/25 to-slate-900/95 shadow-2xl relative overflow-hidden">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+                    
+                    <!-- Left: Title, Project selector & Description -->
+                    <div class="flex-1 w-full lg:w-auto">
+                        <div class="flex items-center gap-2.5 mb-2.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                <span>⏱️</span><span>Stopky & Sledování odpracovaného času</span>
+                            </h2>
+                            <span id="timerStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Připraveno</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Přiřadit k projektu:</label>
+                                <select id="timerProjectSelect" onchange="window.onTimerProjectChange()" class="w-full p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-xs font-semibold focus:outline-none focus:border-indigo-500 transition cursor-pointer">
+                                    <option value="__none__">Bez projektu (Obecná práce)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Popis činnosti:</label>
+                                <input id="timerDescInput" type="text" placeholder="Např. Kódování komponenty, schůzka s klientem..." class="w-full p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Digital Clock Display -->
+                    <div class="flex flex-col items-center justify-center px-6 py-3 rounded-2xl bg-slate-950/80 border border-slate-800/80 min-w-[210px] w-full lg:w-auto shadow-inner">
+                        <div id="timerDisplay" class="text-3xl sm:text-4xl font-extrabold font-mono tracking-wider text-indigo-400 drop-shadow">00:00:00</div>
+                        <div id="timerTimeRangeInfo" class="text-[11px] text-slate-400 font-mono mt-1">Start: --:--</div>
+                    </div>
+
+                    <!-- Right: Control Buttons -->
+                    <div class="flex items-center gap-2 w-full lg:w-auto justify-end flex-wrap">
+                        <button id="btnTimerStart" onclick="window.startTimer()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-1.5">
+                            <span>▶️</span><span>Spustit</span>
+                        </button>
+                        <button id="btnTimerPause" onclick="window.pauseTimer()" class="hidden flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-1.5">
+                            <span>⏸️</span><span>Pauza</span>
+                        </button>
+                        <button id="btnTimerStop" onclick="window.stopAndSaveTimer()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5">
+                            <span>⏹️</span><span>Uložit hodiny</span>
+                        </button>
+                        <button id="btnTimerReset" onclick="window.resetTimer()" title="Vynulovat stopky" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition border border-slate-700">
+                            🔄
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
@@ -477,39 +536,97 @@
                 </div>
             </div>
 
-            <!-- Timesheet / Work Logs Table Section -->
+            <!-- Timesheet & Calendar Section -->
             <div class="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800/80 shadow-xl">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
                     <div>
                         <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                            <span>⏱️</span><span>Historie odpracovaného času (Timesheet)</span>
+                            <span>⏱️</span><span>Historie odpracovaného času</span>
                         </h2>
-                        <p class="text-xs text-slate-400 mt-1">Záznamy práce s možností okamžitého zaúčtování do Příjmů (Mzda)</p>
+                        <p class="text-xs text-slate-400 mt-1">Záznamy práce s časovým rozsahem, kalendářem a možností zaúčtování do Příjmů (Mzda)</p>
                     </div>
                     
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-3">
+                        <!-- Switcher Seznam / Kalendář -->
+                        <div class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+                            <button id="btnWorkViewTable" onclick="window.setWorkView('table')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition flex items-center gap-1.5">
+                                <span>📋</span><span>Seznam</span>
+                            </button>
+                            <button id="btnWorkViewCalendar" onclick="window.setWorkView('calendar')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                                <span>📅</span><span>Kalendář</span>
+                            </button>
+                        </div>
                         <span id="workLogsCountBadge" class="text-xs font-mono font-bold text-slate-400 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800">0 záznamů</span>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto max-h-[580px] rounded-xl border border-slate-800/80 bg-slate-900/40">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 border-b border-slate-800 text-slate-400 text-xs uppercase font-semibold">
-                            <tr>
-                                <th class="p-3.5">Datum</th>
-                                <th class="p-3.5">Projekt</th>
-                                <th class="p-3.5">Popis činnosti</th>
-                                <th class="p-3.5 text-right">Hodiny</th>
-                                <th class="p-3.5 text-right">Částka (Kč)</th>
-                                <th class="p-3.5 text-center">Fakturace</th>
-                                <th class="p-3.5 text-center w-36 no-print">Akce</th>
-                            </tr>
-                        </thead>
-                        <tbody id="workLogsTableBody" class="divide-y divide-slate-800/60 text-sm">
-                            <!-- Dynamic rows rendered by JS -->
-                        </tbody>
-                    </table>
+                <!-- VIEW 1: TABULKA -->
+                <div id="workViewTable">
+                    <div class="overflow-x-auto max-h-[580px] rounded-xl border border-slate-800/80 bg-slate-900/40">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 border-b border-slate-800 text-slate-400 text-xs uppercase font-semibold">
+                                <tr>
+                                    <th class="p-3.5">Datum a čas</th>
+                                    <th class="p-3.5">Projekt</th>
+                                    <th class="p-3.5">Popis činnosti</th>
+                                    <th class="p-3.5 text-right">Hodiny</th>
+                                    <th class="p-3.5 text-right">Částka (Kč)</th>
+                                    <th class="p-3.5 text-center">Fakturace</th>
+                                    <th class="p-3.5 text-center w-36 no-print">Akce</th>
+                                </tr>
+                            </thead>
+                            <tbody id="workLogsTableBody" class="divide-y divide-slate-800/60 text-sm">
+                                <!-- Dynamic rows rendered by JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+
+                <!-- VIEW 2: KALENDÁŘ -->
+                <div id="workViewCalendar" class="hidden space-y-4">
+                    <!-- Calendar Header Controls -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                        <div class="flex items-center gap-2">
+                            <button onclick="window.changeCalendarMonth(-1)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition text-xs font-bold" title="Předchozí měsíc">
+                                <span>◀</span>
+                            </button>
+                            <h3 id="workCalendarMonthTitle" class="text-base font-extrabold text-white min-w-[170px] text-center">Měsíc Rok</h3>
+                            <button onclick="window.changeCalendarMonth(1)" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition text-xs font-bold" title="Následující měsíc">
+                                <span>▶</span>
+                            </button>
+                            <button onclick="window.resetCalendarToToday()" class="ml-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-indigo-300 border border-slate-700 transition">
+                                Dnes
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs font-mono">
+                            <div class="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                                <span class="text-slate-400">Tento měsíc:</span>
+                                <span id="workCalendarMonthHours" class="font-bold text-indigo-400">0 h</span>
+                                <span class="text-slate-600">•</span>
+                                <span id="workCalendarMonthAmount" class="font-bold text-emerald-400">0 Kč</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div class="rounded-2xl border border-slate-800 overflow-hidden bg-slate-950/60">
+                        <!-- Days of Week Header -->
+                        <div class="grid grid-cols-7 bg-slate-900/90 border-b border-slate-800 text-center text-xs font-bold text-slate-400 uppercase py-2.5">
+                            <div>Po</div>
+                            <div>Út</div>
+                            <div>St</div>
+                            <div>Čt</div>
+                            <div>Pá</div>
+                            <div class="text-amber-400/90">So</div>
+                            <div class="text-rose-400/90">Ne</div>
+                        </div>
+                        <!-- Days Grid -->
+                        <div id="workCalendarGrid" class="grid grid-cols-7 divide-x divide-y divide-slate-800/80 text-xs bg-slate-950/40">
+                            <!-- Dynamically generated days -->
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -1056,25 +1173,37 @@
                         <select id="workLogModalProject" onchange="window.onWorkLogProjectChange()" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-semibold focus:outline-none focus:border-indigo-500 transition cursor-pointer"></select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Datum práce</label>
-                            <input id="workLogModalDate" type="date" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-indigo-500 transition font-medium">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Datum práce *</label>
+                            <input id="workLogModalDate" type="date" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-indigo-500 transition font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Odpracováno (hodin) *</label>
-                            <input id="workLogModalHours" type="number" step="0.25" min="0.1" max="24" placeholder="0.0" oninput="window.calculateWorkLogAmount()" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono font-bold text-sm focus:outline-none focus:border-indigo-500 transition">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Čas od (nepovinné)</label>
+                            <input id="workLogModalTimeFrom" type="time" onchange="window.onWorkLogTimeChange()" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono text-sm focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Čas do (nepovinné)</label>
+                            <input id="workLogModalTimeTo" type="time" onchange="window.onWorkLogTimeChange()" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono text-sm focus:outline-none focus:border-indigo-500 transition">
                         </div>
                     </div>
 
-                    <!-- Quick buttons pro hodiny -->
-                    <div class="flex items-center gap-1.5 pt-0.5">
-                        <span class="text-[10px] text-slate-500 uppercase font-bold mr-1">Rychle:</span>
-                        <button type="button" onclick="window.setWorkHours(0.5)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+0.5h</button>
-                        <button type="button" onclick="window.setWorkHours(1)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+1h</button>
-                        <button type="button" onclick="window.setWorkHours(2)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+2h</button>
-                        <button type="button" onclick="window.setWorkHours(4)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+4h</button>
-                        <button type="button" onclick="window.setWorkHours(8)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+8h</button>
+                    <!-- Hours and Quick buttons -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Odpracováno (hodin) *</label>
+                            <input id="workLogModalHours" type="number" step="0.25" min="0.05" max="24" placeholder="0.0" oninput="window.calculateWorkLogAmount()" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono font-bold text-sm focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-slate-500 uppercase font-bold mb-1">Rychle přičíst:</span>
+                            <div class="flex items-center gap-1">
+                                <button type="button" onclick="window.setWorkHours(0.5)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+0.5h</button>
+                                <button type="button" onclick="window.setWorkHours(1)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+1h</button>
+                                <button type="button" onclick="window.setWorkHours(2)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+2h</button>
+                                <button type="button" onclick="window.setWorkHours(4)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+4h</button>
+                                <button type="button" onclick="window.setWorkHours(8)" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono font-semibold text-slate-300 transition">+8h</button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 items-center">
@@ -1279,6 +1408,16 @@ match /work_logs/{docId} {
         let allProjects = [], allWorkLogs = [], activeWorkProjectFilter = 'all';
         let currentNotesProjectId = null, editingNoteId = null;
         let workStorageMode = 'cloud'; // 'cloud' | 'local'
+        let activeWorkView = 'table'; // 'table' | 'calendar'
+        let currentCalendarMonth = new Date().getMonth();
+        let currentCalendarYear = new Date().getFullYear();
+
+        // Stopky (Live Timer) proměnné
+        let timerInterval = null;
+        let timerRunning = false;
+        let timerStartTime = null;
+        let timerAccumulatedSeconds = 0;
+        let timerStartedAtFormatted = null;
 
         function getLocalProjects() {
             try {
@@ -1607,6 +1746,8 @@ match /work_logs/{docId} {
             });
 
             fetchBtcPrice(); 
+            loadTimerFromStorage();
+            updateTimerProjectsDropdown();
         }
 
         const txType = document.getElementById('txType'), catSel = document.getElementById('txCategorySelect'), catCust = document.getElementById('txCategoryCustom');
@@ -2296,11 +2437,14 @@ match /work_logs/{docId} {
                             </div>
 
                             <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
-                                <div class="flex items-center gap-2">
-                                    <button onclick="window.openWorkLogModal('${p.id}')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-1.5">
-                                        <span>⏱️</span><span>+ Hodiny</span>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <button onclick="window.startTimerForProject('${p.id}')" title="Spustit stopky pro tento projekt" class="px-2.5 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 font-bold text-xs border border-indigo-500/30 transition flex items-center gap-1 shadow-sm">
+                                        <span>⏱️</span><span>Stopky</span>
                                     </button>
-                                    <button onclick="window.openProjectNotesModal('${p.id}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5">
+                                    <button onclick="window.openWorkLogModal('${p.id}')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-md shadow-indigo-600/20 flex items-center gap-1.5">
+                                        <span>➕</span><span>Hodiny</span>
+                                    </button>
+                                    <button onclick="window.openProjectNotesModal('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold text-xs border border-slate-700 transition flex items-center gap-1.5">
                                         <span>📝</span><span>Poznámky</span>
                                         <span class="px-1.5 py-0.2 rounded-full bg-slate-900 text-[10px] font-bold text-indigo-300">${pNotesCount}</span>
                                     </button>
@@ -2343,7 +2487,10 @@ match /work_logs/{docId} {
 
                         tbody.innerHTML += `
                             <tr class="hover:bg-slate-800/60 transition-colors">
-                                <td class="p-3.5 text-slate-400 text-xs font-mono whitespace-nowrap">${dateStr}</td>
+                                <td class="p-3.5 text-slate-400 text-xs font-mono whitespace-nowrap">
+                                    <div class="font-bold text-slate-200">${dateStr}</div>
+                                    ${(l.timeFrom || l.timeTo) ? `<div class="text-[11px] text-indigo-300 font-mono mt-0.5">🕒 ${escapeHtml(l.timeFrom || '')}${l.timeTo ? ' – ' + escapeHtml(l.timeTo) : ''}</div>` : ''}
+                                </td>
                                 <td class="p-3.5 font-medium whitespace-nowrap">
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${theme.badge}">
                                         <span class="w-1.5 h-1.5 rounded-full ${theme.dot}"></span>
@@ -2368,6 +2515,11 @@ match /work_logs/{docId} {
                         `;
                     });
                 }
+            }
+
+            updateTimerProjectsDropdown();
+            if (activeWorkView === 'calendar') {
+                renderWorkCalendar();
             }
         };
 
@@ -2522,7 +2674,7 @@ match /work_logs/{docId} {
         };
 
         // --- ZÁZNAMY HODIN (LOGOVÁNÍ) ---
-        window.openWorkLogModal = (projectId = null, logId = null) => {
+        window.openWorkLogModal = (projectId = null, logId = null, prefillDate = null, prefillTimeFrom = null, prefillTimeTo = null, prefillHours = null, prefillDesc = null) => {
             const sel = document.getElementById('workLogModalProject');
             sel.innerHTML = "";
             
@@ -2546,6 +2698,8 @@ match /work_logs/{docId} {
             const hoursInput = document.getElementById('workLogModalHours');
             const rateInput = document.getElementById('workLogModalRate');
             const dateInput = document.getElementById('workLogModalDate');
+            const timeFromInput = document.getElementById('workLogModalTimeFrom');
+            const timeToInput = document.getElementById('workLogModalTimeTo');
             const descInput = document.getElementById('workLogModalDesc');
             const billedInput = document.getElementById('workLogModalBilled');
             
@@ -2556,6 +2710,8 @@ match /work_logs/{docId} {
                 idInput.value = log.id;
                 sel.value = log.projectId || "__none__";
                 dateInput.value = log.date || (log.dateObj ? log.dateObj.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
+                if (timeFromInput) timeFromInput.value = log.timeFrom || "";
+                if (timeToInput) timeToInput.value = log.timeTo || "";
                 hoursInput.value = log.hours;
                 rateInput.value = log.hourlyRate || 0;
                 descInput.value = log.description || "";
@@ -2570,9 +2726,11 @@ match /work_logs/{docId} {
                 } else {
                     sel.value = "__none__";
                 }
-                dateInput.value = new Date().toISOString().split('T')[0];
-                hoursInput.value = "";
-                descInput.value = "";
+                dateInput.value = prefillDate || new Date().toISOString().split('T')[0];
+                if (timeFromInput) timeFromInput.value = prefillTimeFrom || "";
+                if (timeToInput) timeToInput.value = prefillTimeTo || "";
+                hoursInput.value = prefillHours !== null && prefillHours !== undefined ? prefillHours : "";
+                descInput.value = prefillDesc || "";
                 billedInput.checked = false;
                 
                 // Auto-fill sazby
@@ -2598,6 +2756,25 @@ match /work_logs/{docId} {
                 rateInput.value = 0;
             }
             window.calculateWorkLogAmount();
+        };
+
+        window.onWorkLogTimeChange = () => {
+            const timeFromEl = document.getElementById('workLogModalTimeFrom');
+            const timeToEl = document.getElementById('workLogModalTimeTo');
+            if (!timeFromEl || !timeToEl) return;
+            const fromVal = timeFromEl.value;
+            const toVal = timeToEl.value;
+            if (fromVal && toVal) {
+                const [h1, m1] = fromVal.split(':').map(Number);
+                const [h2, m2] = toVal.split(':').map(Number);
+                let diffMins = (h2 * 60 + m2) - (h1 * 60 + m1);
+                if (diffMins < 0) diffMins += 24 * 60; // Přes půlnoc
+                if (diffMins > 0) {
+                    const calculatedHours = Math.round((diffMins / 60) * 100) / 100;
+                    document.getElementById('workLogModalHours').value = calculatedHours;
+                    window.calculateWorkLogAmount();
+                }
+            }
         };
 
         window.setWorkHours = (h) => {
@@ -2626,6 +2803,8 @@ match /work_logs/{docId} {
             
             const dateVal = document.getElementById('workLogModalDate').value;
             const dateObj = dateVal ? new Date(dateVal) : new Date();
+            const timeFrom = document.getElementById('workLogModalTimeFrom')?.value.trim() || '';
+            const timeTo = document.getElementById('workLogModalTimeTo')?.value.trim() || '';
             const hours = parseFloat(document.getElementById('workLogModalHours').value);
             if (isNaN(hours) || hours <= 0) return alert("Zadejte platný počet odpracovaných hodin.");
             
@@ -2644,6 +2823,8 @@ match /work_logs/{docId} {
                         description,
                         isBilled,
                         date: dateVal,
+                        timeFrom,
+                        timeTo,
                         createdAt: Timestamp.fromDate(dateObj)
                     };
                     if (editId) {
@@ -2673,6 +2854,8 @@ match /work_logs/{docId} {
                             description,
                             isBilled,
                             date: dateVal,
+                            timeFrom,
+                            timeTo,
                             dateObj: dateObj
                         };
                     }
@@ -2689,6 +2872,8 @@ match /work_logs/{docId} {
                     description,
                     isBilled,
                     date: dateVal,
+                    timeFrom,
+                    timeTo,
                     createdAt: dateObj.toISOString(),
                     dateObj: dateObj
                 };
@@ -2778,6 +2963,473 @@ match /work_logs/{docId} {
                 renderWork();
             }
             alert(`Výdělek ${amount.toLocaleString('cs-CZ')} Kč byl úspěšně zaúčtován do Příjmů!`);
+        };
+
+        // =========================================================================
+        // --- STOPKY (LIVE TRACKER) & KALENDÁŘ PRÁCE ---
+        // =========================================================================
+
+        function getTimerStorageKey() {
+            const uid = currentUser ? currentUser.uid : 'default';
+            return 'money_web_active_timer_' + uid;
+        }
+
+        function formatTimerSeconds(totalSecs) {
+            const h = Math.floor(totalSecs / 3600);
+            const m = Math.floor((totalSecs % 3600) / 60);
+            const s = Math.floor(totalSecs % 60);
+            return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+        }
+
+        function getCurrentTimerSeconds() {
+            if (timerRunning && timerStartTime) {
+                return timerAccumulatedSeconds + Math.floor((Date.now() - timerStartTime) / 1000);
+            }
+            return timerAccumulatedSeconds;
+        }
+
+        function updateTimerTick() {
+            const secs = getCurrentTimerSeconds();
+            const formatted = formatTimerSeconds(secs);
+            const dispEl = document.getElementById('timerDisplay');
+            if (dispEl) dispEl.textContent = formatted;
+            const headerText = document.getElementById('headerTimerText');
+            if (headerText) headerText.textContent = formatted;
+        }
+
+        function updateHeaderTimerProjectLabel() {
+            const sel = document.getElementById('timerProjectSelect');
+            const pId = sel ? sel.value : '__none__';
+            const proj = allProjects.find(p => p.id === pId);
+            const pName = proj ? proj.name : (pId === '__none__' ? 'Obecná práce' : '');
+            const pLabelEl = document.getElementById('headerTimerProject');
+            if (pLabelEl) pLabelEl.textContent = pName ? `• ${pName}` : '';
+        }
+
+        function saveTimerToStorage() {
+            try {
+                const sel = document.getElementById('timerProjectSelect');
+                const descEl = document.getElementById('timerDescInput');
+                const data = {
+                    running: timerRunning,
+                    startTime: timerStartTime,
+                    accumulatedSeconds: timerAccumulatedSeconds,
+                    startedAtFormatted: timerStartedAtFormatted,
+                    projectId: sel ? sel.value : '__none__',
+                    description: descEl ? descEl.value : ''
+                };
+                localStorage.setItem(getTimerStorageKey(), JSON.stringify(data));
+            } catch(e) {}
+        }
+
+        function loadTimerFromStorage() {
+            try {
+                const raw = localStorage.getItem(getTimerStorageKey());
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                timerAccumulatedSeconds = parseInt(data.accumulatedSeconds) || 0;
+                timerStartedAtFormatted = data.startedAtFormatted || null;
+                timerRunning = !!data.running;
+                timerStartTime = data.startTime || null;
+
+                const sel = document.getElementById('timerProjectSelect');
+                if (sel && data.projectId) sel.value = data.projectId;
+                const descEl = document.getElementById('timerDescInput');
+                if (descEl && data.description) descEl.value = data.description;
+
+                const rangeInfo = document.getElementById('timerTimeRangeInfo');
+                if (rangeInfo) {
+                    rangeInfo.textContent = timerStartedAtFormatted ? `Start: ${timerStartedAtFormatted}` : 'Start: --:--';
+                }
+
+                const btnStart = document.getElementById('btnTimerStart');
+                const btnPause = document.getElementById('btnTimerPause');
+                const badge = document.getElementById('timerStatusBadge');
+                const headerTimer = document.getElementById('headerActiveTimer');
+
+                if (timerRunning && timerStartTime) {
+                    if (btnStart) btnStart.classList.add('hidden');
+                    if (btnPause) btnPause.classList.remove('hidden');
+                    if (badge) {
+                        badge.textContent = "🟢 Běží";
+                        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                    }
+                    if (headerTimer) {
+                        headerTimer.classList.remove('hidden');
+                        headerTimer.classList.add('flex');
+                    }
+                    updateHeaderTimerProjectLabel();
+
+                    if (timerInterval) clearInterval(timerInterval);
+                    timerInterval = setInterval(updateTimerTick, 1000);
+                    updateTimerTick();
+                } else if (timerAccumulatedSeconds > 0) {
+                    if (btnStart) btnStart.classList.remove('hidden');
+                    if (btnPause) btnPause.classList.add('hidden');
+                    if (badge) {
+                        badge.textContent = "🟡 Pozastaveno";
+                        badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                    }
+                    if (headerTimer) {
+                        headerTimer.classList.remove('hidden');
+                        headerTimer.classList.add('flex');
+                    }
+                    updateHeaderTimerProjectLabel();
+                    updateTimerTick();
+                }
+            } catch(e) {}
+        }
+
+        window.updateTimerProjectsDropdown = () => {
+            const sel = document.getElementById('timerProjectSelect');
+            if (!sel) return;
+            const curVal = sel.value;
+            sel.innerHTML = `<option value="__none__">Bez projektu (Obecná práce)</option>`;
+            allProjects.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.name} ${p.client ? '(' + p.client + ')' : ''}`;
+                sel.appendChild(opt);
+            });
+            if (curVal && (curVal === '__none__' || allProjects.some(p => p.id === curVal))) {
+                sel.value = curVal;
+            }
+            updateHeaderTimerProjectLabel();
+        };
+
+        window.onTimerProjectChange = () => {
+            updateHeaderTimerProjectLabel();
+            saveTimerToStorage();
+        };
+
+        window.startTimer = () => {
+            if (timerRunning) return;
+            timerRunning = true;
+            timerStartTime = Date.now();
+            if (!timerStartedAtFormatted) {
+                const nowD = new Date();
+                timerStartedAtFormatted = nowD.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+            }
+            const rangeInfo = document.getElementById('timerTimeRangeInfo');
+            if (rangeInfo) rangeInfo.textContent = `Start: ${timerStartedAtFormatted}`;
+
+            const btnStart = document.getElementById('btnTimerStart');
+            const btnPause = document.getElementById('btnTimerPause');
+            const badge = document.getElementById('timerStatusBadge');
+            const headerTimer = document.getElementById('headerActiveTimer');
+
+            if (btnStart) btnStart.classList.add('hidden');
+            if (btnPause) btnPause.classList.remove('hidden');
+            if (badge) {
+                badge.textContent = "🟢 Běží";
+                badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+            }
+            if (headerTimer) {
+                headerTimer.classList.remove('hidden');
+                headerTimer.classList.add('flex');
+            }
+            updateHeaderTimerProjectLabel();
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimerTick, 1000);
+            updateTimerTick();
+            saveTimerToStorage();
+        };
+
+        window.pauseTimer = () => {
+            if (!timerRunning) return;
+            timerAccumulatedSeconds = getCurrentTimerSeconds();
+            timerRunning = false;
+            timerStartTime = null;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
+            const btnStart = document.getElementById('btnTimerStart');
+            const btnPause = document.getElementById('btnTimerPause');
+            const badge = document.getElementById('timerStatusBadge');
+
+            if (btnStart) btnStart.classList.remove('hidden');
+            if (btnPause) btnPause.classList.add('hidden');
+            if (badge) {
+                badge.textContent = "🟡 Pozastaveno";
+                badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+            }
+            updateTimerTick();
+            saveTimerToStorage();
+        };
+
+        window.resetTimer = () => {
+            const secs = getCurrentTimerSeconds();
+            if (secs > 0 || timerRunning) {
+                if (!confirm("Opravdu chcete vynulovat stopky a smazat naměřený čas?")) return;
+            }
+            timerRunning = false;
+            timerStartTime = null;
+            timerAccumulatedSeconds = 0;
+            timerStartedAtFormatted = null;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
+            const btnStart = document.getElementById('btnTimerStart');
+            const btnPause = document.getElementById('btnTimerPause');
+            const badge = document.getElementById('timerStatusBadge');
+            const rangeInfo = document.getElementById('timerTimeRangeInfo');
+            const dispEl = document.getElementById('timerDisplay');
+            const headerTimer = document.getElementById('headerActiveTimer');
+
+            if (btnStart) btnStart.classList.remove('hidden');
+            if (btnPause) btnPause.classList.add('hidden');
+            if (dispEl) dispEl.textContent = "00:00:00";
+            if (rangeInfo) rangeInfo.textContent = "Start: --:--";
+            if (badge) {
+                badge.textContent = "Připraveno";
+                badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700";
+            }
+            if (headerTimer) {
+                headerTimer.classList.remove('flex');
+                headerTimer.classList.add('hidden');
+            }
+            try {
+                localStorage.removeItem(getTimerStorageKey());
+            } catch(e) {}
+        };
+
+        window.stopAndSaveTimer = () => {
+            const totalSecs = getCurrentTimerSeconds();
+            if (totalSecs <= 0) {
+                return alert("Stopky nemají zaznamenán žádný čas. Klikněte na 'Spustit' pro zahájení měření.");
+            }
+
+            const calculatedHours = Math.max(0.01, Math.round((totalSecs / 3600) * 100) / 100);
+            const nowD = new Date();
+            const endTime = nowD.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+            const startTime = timerStartedAtFormatted || endTime;
+            const today = nowD.toISOString().split('T')[0];
+
+            const sel = document.getElementById('timerProjectSelect');
+            const projId = sel ? sel.value : '__none__';
+            const descEl = document.getElementById('timerDescInput');
+            const desc = descEl ? descEl.value.trim() : '';
+
+            // Pozastavíme stopky
+            if (timerRunning) {
+                timerAccumulatedSeconds = totalSecs;
+                timerRunning = false;
+                timerStartTime = null;
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }
+
+            // Otevřít modal se všemi předvyplněnými hodnotami
+            window.openWorkLogModal(projId, null, today, startTime, endTime, calculatedHours, desc);
+
+            // Vynulovat stopky
+            timerRunning = false;
+            timerStartTime = null;
+            timerAccumulatedSeconds = 0;
+            timerStartedAtFormatted = null;
+            const btnStart = document.getElementById('btnTimerStart');
+            const btnPause = document.getElementById('btnTimerPause');
+            const badge = document.getElementById('timerStatusBadge');
+            const rangeInfo = document.getElementById('timerTimeRangeInfo');
+            const dispEl = document.getElementById('timerDisplay');
+            const headerTimer = document.getElementById('headerActiveTimer');
+
+            if (btnStart) btnStart.classList.remove('hidden');
+            if (btnPause) btnPause.classList.add('hidden');
+            if (dispEl) dispEl.textContent = "00:00:00";
+            if (rangeInfo) rangeInfo.textContent = "Start: --:--";
+            if (badge) {
+                badge.textContent = "Připraveno";
+                badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700";
+            }
+            if (headerTimer) {
+                headerTimer.classList.remove('flex');
+                headerTimer.classList.add('hidden');
+            }
+            if (descEl) descEl.value = '';
+            try {
+                localStorage.removeItem(getTimerStorageKey());
+            } catch(e) {}
+        };
+
+        window.startTimerForProject = (projectId) => {
+            const sel = document.getElementById('timerProjectSelect');
+            if (sel) sel.value = projectId;
+            updateHeaderTimerProjectLabel();
+            if (!timerRunning) {
+                window.startTimer();
+            }
+            const proj = allProjects.find(p => p.id === projectId);
+            const pName = proj ? proj.name : 'Projekt';
+            alert(`⏱️ Stopky spuštěny pro projekt "${pName}"!\nČas běží a můžete jej sledovat přímo v horní liště nebo na Přehledu.`);
+        };
+
+        // --- ZOBRAZENÍ V KALENDÁŘI ---
+        window.setWorkView = (view) => {
+            activeWorkView = view;
+            const btnTable = document.getElementById('btnWorkViewTable');
+            const btnCalendar = document.getElementById('btnWorkViewCalendar');
+            const viewTable = document.getElementById('workViewTable');
+            const viewCalendar = document.getElementById('workViewCalendar');
+
+            if (view === 'calendar') {
+                if (btnTable) btnTable.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5";
+                if (btnCalendar) btnCalendar.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition flex items-center gap-1.5";
+                if (viewTable) viewTable.classList.add('hidden');
+                if (viewCalendar) viewCalendar.classList.remove('hidden');
+                window.renderWorkCalendar();
+            } else {
+                if (btnTable) btnTable.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition flex items-center gap-1.5";
+                if (btnCalendar) btnCalendar.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5";
+                if (viewCalendar) viewCalendar.classList.add('hidden');
+                if (viewTable) viewTable.classList.remove('hidden');
+            }
+        };
+
+        window.changeCalendarMonth = (delta) => {
+            currentCalendarMonth += delta;
+            if (currentCalendarMonth < 0) {
+                currentCalendarMonth = 11;
+                currentCalendarYear--;
+            } else if (currentCalendarMonth > 11) {
+                currentCalendarMonth = 0;
+                currentCalendarYear++;
+            }
+            window.renderWorkCalendar();
+        };
+
+        window.resetCalendarToToday = () => {
+            const now = new Date();
+            currentCalendarMonth = now.getMonth();
+            currentCalendarYear = now.getFullYear();
+            window.renderWorkCalendar();
+        };
+
+        window.renderWorkCalendar = () => {
+            const titleEl = document.getElementById('workCalendarMonthTitle');
+            if (titleEl) titleEl.textContent = `${monthNames[currentCalendarMonth]} ${currentCalendarYear}`;
+
+            let monthLogs = allWorkLogs.filter(l => {
+                const d = l.date ? new Date(l.date) : (l.dateObj || new Date());
+                return d.getMonth() === currentCalendarMonth && d.getFullYear() === currentCalendarYear;
+            });
+            if (activeWorkProjectFilter !== 'all') {
+                monthLogs = monthLogs.filter(l => activeWorkProjectFilter === '__none__' ? !l.projectId : l.projectId === activeWorkProjectFilter);
+            }
+
+            let monthHours = 0, monthAmount = 0;
+            monthLogs.forEach(l => {
+                const h = parseFloat(l.hours) || 0;
+                const r = parseFloat(l.hourlyRate) || 0;
+                monthHours += h;
+                monthAmount += h * r;
+            });
+
+            const hoursEl = document.getElementById('workCalendarMonthHours');
+            if (hoursEl) hoursEl.textContent = `${monthHours.toFixed(1)} h`;
+            const amountEl = document.getElementById('workCalendarMonthAmount');
+            if (amountEl) amountEl.textContent = `${monthAmount.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} Kč`;
+
+            const gridEl = document.getElementById('workCalendarGrid');
+            if (!gridEl) return;
+            gridEl.innerHTML = "";
+
+            const firstDayOfMonth = new Date(currentCalendarYear, currentCalendarMonth, 1);
+            // Pondělí = 0, Neděle = 6
+            const startOffset = (firstDayOfMonth.getDay() + 6) % 7;
+            const daysInMonth = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
+            const daysInPrevMonth = new Date(currentCalendarYear, currentCalendarMonth, 0).getDate();
+
+            const today = new Date();
+            const isCurrentMonthToday = (today.getMonth() === currentCalendarMonth && today.getFullYear() === currentCalendarYear);
+
+            // Předchozí měsíc doplňkové buňky
+            for (let i = startOffset - 1; i >= 0; i--) {
+                const dayNum = daysInPrevMonth - i;
+                const cell = document.createElement('div');
+                cell.className = "min-h-[105px] p-2 bg-slate-950/70 border-b border-r border-slate-800/80 text-slate-600 flex flex-col justify-between";
+                cell.innerHTML = `<span class="font-mono text-xs font-semibold opacity-40">${dayNum}</span>`;
+                gridEl.appendChild(cell);
+            }
+
+            // Dny aktuálního měsíce
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = isCurrentMonthToday && today.getDate() === day;
+
+                const dayLogs = monthLogs.filter(l => {
+                    if (l.date) return l.date === dateStr;
+                    if (l.dateObj) {
+                        const ld = new Date(l.dateObj);
+                        return ld.getFullYear() === currentCalendarYear && ld.getMonth() === currentCalendarMonth && ld.getDate() === day;
+                    }
+                    return false;
+                });
+
+                const dayHours = dayLogs.reduce((acc, l) => acc + (parseFloat(l.hours) || 0), 0);
+
+                const cell = document.createElement('div');
+                cell.className = `min-h-[105px] p-2 flex flex-col justify-between border-b border-r border-slate-800/80 transition group relative ${isToday ? 'bg-indigo-950/20 ring-1 ring-inset ring-indigo-500/40' : 'bg-slate-900/30 hover:bg-slate-800/50'}`;
+
+                // Hlavička dne
+                let headerHtml = `
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-mono font-bold text-xs ${isToday ? 'w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center' : 'text-slate-300'}">${day}</span>
+                            ${dayHours > 0 ? `<span class="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-950/80 px-1 py-0.2 rounded border border-indigo-800/50">+${dayHours.toFixed(1)}h</span>` : ''}
+                        </div>
+                        <button onclick="window.openWorkLogModal(${activeWorkProjectFilter !== 'all' && activeWorkProjectFilter !== '__none__' ? `'${activeWorkProjectFilter}'` : 'null'}, null, '${dateStr}')" title="Zalogovat hodiny pro ${day}. ${monthNames[currentCalendarMonth]}" class="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-slate-800 rounded text-[11px] text-slate-400 hover:text-white transition">
+                            ➕
+                        </button>
+                    </div>
+                `;
+
+                // Položky práce v daný den
+                let itemsHtml = `<div class="space-y-1 overflow-y-auto max-h-[75px] pr-0.5">`;
+                if (dayLogs.length > 0) {
+                    dayLogs.forEach(l => {
+                        const proj = allProjects.find(x => x.id === l.projectId);
+                        const pName = l.projectName || (proj ? proj.name : 'Obecné');
+                        const theme = proj && projectColorThemes[proj.color] ? projectColorThemes[proj.color] : projectColorThemes.indigo;
+                        const hours = parseFloat(l.hours) || 0;
+                        const timeRange = (l.timeFrom || l.timeTo) ? `${l.timeFrom || ''}-${l.timeTo || ''}` : `${hours}h`;
+
+                        itemsHtml += `
+                            <div onclick="window.openWorkLogModal(null, '${l.id}')" title="${escapeHtml(pName)}: ${hours}h (${l.timeFrom || ''} - ${l.timeTo || ''}) ${l.description ? '• ' + escapeHtml(l.description) : ''}" class="p-1 rounded-md bg-slate-950/90 border ${theme.border} hover:border-white/40 cursor-pointer transition text-[10px] flex items-center justify-between gap-1 shadow-sm">
+                                <div class="flex items-center gap-1 truncate">
+                                    <span class="w-1.5 h-1.5 rounded-full ${theme.dot} flex-shrink-0"></span>
+                                    <span class="font-medium text-slate-200 truncate">${escapeHtml(pName)}</span>
+                                </div>
+                                <span class="font-mono font-bold text-indigo-300 flex-shrink-0">${timeRange}</span>
+                            </div>
+                        `;
+                    });
+                }
+                itemsHtml += `</div>`;
+
+                cell.innerHTML = headerHtml + itemsHtml;
+                gridEl.appendChild(cell);
+            }
+
+            // Následující měsíc doplňkové buňky
+            const totalRendered = startOffset + daysInMonth;
+            const remainder = totalRendered % 7;
+            if (remainder > 0) {
+                const nextDaysCount = 7 - remainder;
+                for (let d = 1; d <= nextDaysCount; d++) {
+                    const cell = document.createElement('div');
+                    cell.className = "min-h-[105px] p-2 bg-slate-950/70 border-b border-r border-slate-800/80 text-slate-600 flex flex-col justify-between";
+                    cell.innerHTML = `<span class="font-mono text-xs font-semibold opacity-40">${d}</span>`;
+                    gridEl.appendChild(cell);
+                }
+            }
         };
 
         // --- POZNÁMKY K PROJEKTU (VÍCEŘÁDKOVÝ TEXT) ---
@@ -2984,7 +3636,7 @@ match /work_logs/{docId} {
 
         window.exportWorkCsv = () => {
             if (!allWorkLogs.length) return alert("Zatím nejsou k dispozici žádné odpracované hodiny k exportu.");
-            let csv = "Datum;Projekt;Klient;Popis činnosti;Odpracováno (hodiny);Sazba (Kč/h);Částka (Kč);Vyfakturováno\n";
+            let csv = "Datum;Čas (Od - Do);Projekt;Klient;Popis činnosti;Odpracováno (hodiny);Sazba (Kč/h);Částka (Kč);Vyfakturováno\n";
             allWorkLogs.forEach(l => {
                 const p = allProjects.find(x => x.id === l.projectId);
                 const pName = l.projectName || (p ? p.name : "Obecné");
@@ -2994,7 +3646,8 @@ match /work_logs/{docId} {
                 const hours = parseFloat(l.hours) || 0;
                 const total = hours * rate;
                 const dateStr = l.date || (l.dateObj ? l.dateObj.toLocaleDateString('cs-CZ') : "");
-                csv += `"${dateStr}";"${pName.replace(/"/g, '""')}";"${client.replace(/"/g, '""')}";"${descEsc}";"${hours}";"${rate}";"${total}";"${l.isBilled ? 'Ano' : 'Ne'}"\n`;
+                const timeRange = (l.timeFrom || l.timeTo) ? `${l.timeFrom || ''} - ${l.timeTo || ''}` : "";
+                csv += `"${dateStr}";"${timeRange}";"${pName.replace(/"/g, '""')}";"${client.replace(/"/g, '""')}";"${descEsc}";"${hours}";"${rate}";"${total}";"${l.isBilled ? 'Ano' : 'Ne'}"\n`;
             });
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -3081,12 +3734,12 @@ match /work_logs/{docId} {
             });
 
             // Odpracované hodiny
-            sql += `\nCREATE TABLE IF NOT EXISTS work_logs (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  project_id VARCHAR(64),\n  project_name VARCHAR(128),\n  hours DECIMAL(8,2),\n  hourly_rate DECIMAL(15,2),\n  description TEXT,\n  is_billed BOOLEAN,\n  date VARCHAR(32),\n  created_at DATETIME\n);\n\n`;
+            sql += `\nCREATE TABLE IF NOT EXISTS work_logs (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  project_id VARCHAR(64),\n  project_name VARCHAR(128),\n  hours DECIMAL(8,2),\n  hourly_rate DECIMAL(15,2),\n  description TEXT,\n  is_billed BOOLEAN,\n  date VARCHAR(32),\n  time_from VARCHAR(16),\n  time_to VARCHAR(16),\n  created_at DATETIME\n);\n\n`;
             allWorkLogs.forEach(l => {
                 const pNameEsc = (l.projectName || "").replace(/'/g, "''");
                 const descEsc = (l.description || "").replace(/'/g, "''");
                 const dateStr = l.dateObj.toISOString().slice(0, 19).replace('T', ' ');
-                sql += `INSERT INTO work_logs (id, user_id, project_id, project_name, hours, hourly_rate, description, is_billed, date, created_at) VALUES ('${l.id}', '${currentUser.uid}', '${l.projectId || ''}', '${pNameEsc}', ${l.hours || 0}, ${l.hourlyRate || 0}, '${descEsc}', ${l.isBilled ? 1 : 0}, '${l.date || ''}', '${dateStr}');\n`;
+                sql += `INSERT INTO work_logs (id, user_id, project_id, project_name, hours, hourly_rate, description, is_billed, date, time_from, time_to, created_at) VALUES ('${l.id}', '${currentUser.uid}', '${l.projectId || ''}', '${pNameEsc}', ${l.hours || 0}, ${l.hourlyRate || 0}, '${descEsc}', ${l.isBilled ? 1 : 0}, '${l.date || ''}', '${l.timeFrom || ''}', '${l.timeTo || ''}', '${dateStr}');\n`;
             });
 
             const blob = new Blob([sql], { type: 'text/sql' });
@@ -3202,6 +3855,8 @@ match /work_logs/{docId} {
                                     description: l.description || "",
                                     isBilled: !!l.isBilled,
                                     date: l.date || d.toISOString().split('T')[0],
+                                    timeFrom: l.timeFrom || "",
+                                    timeTo: l.timeTo || "",
                                     createdAt: Timestamp.fromDate(d)
                                 };
                                 if (workStorageMode === 'cloud') {
