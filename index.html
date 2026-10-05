@@ -185,6 +185,7 @@
                     <div id="headerActiveTimer" onclick="switchTab('overview'); const el = document.getElementById('dashboardTimerCard'); if(el) el.scrollIntoView({behavior: 'smooth'})" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-950/80 border border-indigo-500/50 text-xs font-mono font-bold text-indigo-300 hover:border-indigo-400 transition cursor-pointer shadow-lg shadow-indigo-500/10" title="Kliknutím přejdete na stopky na Dashboardu">
                         <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                         <span id="headerTimerText">00:00:00</span>
+                        <span id="headerTimerEarnings" class="text-emerald-400 font-bold ml-0.5"></span>
                         <span id="headerTimerProject" class="text-slate-400 font-sans text-[11px] truncate max-w-[90px] hidden sm:inline"></span>
                     </div>
 
@@ -275,7 +276,7 @@
             <div id="dashboardTimerCard" class="glass-card p-5 sm:p-6 rounded-2xl border border-indigo-500/30 mb-8 bg-gradient-to-r from-slate-900/95 via-indigo-950/25 to-slate-900/95 shadow-2xl relative overflow-hidden">
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
                     
-                    <!-- Left: Title, Project selector & Description -->
+                    <!-- Left: Title, Project selector, Hourly rate & Description -->
                     <div class="flex-1 w-full lg:w-auto">
                         <div class="flex items-center gap-2.5 mb-2.5">
                             <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
@@ -284,24 +285,46 @@
                             </h2>
                             <span id="timerStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Připraveno</span>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                            <div class="sm:col-span-5">
                                 <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Přiřadit k projektu:</label>
                                 <select id="timerProjectSelect" onchange="window.onTimerProjectChange()" class="w-full p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-xs font-semibold focus:outline-none focus:border-indigo-500 transition cursor-pointer">
                                     <option value="__none__">Bez projektu (Obecná práce)</option>
                                 </select>
                             </div>
-                            <div>
+                            <div class="sm:col-span-3">
+                                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Hodinová sazba:</label>
+                                <div class="relative">
+                                    <input id="timerRateInput" type="number" step="10" min="0" placeholder="0" oninput="window.onTimerRateChange()" class="w-full p-2.5 pr-9 rounded-xl bg-slate-950/80 border border-slate-700/80 text-emerald-400 text-xs font-mono font-bold focus:outline-none focus:border-emerald-500 transition">
+                                    <span class="absolute right-2.5 top-2.5 text-[10px] font-bold text-slate-500 pointer-events-none">Kč/h</span>
+                                </div>
+                            </div>
+                            <div class="sm:col-span-4">
                                 <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Popis činnosti:</label>
-                                <input id="timerDescInput" type="text" placeholder="Např. Kódování komponenty, schůzka s klientem..." class="w-full p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-indigo-500 transition">
+                                <input id="timerDescInput" type="text" placeholder="Např. Kódování, schůzka..." class="w-full p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-indigo-500 transition">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Center: Digital Clock Display -->
-                    <div class="flex flex-col items-center justify-center px-6 py-3 rounded-2xl bg-slate-950/80 border border-slate-800/80 min-w-[210px] w-full lg:w-auto shadow-inner">
-                        <div id="timerDisplay" class="text-3xl sm:text-4xl font-extrabold font-mono tracking-wider text-indigo-400 drop-shadow">00:00:00</div>
-                        <div id="timerTimeRangeInfo" class="text-[11px] text-slate-400 font-mono mt-1">Start: --:--</div>
+                    <!-- Center: Digital Clock Display & Live Earnings Counter -->
+                    <div class="flex flex-col items-center justify-center px-5 py-3 rounded-2xl bg-slate-950/90 border border-slate-800/90 min-w-[245px] w-full lg:w-auto shadow-inner relative overflow-hidden group">
+                        <div class="flex items-center justify-center gap-3.5 w-full">
+                            <div class="text-center">
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Čas</div>
+                                <div id="timerDisplay" class="text-2xl sm:text-3xl font-extrabold font-mono tracking-wider text-indigo-400 drop-shadow">00:00:00</div>
+                            </div>
+                            <div class="h-9 w-px bg-slate-800/80 self-center"></div>
+                            <div class="text-center">
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-center gap-1">
+                                    <span>💰</span><span>Zarobeno</span>
+                                </div>
+                                <div id="timerEarningsDisplay" class="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-emerald-400 drop-shadow">0,00 Kč</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between w-full mt-2 pt-1.5 border-t border-slate-800/80 text-[11px] font-mono">
+                            <span id="timerTimeRangeInfo" class="text-slate-400">Start: --:--</span>
+                            <span id="timerRatePreview" class="text-emerald-400/90 font-bold">0 Kč/h</span>
+                        </div>
                     </div>
 
                     <!-- Right: Control Buttons -->
@@ -2674,7 +2697,7 @@ match /work_logs/{docId} {
         };
 
         // --- ZÁZNAMY HODIN (LOGOVÁNÍ) ---
-        window.openWorkLogModal = (projectId = null, logId = null, prefillDate = null, prefillTimeFrom = null, prefillTimeTo = null, prefillHours = null, prefillDesc = null) => {
+        window.openWorkLogModal = (projectId = null, logId = null, prefillDate = null, prefillTimeFrom = null, prefillTimeTo = null, prefillHours = null, prefillDesc = null, prefillRate = null) => {
             const sel = document.getElementById('workLogModalProject');
             sel.innerHTML = "";
             
@@ -2734,8 +2757,12 @@ match /work_logs/{docId} {
                 billedInput.checked = false;
                 
                 // Auto-fill sazby
-                const curProj = allProjects.find(p => p.id === sel.value);
-                rateInput.value = curProj ? (curProj.hourlyRate || 0) : 0;
+                if (prefillRate !== null && prefillRate !== undefined) {
+                    rateInput.value = prefillRate;
+                } else {
+                    const curProj = allProjects.find(p => p.id === sel.value);
+                    rateInput.value = curProj ? (curProj.hourlyRate || 0) : 0;
+                }
             }
             
             window.calculateWorkLogAmount();
@@ -2988,6 +3015,39 @@ match /work_logs/{docId} {
             return timerAccumulatedSeconds;
         }
 
+        function getTimerHourlyRate() {
+            const rateEl = document.getElementById('timerRateInput');
+            if (rateEl && rateEl.value !== "" && !isNaN(parseFloat(rateEl.value))) {
+                return parseFloat(rateEl.value) || 0;
+            }
+            const sel = document.getElementById('timerProjectSelect');
+            const pId = sel ? sel.value : '__none__';
+            const proj = allProjects.find(p => p.id === pId);
+            return proj ? (parseFloat(proj.hourlyRate) || 0) : 0;
+        }
+
+        function getCurrentTimerEarnings() {
+            const secs = getCurrentTimerSeconds();
+            const rate = getTimerHourlyRate();
+            return (secs / 3600) * rate;
+        }
+
+        function formatTimerEarnings(earned) {
+            if (earned <= 0) return "0,00 Kč";
+            if (earned < 100) {
+                return earned.toLocaleString('cs-CZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " Kč";
+            }
+            return Math.round(earned).toLocaleString('cs-CZ') + " Kč";
+        }
+
+        function formatHeaderTimerEarnings(earned) {
+            if (earned <= 0) return "0 Kč";
+            if (earned < 100) {
+                return earned.toLocaleString('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " Kč";
+            }
+            return Math.round(earned).toLocaleString('cs-CZ') + " Kč";
+        }
+
         function updateTimerTick() {
             const secs = getCurrentTimerSeconds();
             const formatted = formatTimerSeconds(secs);
@@ -2995,6 +3055,16 @@ match /work_logs/{docId} {
             if (dispEl) dispEl.textContent = formatted;
             const headerText = document.getElementById('headerTimerText');
             if (headerText) headerText.textContent = formatted;
+
+            // Počítadlo zarobených peněz v reálném čase
+            const earned = getCurrentTimerEarnings();
+            const rate = getTimerHourlyRate();
+            const earnDisp = document.getElementById('timerEarningsDisplay');
+            if (earnDisp) earnDisp.textContent = formatTimerEarnings(earned);
+            const headerEarn = document.getElementById('headerTimerEarnings');
+            if (headerEarn) headerEarn.textContent = `• ${formatHeaderTimerEarnings(earned)}`;
+            const ratePreview = document.getElementById('timerRatePreview');
+            if (ratePreview) ratePreview.textContent = `${rate} Kč/h`;
         }
 
         function updateHeaderTimerProjectLabel() {
@@ -3010,12 +3080,14 @@ match /work_logs/{docId} {
             try {
                 const sel = document.getElementById('timerProjectSelect');
                 const descEl = document.getElementById('timerDescInput');
+                const rateEl = document.getElementById('timerRateInput');
                 const data = {
                     running: timerRunning,
                     startTime: timerStartTime,
                     accumulatedSeconds: timerAccumulatedSeconds,
                     startedAtFormatted: timerStartedAtFormatted,
                     projectId: sel ? sel.value : '__none__',
+                    rate: rateEl ? rateEl.value : '',
                     description: descEl ? descEl.value : ''
                 };
                 localStorage.setItem(getTimerStorageKey(), JSON.stringify(data));
@@ -3036,6 +3108,13 @@ match /work_logs/{docId} {
                 if (sel && data.projectId) sel.value = data.projectId;
                 const descEl = document.getElementById('timerDescInput');
                 if (descEl && data.description) descEl.value = data.description;
+                const rateEl = document.getElementById('timerRateInput');
+                if (rateEl && data.rate !== undefined && data.rate !== '') {
+                    rateEl.value = data.rate;
+                } else if (sel && sel.value !== '__none__') {
+                    const curP = allProjects.find(p => p.id === sel.value);
+                    if (curP && rateEl) rateEl.value = curP.hourlyRate || '';
+                }
 
                 const rangeInfo = document.getElementById('timerTimeRangeInfo');
                 if (rangeInfo) {
@@ -3088,17 +3167,36 @@ match /work_logs/{docId} {
             allProjects.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.id;
-                opt.textContent = `${p.name} ${p.client ? '(' + p.client + ')' : ''}`;
+                opt.textContent = `${p.name} ${p.client ? '(' + p.client + ')' : ''} - ${p.hourlyRate ? p.hourlyRate + ' Kč/h' : '0 Kč/h'}`;
                 sel.appendChild(opt);
             });
             if (curVal && (curVal === '__none__' || allProjects.some(p => p.id === curVal))) {
                 sel.value = curVal;
             }
+            const rateEl = document.getElementById('timerRateInput');
+            if (rateEl && (!rateEl.value || rateEl.value === '0')) {
+                const proj = allProjects.find(p => p.id === sel.value);
+                if (proj && proj.hourlyRate) rateEl.value = proj.hourlyRate;
+            }
             updateHeaderTimerProjectLabel();
+            updateTimerTick();
         };
 
         window.onTimerProjectChange = () => {
+            const sel = document.getElementById('timerProjectSelect');
+            const pId = sel ? sel.value : '__none__';
+            const proj = allProjects.find(p => p.id === pId);
+            const rateEl = document.getElementById('timerRateInput');
+            if (rateEl) {
+                rateEl.value = proj && proj.hourlyRate ? proj.hourlyRate : '';
+            }
             updateHeaderTimerProjectLabel();
+            updateTimerTick();
+            saveTimerToStorage();
+        };
+
+        window.onTimerRateChange = () => {
+            updateTimerTick();
             saveTimerToStorage();
         };
 
@@ -3179,11 +3277,14 @@ match /work_logs/{docId} {
             const badge = document.getElementById('timerStatusBadge');
             const rangeInfo = document.getElementById('timerTimeRangeInfo');
             const dispEl = document.getElementById('timerDisplay');
+            const earnDisp = document.getElementById('timerEarningsDisplay');
             const headerTimer = document.getElementById('headerActiveTimer');
+            const headerEarn = document.getElementById('headerTimerEarnings');
 
             if (btnStart) btnStart.classList.remove('hidden');
             if (btnPause) btnPause.classList.add('hidden');
             if (dispEl) dispEl.textContent = "00:00:00";
+            if (earnDisp) earnDisp.textContent = "0,00 Kč";
             if (rangeInfo) rangeInfo.textContent = "Start: --:--";
             if (badge) {
                 badge.textContent = "Připraveno";
@@ -3193,6 +3294,7 @@ match /work_logs/{docId} {
                 headerTimer.classList.remove('flex');
                 headerTimer.classList.add('hidden');
             }
+            if (headerEarn) headerEarn.textContent = "";
             try {
                 localStorage.removeItem(getTimerStorageKey());
             } catch(e) {}
@@ -3214,6 +3316,7 @@ match /work_logs/{docId} {
             const projId = sel ? sel.value : '__none__';
             const descEl = document.getElementById('timerDescInput');
             const desc = descEl ? descEl.value.trim() : '';
+            const rate = getTimerHourlyRate();
 
             // Pozastavíme stopky
             if (timerRunning) {
@@ -3226,8 +3329,8 @@ match /work_logs/{docId} {
                 }
             }
 
-            // Otevřít modal se všemi předvyplněnými hodnotami
-            window.openWorkLogModal(projId, null, today, startTime, endTime, calculatedHours, desc);
+            // Otevřít modal se všemi předvyplněnými hodnotami včetně vypočtené sazby
+            window.openWorkLogModal(projId, null, today, startTime, endTime, calculatedHours, desc, rate);
 
             // Vynulovat stopky
             timerRunning = false;
@@ -3239,11 +3342,14 @@ match /work_logs/{docId} {
             const badge = document.getElementById('timerStatusBadge');
             const rangeInfo = document.getElementById('timerTimeRangeInfo');
             const dispEl = document.getElementById('timerDisplay');
+            const earnDisp = document.getElementById('timerEarningsDisplay');
             const headerTimer = document.getElementById('headerActiveTimer');
+            const headerEarn = document.getElementById('headerTimerEarnings');
 
             if (btnStart) btnStart.classList.remove('hidden');
             if (btnPause) btnPause.classList.add('hidden');
             if (dispEl) dispEl.textContent = "00:00:00";
+            if (earnDisp) earnDisp.textContent = "0,00 Kč";
             if (rangeInfo) rangeInfo.textContent = "Start: --:--";
             if (badge) {
                 badge.textContent = "Připraveno";
@@ -3253,6 +3359,7 @@ match /work_logs/{docId} {
                 headerTimer.classList.remove('flex');
                 headerTimer.classList.add('hidden');
             }
+            if (headerEarn) headerEarn.textContent = "";
             if (descEl) descEl.value = '';
             try {
                 localStorage.removeItem(getTimerStorageKey());
@@ -3262,13 +3369,18 @@ match /work_logs/{docId} {
         window.startTimerForProject = (projectId) => {
             const sel = document.getElementById('timerProjectSelect');
             if (sel) sel.value = projectId;
+            const proj = allProjects.find(p => p.id === projectId);
+            const rateEl = document.getElementById('timerRateInput');
+            if (rateEl && proj) {
+                rateEl.value = proj.hourlyRate || '';
+            }
             updateHeaderTimerProjectLabel();
             if (!timerRunning) {
                 window.startTimer();
             }
-            const proj = allProjects.find(p => p.id === projectId);
             const pName = proj ? proj.name : 'Projekt';
-            alert(`⏱️ Stopky spuštěny pro projekt "${pName}"!\nČas běží a můžete jej sledovat přímo v horní liště nebo na Přehledu.`);
+            const rateStr = proj && proj.hourlyRate ? ` (${proj.hourlyRate} Kč/h)` : '';
+            alert(`⏱️ Stopky spuštěny pro projekt "${pName}"${rateStr}!\nČas i zarobené peníze běží a můžete je sledovat v reálném čase přímo v horní liště nebo na Přehledu.`);
         };
 
         // --- ZOBRAZENÍ V KALENDÁŘI ---
