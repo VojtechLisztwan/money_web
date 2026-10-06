@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Správa osobních financí | PRO</title>
+    <title>Správa osobních financí</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -127,25 +128,102 @@
         </div>
     </div>
 
-    <!-- APP SECTION -->
-    <div id="app-section" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+    <!-- MOBILE OFF-CANVAS SIDEBAR MENU (SCHOVANÉ BOČNÍ MENU PRO MOBILY A ÚZKÁ ZOBRAZENÍ) -->
+    <div id="mobileSidebarContainer" class="hidden fixed inset-0 z-50 no-print" role="dialog" aria-modal="true">
+        <!-- Backdrop blur overlay -->
+        <div id="mobileSidebarBackdrop" onclick="window.closeMobileSidebar()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"></div>
         
-        <!-- TOP NAVBAR -->
-        <header class="glass-header rounded-2xl p-4 sm:p-5 mb-8 no-print shadow-xl">
-            <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
-                
-                <!-- Logo & Title -->
-                <div class="flex items-center gap-3.5 w-full lg:w-auto justify-between lg:justify-start">
+        <!-- Sliding drawer -->
+        <div id="mobileSidebarDrawer" class="fixed top-0 left-0 bottom-0 w-72 sm:w-80 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800 p-5 shadow-2xl flex flex-col justify-between transform -translate-x-full transition-transform duration-300 ease-in-out z-10 overflow-y-auto">
+            <div class="space-y-6">
+                <!-- Sidebar Header -->
+                <div class="flex items-center justify-between pb-4 border-b border-slate-800">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/30 text-xl font-bold">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-xl shadow-md shadow-blue-500/30">
                             💼
                         </div>
                         <div>
-                            <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                            <h2 class="text-base font-extrabold text-white">Správa financí</h2>
+                            <p id="drawerUserEmail" class="text-xs text-slate-400 font-medium truncate max-w-[160px]"></p>
+                        </div>
+                    </div>
+                    <button onclick="window.closeMobileSidebar()" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white transition" aria-label="Zavřít menu">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Active Timer Notice in Sidebar (if active) -->
+                <div id="drawerTimerBadge" onclick="window.closeMobileSidebar(); switchTab('work');" class="hidden items-center justify-between p-3 rounded-xl bg-indigo-950/60 border border-indigo-500/40 text-xs font-mono text-indigo-300 cursor-pointer hover:border-indigo-400 transition shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span class="font-sans font-semibold">Stopky běží:</span>
+                    </div>
+                    <span id="drawerTimerText" class="font-bold text-emerald-400">00:00:00</span>
+                </div>
+
+                <!-- Nav Menu Links -->
+                <div class="space-y-1.5">
+                    <p class="text-[10px] uppercase font-bold tracking-wider text-slate-500 px-3 mb-2">Navigace</p>
+                    <button onclick="switchTab('overview')" data-tab="overview" data-mobile-tab="true" class="w-full text-left px-3.5 py-2.5 rounded-xl font-bold text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition flex items-center gap-3">
+                        <span class="text-base">📊</span><span>Přehled</span>
+                    </button>
+                    <button onclick="switchTab('work')" data-tab="work" data-mobile-tab="true" class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
+                        <span class="text-base">💼</span><span>Práce & Projekty</span>
+                    </button>
+                    <button onclick="switchTab('analysis')" data-tab="analysis" data-mobile-tab="true" class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
+                        <span class="text-base">📈</span><span>Analýza</span>
+                    </button>
+                    <button onclick="switchTab('recurring')" data-tab="recurring" data-mobile-tab="true" class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
+                        <span class="text-base">🔁</span><span>Trvalé platby</span>
+                    </button>
+                    <button onclick="switchTab('reports')" data-tab="reports" data-mobile-tab="true" class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
+                        <span class="text-base">📑</span><span>Reporty</span>
+                    </button>
+                    <button onclick="switchTab('investments')" data-tab="investments" data-mobile-tab="true" class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-orange-400 hover:text-orange-300 hover:bg-orange-950/30 transition flex items-center gap-3">
+                        <span class="text-base">₿</span><span>Bitcoin</span>
+                    </button>
+                    <button onclick="switchTab('settings')" data-tab="settings" data-mobile-tab="true" class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
+                        <span class="text-base">⚙️</span><span>Data / DB</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="pt-4 mt-6 border-t border-slate-800 space-y-3">
+                <button onclick="document.getElementById('btnLogout').click()" class="w-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <span>Odhlásit se</span>
+                </button>
+                <div class="text-[10px] text-center text-slate-500 font-mono">
+                    Správa financí &bull; Osobní portál
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP SECTION -->
+    <div id="app-section" class="hidden max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4">
+        
+        <!-- TOP NAVBAR -->
+        <header class="glass-header rounded-2xl p-3.5 sm:p-5 mb-6 sm:mb-8 no-print shadow-xl">
+            <div class="flex flex-col lg:flex-row justify-between items-center gap-4">
+                
+                <!-- Logo & Title & Mobile Hamburger Button -->
+                <div class="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
+                    <div class="flex items-center gap-3">
+                        <!-- Mobile Hamburger Button (Only on < lg screens) -->
+                        <button onclick="window.openMobileSidebar()" class="lg:hidden p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-white transition shadow-sm flex items-center justify-center" aria-label="Otevřít boční menu">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        </button>
+
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/30 text-xl font-bold flex-shrink-0">
+                            💼
+                        </div>
+                        <div>
+                            <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
                                 <span>Správa financí</span>
-                                <span class="px-2 py-0.5 text-[10px] uppercase tracking-widest font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full">PRO</span>
                             </h1>
-                            <p id="navUserEmail" class="text-xs text-slate-400 font-medium truncate max-w-[200px]"></p>
+                            <p id="navUserEmail" class="text-xs text-slate-400 font-medium truncate max-w-[150px] sm:max-w-[200px]"></p>
                         </div>
                     </div>
                     
@@ -154,8 +232,8 @@
                     </button>
                 </div>
                 
-                <!-- Navigation Tabs -->
-                <nav class="flex flex-wrap items-center justify-center gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800/80 w-full lg:w-auto overflow-x-auto">
+                <!-- Desktop Navigation Tabs (Hidden on mobile / narrow view, accessible via sidebar drawer) -->
+                <nav class="hidden lg:flex flex-wrap items-center justify-center gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800/80 overflow-x-auto">
                     <button onclick="switchTab('overview')" data-tab="overview" class="px-3.5 py-2 rounded-lg font-bold text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition-all duration-200 flex items-center gap-1.5">
                         <span>📊</span><span>Přehled</span>
                     </button>
@@ -180,9 +258,9 @@
                 </nav>
 
                 <!-- Period Filter, Timer & Logout -->
-                <div class="flex flex-wrap items-center justify-end gap-3 w-full lg:w-auto">
+                <div class="flex flex-wrap items-center justify-end gap-2.5 sm:gap-3 w-full lg:w-auto">
                     <!-- Header Active Timer Badge (visible when stopwatch is running) -->
-                    <div id="headerActiveTimer" onclick="switchTab('overview'); const el = document.getElementById('dashboardTimerCard'); if(el) el.scrollIntoView({behavior: 'smooth'})" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-950/80 border border-indigo-500/50 text-xs font-mono font-bold text-indigo-300 hover:border-indigo-400 transition cursor-pointer shadow-lg shadow-indigo-500/10" title="Kliknutím přejdete na stopky na Dashboardu">
+                    <div id="headerActiveTimer" onclick="switchTab('work'); const el = document.getElementById('dashboardTimerCard'); if(el) el.scrollIntoView({behavior: 'smooth'})" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-950/80 border border-indigo-500/50 text-xs font-mono font-bold text-indigo-300 hover:border-indigo-400 transition cursor-pointer shadow-lg shadow-indigo-500/10" title="Kliknutím přejdete na stopky v sekci Práce">
                         <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                         <span id="headerTimerText">00:00:00</span>
                         <span id="headerTimerEarnings" class="text-emerald-400 font-bold ml-0.5"></span>
@@ -190,10 +268,10 @@
                     </div>
 
                     <!-- Smart Filter Container -->
-                    <div class="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800 w-full sm:w-auto justify-end">
-                        <span class="text-xs font-semibold text-slate-400 pl-2 hidden sm:inline">🗓️ Období:</span>
+                    <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800 w-full sm:w-auto justify-between sm:justify-end">
+                        <span class="text-xs font-semibold text-slate-400 pl-1.5 hidden sm:inline">🗓️ Období:</span>
                         
-                        <select id="globalPeriodFilter" class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-blue-300 outline-none focus:border-blue-500 cursor-pointer transition">
+                        <select id="globalPeriodFilter" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-blue-300 outline-none focus:border-blue-500 cursor-pointer transition flex-1 sm:flex-initial">
                             <option value="current_month" selected>Tento měsíc</option>
                             <option value="last_month">Minulý měsíc</option>
                             <option value="last_3_months">Poslední 3 měsíce</option>
@@ -270,82 +348,6 @@
                         Kurz: 0 Kč / BTC
                     </p>
                 </div>
-            </div>
-
-            <!-- LIVE TRACKER / STOPKY NA DASHBOARDU -->
-            <div id="dashboardTimerCard" class="glass-card p-5 sm:p-6 rounded-2xl border border-indigo-500/30 mb-8 bg-gradient-to-r from-slate-900/95 via-indigo-950/25 to-slate-900/95 shadow-2xl relative overflow-hidden">
-                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
-                    
-                    <!-- Left: Title, Project selector, Hourly rate & Description -->
-                    <div class="flex-1 w-full lg:w-auto">
-                        <div class="flex items-center gap-2.5 mb-2.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                            <h2 class="text-base font-bold text-white flex items-center gap-2">
-                                <span>⏱️</span><span>Stopky & Sledování odpracovaného času</span>
-                            </h2>
-                            <span id="timerStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Připraveno</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
-                            <div class="sm:col-span-5">
-                                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Přiřadit k projektu:</label>
-                                <select id="timerProjectSelect" onchange="window.onTimerProjectChange()" class="w-full p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-xs font-semibold focus:outline-none focus:border-indigo-500 transition cursor-pointer">
-                                    <option value="__none__">Bez projektu (Obecná práce)</option>
-                                </select>
-                            </div>
-                            <div class="sm:col-span-3">
-                                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Hodinová sazba:</label>
-                                <div class="relative">
-                                    <input id="timerRateInput" type="number" step="10" min="0" placeholder="0" oninput="window.onTimerRateChange()" class="w-full p-2.5 pr-9 rounded-xl bg-slate-950/80 border border-slate-700/80 text-emerald-400 text-xs font-mono font-bold focus:outline-none focus:border-emerald-500 transition">
-                                    <span class="absolute right-2.5 top-2.5 text-[10px] font-bold text-slate-500 pointer-events-none">Kč/h</span>
-                                </div>
-                            </div>
-                            <div class="sm:col-span-4">
-                                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Popis činnosti:</label>
-                                <input id="timerDescInput" type="text" placeholder="Např. Kódování, schůzka..." class="w-full p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-indigo-500 transition">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Center: Digital Clock Display & Live Earnings Counter -->
-                    <div class="flex flex-col items-center justify-center px-5 py-3 rounded-2xl bg-slate-950/90 border border-slate-800/90 min-w-[245px] w-full lg:w-auto shadow-inner relative overflow-hidden group">
-                        <div class="flex items-center justify-center gap-3.5 w-full">
-                            <div class="text-center">
-                                <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Čas</div>
-                                <div id="timerDisplay" class="text-2xl sm:text-3xl font-extrabold font-mono tracking-wider text-indigo-400 drop-shadow">00:00:00</div>
-                            </div>
-                            <div class="h-9 w-px bg-slate-800/80 self-center"></div>
-                            <div class="text-center">
-                                <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-center gap-1">
-                                    <span>💰</span><span>Zarobeno</span>
-                                </div>
-                                <div id="timerEarningsDisplay" class="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-emerald-400 drop-shadow">0,00 Kč</div>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between w-full mt-2 pt-1.5 border-t border-slate-800/80 text-[11px] font-mono">
-                            <span id="timerTimeRangeInfo" class="text-slate-400">Start: --:--</span>
-                            <span id="timerRatePreview" class="text-emerald-400/90 font-bold">0 Kč/h</span>
-                        </div>
-                    </div>
-
-                    <!-- Right: Control Buttons -->
-                    <div class="flex items-center gap-2 w-full lg:w-auto justify-end flex-wrap">
-                        <button id="btnTimerStart" onclick="window.startTimer()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-1.5">
-                            <span>▶️</span><span>Spustit</span>
-                        </button>
-                        <button id="btnTimerPause" onclick="window.pauseTimer()" class="hidden flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-1.5">
-                            <span>⏸️</span><span>Pauza</span>
-                        </button>
-                        <button id="btnTimerStop" onclick="window.stopAndSaveTimer()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5">
-                            <span>⏹️</span><span>Uložit hodiny</span>
-                        </button>
-                        <button id="btnTimerReset" onclick="window.resetTimer()" title="Vynulovat stopky" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition border border-slate-700">
-                            🔄
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-
             <!-- Main Layout Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 
@@ -420,8 +422,11 @@
                             </h2>
                             <p class="text-xs text-slate-400 mt-0.5">Zobrazuje položky odpovídající vybranému filtru nahoře</p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <button onclick="deleteSelected()" class="text-rose-400 hover:text-white bg-rose-950/40 hover:bg-rose-900/80 border border-rose-800/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="window.exportTransactionsXlsx(true)" title="Stáhnout zobrazené transakce do Excelu (.xlsx)" class="text-emerald-300 hover:text-white bg-emerald-950/40 hover:bg-emerald-900/80 border border-emerald-800/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                                <span>📊</span><span>Exportovat do XLSX</span>
+                            </button>
+                            <button onclick="deleteSelected()" class="text-rose-400 hover:text-white bg-rose-950/40 hover:bg-rose-900/80 border border-rose-800/60 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 shadow-sm active:scale-95">
                                 <span>🗑️ Smazat vybrané</span>
                             </button>
                         </div>
@@ -468,6 +473,80 @@
                     <button onclick="window.showFirebaseRulesModal()" class="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold border border-amber-500/40 whitespace-nowrap transition text-xs shadow-sm">
                         📋 Návod na pravidla
                     </button>
+                </div>
+            </div>
+
+            <!-- STOPKY NA PRÁCI (PŘESUNUTO DO OKNA PRÁCE) -->
+            <div id="dashboardTimerCard" class="glass-card p-5 sm:p-6 rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-slate-900/95 via-indigo-950/25 to-slate-900/95 shadow-2xl relative overflow-hidden">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+                    
+                    <!-- Left: Title, Project selector, Hourly rate & Description -->
+                    <div class="flex-1 w-full lg:w-auto">
+                        <div class="flex items-center gap-2.5 mb-2.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                            <h2 class="text-base font-bold text-white flex items-center gap-2">
+                                <span>⏱️</span><span>Stopky & Sledování odpracovaného času</span>
+                            </h2>
+                            <span id="timerStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Připraveno</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                            <div class="sm:col-span-5">
+                                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Přiřadit k projektu:</label>
+                                <select id="timerProjectSelect" onchange="window.onTimerProjectChange()" class="w-full p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-xs font-semibold focus:outline-none focus:border-indigo-500 transition cursor-pointer">
+                                    <option value="__none__">Bez projektu (Obecná práce)</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Hodinová sazba:</label>
+                                <div class="relative">
+                                    <input id="timerRateInput" type="number" step="10" min="0" placeholder="0" oninput="window.onTimerRateChange()" class="w-full p-2.5 pr-9 rounded-xl bg-slate-950/80 border border-slate-700/80 text-emerald-400 text-xs font-mono font-bold focus:outline-none focus:border-emerald-500 transition">
+                                    <span class="absolute right-2.5 top-2.5 text-[10px] font-bold text-slate-500 pointer-events-none">Kč/h</span>
+                                </div>
+                            </div>
+                            <div class="sm:col-span-4">
+                                <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Popis činnosti:</label>
+                                <input id="timerDescInput" type="text" placeholder="Např. Kódování, schůzka..." class="w-full p-2.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center: Digital Clock Display & Live Earnings Counter -->
+                    <div class="flex flex-col items-center justify-center px-5 py-3 rounded-2xl bg-slate-950/90 border border-slate-800/90 min-w-[245px] w-full lg:w-auto shadow-inner relative overflow-hidden group">
+                        <div class="flex items-center justify-center gap-3.5 w-full">
+                            <div class="text-center">
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Čas</div>
+                                <div id="timerDisplay" class="text-2xl sm:text-3xl font-extrabold font-mono tracking-wider text-indigo-400 drop-shadow">00:00:00</div>
+                            </div>
+                            <div class="h-9 w-px bg-slate-800/80 self-center"></div>
+                            <div class="text-center">
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-center gap-1">
+                                    <span>💰</span><span>Zarobeno</span>
+                                </div>
+                                <div id="timerEarningsDisplay" class="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-emerald-400 drop-shadow">0,00 Kč</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between w-full mt-2 pt-1.5 border-t border-slate-800/80 text-[11px] font-mono">
+                            <span id="timerTimeRangeInfo" class="text-slate-400">Start: --:--</span>
+                            <span id="timerRatePreview" class="text-emerald-400/90 font-bold">0 Kč/h</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Control Buttons -->
+                    <div class="flex items-center gap-2 w-full lg:w-auto justify-end flex-wrap">
+                        <button id="btnTimerStart" onclick="window.startTimer()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-1.5">
+                            <span>▶️</span><span>Spustit</span>
+                        </button>
+                        <button id="btnTimerPause" onclick="window.pauseTimer()" class="hidden flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs transition shadow-lg shadow-amber-600/30 flex items-center justify-center gap-1.5">
+                            <span>⏸️</span><span>Pauza</span>
+                        </button>
+                        <button id="btnTimerStop" onclick="window.stopAndSaveTimer()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-1.5">
+                            <span>⏹️</span><span>Uložit hodiny</span>
+                        </button>
+                        <button id="btnTimerReset" onclick="window.resetTimer()" title="Vynulovat stopky" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition border border-slate-700">
+                            🔄
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
@@ -1044,51 +1123,140 @@
                         ⚙️
                     </div>
                     <div>
-                        <h1 class="text-xl font-extrabold text-white">Správa dat a Databáze (Export & Import)</h1>
-                        <p class="text-xs text-slate-400">Kompletní zálohování, exporty pro databáze (SQL / JSON / CSV) a obnova z lokálního souboru</p>
+                        <h1 class="text-xl font-extrabold text-white">Správa dat, Kategorií a Databáze</h1>
+                        <p class="text-xs text-slate-400">Editace kategorií příjmů i výdajů, kompletní zálohování a exporty (SQL / JSON / XLSX / CSV)</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <!-- SPRÁVA KATEGORIÍ PŘÍJMŮ A VÝDAJŮ -->
+                <div class="bg-slate-900/60 p-5 sm:p-6 rounded-2xl border border-slate-800 mb-8 shadow-inner">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-800">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-xl">🏷️</span>
+                            <div>
+                                <h2 class="text-base font-bold text-white">Editace kategorií (Příjmy & Výdaje)</h2>
+                                <p class="text-xs text-slate-400 mt-0.5">Spravujte kategorie nabízené při zadávání plateb. Můžete přidávat nové, přejmenovávat nebo mazat nepoužívané.</p>
+                            </div>
+                        </div>
+                        <button onclick="window.resetCategoriesToDefault()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold transition flex items-center gap-1.5 self-start sm:self-auto shadow-sm">
+                            <span>🔄</span><span>Obnovit výchozí</span>
+                        </button>
+                    </div>
+
+                    <!-- Category Dual Columns: Výdaje & Příjmy -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                        <!-- Column 1: Výdajové kategorie -->
+                        <div class="bg-slate-950/80 rounded-2xl p-4 sm:p-5 border border-slate-800/90 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                        <h3 class="font-bold text-white text-sm">Kategorie Výdajů</h3>
+                                    </div>
+                                    <span id="expenseCategoryCountBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">0 kategorií</span>
+                                </div>
+
+                                <!-- Add new expense category -->
+                                <div class="flex items-center gap-2 mb-3">
+                                    <input id="newExpenseCatInput" type="text" placeholder="Nová kategorie výdaje (např. Cestování)..." class="flex-1 p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-rose-500 transition font-medium" onkeydown="if(event.key === 'Enter') window.addCategory('Výdaj')">
+                                    <button onclick="window.addCategory('Výdaj')" class="px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition shadow-md shadow-rose-600/20 whitespace-nowrap flex items-center gap-1">
+                                        <span>➕ Přidat</span>
+                                    </button>
+                                </div>
+
+                                <!-- List of expense categories -->
+                                <div id="expenseCategoriesList" class="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                                    <!-- Dynamic items -->
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-3 pt-2.5 border-t border-slate-800/80">Kategorie se ihned nabízejí ve formuláři nové transakce i filtrech.</p>
+                        </div>
+
+                        <!-- Column 2: Příjmové kategorie -->
+                        <div class="bg-slate-950/80 rounded-2xl p-4 sm:p-5 border border-slate-800/90 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                        <h3 class="font-bold text-white text-sm">Kategorie Příjmů</h3>
+                                    </div>
+                                    <span id="incomeCategoryCountBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">0 kategorií</span>
+                                </div>
+
+                                <!-- Add new income category -->
+                                <div class="flex items-center gap-2 mb-3">
+                                    <input id="newIncomeCatInput" type="text" placeholder="Nová kategorie příjmu (např. Bonusy)..." class="flex-1 p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-emerald-500 transition font-medium" onkeydown="if(event.key === 'Enter') window.addCategory('Příjem')">
+                                    <button onclick="window.addCategory('Příjem')" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-md shadow-emerald-600/20 whitespace-nowrap flex items-center gap-1">
+                                        <span>➕ Přidat</span>
+                                    </button>
+                                </div>
+
+                                <!-- List of income categories -->
+                                <div id="incomeCategoriesList" class="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                                    <!-- Dynamic items -->
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-500 mt-3 pt-2.5 border-t border-slate-800/80">Příjmové kategorie slouží pro sledování mezd, brigád, investic a darů.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
                     <!-- Export SQL -->
-                    <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-blue-500/40 transition">
+                    <div class="bg-slate-900/90 p-5 sm:p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-blue-500/40 transition">
                         <div>
                             <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center text-lg font-bold mb-3">
                                 🗄️
                             </div>
                             <h3 class="font-bold text-white text-base">Export do SQL databáze</h3>
-                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Vygeneruje plnohodnotný SQL dump (CREATE TABLE & INSERT INTO) se všemi transakcemi pro snadný import do MySQL, SQLite či PostgreSQL.</p>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Vygeneruje plnohodnotný SQL dump (CREATE TABLE & INSERT INTO) se všemi transakcemi pro snadný import do MySQL či SQLite.</p>
                         </div>
                         <button id="btnExportSql" class="mt-6 w-full bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 p-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
-                            <span>📥 Stáhnout SQL dump (.sql)</span>
+                            <span>📥 SQL dump (.sql)</span>
                         </button>
                     </div>
 
                     <!-- Export JSON -->
-                    <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-indigo-500/40 transition">
+                    <div class="bg-slate-900/90 p-5 sm:p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-indigo-500/40 transition">
                         <div>
                             <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center text-lg font-bold mb-3">
                                 💾
                             </div>
                             <h3 class="font-bold text-white text-base">Kompletní JSON záloha</h3>
-                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Uloží veškerá data (běžné transakce i Bitcoin portfolia) do strukturovaného JSON souboru, který lze kdykoli obnovit přes Import níže.</p>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Uloží veškerá data, projekty, odpracovaný čas i kategorie do JSON souboru, který lze kdykoli obnovit.</p>
                         </div>
                         <button id="btnExportJson" class="mt-6 w-full bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 p-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
-                            <span>📥 Stáhnout JSON zálohu (.json)</span>
+                            <span>📥 JSON záloha (.json)</span>
+                        </button>
+                    </div>
+
+                    <!-- Export XLSX -->
+                    <div class="bg-slate-900/90 p-5 sm:p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-emerald-500/40 transition">
+                        <div>
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-lg font-bold mb-3">
+                                📗
+                            </div>
+                            <h3 class="font-bold text-white text-base">Export do Excelu (.xlsx)</h3>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Vygeneruje moderní sešit MS Excel (.xlsx) s kompletní historií transakcí a správným formátem čísel i dat.</p>
+                        </div>
+                        <button id="btnExportXlsx" onclick="window.exportTransactionsXlsx(false)" class="mt-6 w-full bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 p-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
+                            <span>📥 Excel sešit (.xlsx)</span>
                         </button>
                     </div>
 
                     <!-- Export CSV -->
-                    <div class="bg-slate-900/90 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-emerald-500/40 transition">
+                    <div class="bg-slate-900/90 p-5 sm:p-6 rounded-2xl border border-slate-800 flex flex-col justify-between group hover:border-teal-500/40 transition">
                         <div>
-                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-lg font-bold mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 flex items-center justify-center text-lg font-bold mb-3">
                                 📊
                             </div>
-                            <h3 class="font-bold text-white text-base">Export do Excelu (CSV)</h3>
-                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Vygeneruje přehlednou tabulku ve formátu CSV se správným kódováním UTF-8 s BOM pro snadné otevření v Excelu či Google Tabulkách.</p>
+                            <h3 class="font-bold text-white text-base">Export do CSV</h3>
+                            <p class="text-xs text-slate-400 mt-2 leading-relaxed">Vygeneruje přehlednou tabulku ve formátu CSV s UTF-8 BOM pro otevření v Google Tabulkách a starších tabulkách.</p>
                         </div>
-                        <button id="btnExportCsv" class="mt-6 w-full bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 p-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
-                            <span>📥 Stáhnout tabulku (.csv)</span>
+                        <button id="btnExportCsv" class="mt-6 w-full bg-teal-600/20 hover:bg-teal-600 text-teal-300 hover:text-white border border-teal-500/30 p-3 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2">
+                            <span>📥 Tabulka CSV (.csv)</span>
                         </button>
                     </div>
                 </div>
@@ -1418,11 +1586,72 @@ match /work_logs/{docId} {
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Rozšířený seznam kategorií včetně Dar a Ostatní přímo ve volbě bez nutnosti ručního zadávání
+        // Výchozí a uživatelsky editovatelné kategorie
         const defaultCategories = { 
             "Výdaj": ["Jídlo", "Bydlení", "Doprava", "Zábava", "Sport", "Dar", "Ostatní"], 
             "Příjem": ["Mzda", "Investice", "Dar", "Ostatní"] 
         };
+        let userCategories = {
+            "Výdaj": [...defaultCategories["Výdaj"]],
+            "Příjem": [...defaultCategories["Příjem"]]
+        };
+
+        function loadUserCategories() {
+            try {
+                const uid = currentUser ? currentUser.uid : 'default';
+                const raw = localStorage.getItem(`user_categories_${uid}`);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed["Výdaj"]) && Array.isArray(parsed["Příjem"])) {
+                        userCategories = parsed;
+                        return;
+                    }
+                }
+            } catch(e) {}
+            userCategories = {
+                "Výdaj": [...defaultCategories["Výdaj"]],
+                "Příjem": [...defaultCategories["Příjem"]]
+            };
+        }
+
+        function saveUserCategories() {
+            try {
+                const uid = currentUser ? currentUser.uid : 'default';
+                localStorage.setItem(`user_categories_${uid}`, JSON.stringify(userCategories));
+            } catch(e) {}
+            updateCats();
+            if (window.renderCategoryManager) window.renderCategoryManager();
+        }
+
+        // Ovládání schovaného bočního menu pro mobil / úzké obrazovky
+        window.openMobileSidebar = () => {
+            const container = document.getElementById('mobileSidebarContainer');
+            const drawer = document.getElementById('mobileSidebarDrawer');
+            if (!container || !drawer) return;
+            container.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                drawer.classList.remove('-translate-x-full');
+            });
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeMobileSidebar = () => {
+            const container = document.getElementById('mobileSidebarContainer');
+            const drawer = document.getElementById('mobileSidebarDrawer');
+            if (!container || !drawer) return;
+            drawer.classList.add('-translate-x-full');
+            setTimeout(() => {
+                container.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 280);
+        };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                window.closeMobileSidebar();
+            }
+        });
+
         const monthNames = ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"];
 
         let currentUser = null, allTx = [], expChart = null, incChart = null, salaryChart = null, trendChart = null;
@@ -1584,16 +1813,27 @@ match /work_logs/{docId} {
         }
 
         window.switchTab = (id) => {
+            window.closeMobileSidebar();
             document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
             const tabEl = document.getElementById('tab-' + id);
             if(tabEl) tabEl.classList.remove('hidden');
 
-            // Aktivní styl tabů v navigaci
-            document.querySelectorAll('nav button').forEach(btn => {
-                if(btn.getAttribute('data-tab') === id) {
-                    btn.className = "px-3.5 py-2 rounded-lg font-bold text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition-all duration-200 flex items-center gap-1.5";
+            // Aktivní styl tabů v navigaci (desktop i mobilní boční menu)
+            document.querySelectorAll('[data-tab]').forEach(btn => {
+                const tabKey = btn.getAttribute('data-tab');
+                const isAct = tabKey === id;
+                if (btn.hasAttribute('data-mobile-tab')) {
+                    if (isAct) {
+                        btn.className = "w-full text-left px-3.5 py-2.5 rounded-xl font-bold text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition flex items-center gap-3";
+                    } else {
+                        btn.className = "w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3";
+                    }
                 } else {
-                    btn.className = "px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5";
+                    if (isAct) {
+                        btn.className = "px-3.5 py-2 rounded-lg font-bold text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition-all duration-200 flex items-center gap-1.5";
+                    } else {
+                        btn.className = "px-3.5 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5";
+                    }
                 }
             });
 
@@ -1607,6 +1847,9 @@ match /work_logs/{docId} {
             }
             if(id === 'work') {
                 renderWork();
+            }
+            if(id === 'settings' && window.renderCategoryManager) {
+                window.renderCategoryManager();
             }
         };
 
@@ -1632,8 +1875,12 @@ match /work_logs/{docId} {
                 document.getElementById('app-section').classList.remove('hidden'); 
                 const navEmail = document.getElementById('navUserEmail');
                 if(navEmail) navEmail.textContent = user.email;
+                const drawerEmail = document.getElementById('drawerUserEmail');
+                if(drawerEmail) drawerEmail.textContent = user.email;
+                loadUserCategories();
                 setDefaultDate(); 
                 init(); 
+                if (window.renderCategoryManager) window.renderCategoryManager();
             } else { 
                 document.getElementById('login-section').classList.remove('hidden'); 
                 document.getElementById('app-section').classList.add('hidden'); 
@@ -1781,7 +2028,8 @@ match /work_logs/{docId} {
         
         function updateCats() {
             catSel.innerHTML = "";
-            defaultCategories[txType.value].forEach(c => { 
+            const cats = (userCategories && userCategories[txType.value]) ? userCategories[txType.value] : defaultCategories[txType.value];
+            cats.forEach(c => { 
                 let o = document.createElement("option"); 
                 o.value = c; 
                 o.textContent = c; 
@@ -1849,7 +2097,8 @@ match /work_logs/{docId} {
             txType.value = t.type; 
             updateCats();
             
-            if (defaultCategories[t.type].includes(t.category)) {
+            const curCats = (userCategories && userCategories[t.type]) ? userCategories[t.type] : defaultCategories[t.type];
+            if (curCats.includes(t.category)) {
                 catSel.value = t.category;
             } else {
                 catSel.value = "__custom__";
@@ -1926,6 +2175,7 @@ match /work_logs/{docId} {
             } else if (filter === 'all') {
                 customPeriodLabel = "Celá historie";
             }
+            window.currentFilteredTx = filtered;
 
             let inc = 0, exp = 0, cats = {}, incCats = {}, trend = {}, salaryMonths = {};
             const txBody = document.getElementById('txTableBody'), recBody = document.getElementById('recurringTableBody');
@@ -3154,6 +3404,8 @@ match /work_logs/{docId} {
             if (dispEl) dispEl.textContent = formatted;
             const headerText = document.getElementById('headerTimerText');
             if (headerText) headerText.textContent = formatted;
+            const drawerTimer = document.getElementById('drawerTimerText');
+            if (drawerTimer) drawerTimer.textContent = formatted;
 
             // Počítadlo zarobených peněz v reálném čase
             const earned = getCurrentTimerEarnings();
@@ -3236,6 +3488,8 @@ match /work_logs/{docId} {
                         headerTimer.classList.remove('hidden');
                         headerTimer.classList.add('flex');
                     }
+                    const dBadge1 = document.getElementById('drawerTimerBadge');
+                    if (dBadge1) { dBadge1.classList.remove('hidden'); dBadge1.classList.add('flex'); }
                     updateHeaderTimerProjectLabel();
 
                     if (timerInterval) clearInterval(timerInterval);
@@ -3252,6 +3506,8 @@ match /work_logs/{docId} {
                         headerTimer.classList.remove('hidden');
                         headerTimer.classList.add('flex');
                     }
+                    const dBadge2 = document.getElementById('drawerTimerBadge');
+                    if (dBadge2) { dBadge2.classList.remove('hidden'); dBadge2.classList.add('flex'); }
                     updateHeaderTimerProjectLabel();
                     updateTimerTick();
                 }
@@ -3325,6 +3581,8 @@ match /work_logs/{docId} {
                 headerTimer.classList.remove('hidden');
                 headerTimer.classList.add('flex');
             }
+            const dBadgeStart = document.getElementById('drawerTimerBadge');
+            if (dBadgeStart) { dBadgeStart.classList.remove('hidden'); dBadgeStart.classList.add('flex'); }
             updateHeaderTimerProjectLabel();
 
             if (timerInterval) clearInterval(timerInterval);
@@ -3393,6 +3651,8 @@ match /work_logs/{docId} {
                 headerTimer.classList.remove('flex');
                 headerTimer.classList.add('hidden');
             }
+            const dBadgeReset = document.getElementById('drawerTimerBadge');
+            if (dBadgeReset) { dBadgeReset.classList.remove('flex'); dBadgeReset.classList.add('hidden'); }
             if (headerEarn) headerEarn.textContent = "";
             try {
                 localStorage.removeItem(getTimerStorageKey());
@@ -3479,7 +3739,7 @@ match /work_logs/{docId} {
             }
             const pName = proj ? proj.name : 'Projekt';
             const rateStr = proj && proj.hourlyRate ? ` (${proj.hourlyRate} Kč/h)` : '';
-            alert(`⏱️ Stopky spuštěny pro projekt "${pName}"${rateStr}!\nČas i zarobené peníze běží a můžete je sledovat v reálném čase přímo v horní liště nebo na Přehledu.`);
+            alert(`⏱️ Stopky spuštěny pro projekt "${pName}"${rateStr}!\nČas i zarobené peníze běží a můžete je sledovat v reálném čase přímo v horní liště nebo v okně Práce.`);
         };
 
         // --- ZOBRAZENÍ V KALENDÁŘI ---
@@ -3892,12 +4152,13 @@ match /work_logs/{docId} {
         document.getElementById('topTxCount').onchange = render;
         window.toggleSelectAll = (src) => document.querySelectorAll('.tx-checkbox').forEach(cb => cb.checked = src.checked);
 
-        // --- EXPORTY DATABÁZE A ZÁLOH (SQL, JSON, CSV) ---
+        // --- EXPORTY DATABÁZE A ZÁLOH (SQL, JSON, XLSX, CSV) ---
         document.getElementById('btnExportJson').onclick = () => {
             if (!currentUser) return alert("Musíte být přihlášeni.");
             const data = {
                 exportDate: new Date().toISOString(),
                 userEmail: currentUser.email,
+                categories: userCategories,
                 transactions: allTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
                 btc_transactions: allBtcTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
                 work_projects: allProjects.map(p => ({ ...p, createdAt: p.dateObj.toISOString() })),
@@ -3916,7 +4177,7 @@ match /work_logs/{docId} {
 
         document.getElementById('btnExportSql').onclick = () => {
             if (!currentUser) return alert("Musíte být přihlášeni.");
-            let sql = `-- Export databáze Správa financí PRO\n-- Vygenerováno: ${new Date().toLocaleString('cs-CZ')}\n-- Uživatel: ${currentUser.email}\n\n`;
+            let sql = `-- Export databáze Správa financí\n-- Vygenerováno: ${new Date().toLocaleString('cs-CZ')}\n-- Uživatel: ${currentUser.email}\n\n`;
             
             // Běžné finance
             sql += `CREATE TABLE IF NOT EXISTS transactions (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  type VARCHAR(32),\n  category VARCHAR(64),\n  amount DECIMAL(15,2),\n  note TEXT,\n  recurring BOOLEAN,\n  created_at DATETIME\n);\n\n`;
@@ -3981,6 +4242,194 @@ match /work_logs/{docId} {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        };
+
+        // --- EXPORT DO EXCELU (.XLSX) ---
+        window.exportTransactionsXlsx = (onlyFiltered = false) => {
+            if (typeof XLSX === 'undefined') {
+                return alert("Knihovna pro export do Excelu (XLSX) se ještě nenačetla. Zkontrolujte připojení k internetu.");
+            }
+            const filter = document.getElementById('globalPeriodFilter') ? document.getElementById('globalPeriodFilter').value : 'all';
+            const txList = onlyFiltered ? (window.currentFilteredTx || allTx) : allTx;
+            if (!txList || !txList.length) {
+                return alert("Zatím nejsou k dispozici žádné transakce k exportu.");
+            }
+
+            const rows = [
+                ["Datum", "Typ", "Kategorie", "Částka (Kč)", "Měna", "Poznámka", "Trvalá platba"]
+            ];
+
+            txList.forEach(t => {
+                const dateStr = t.dateObj ? t.dateObj.toLocaleDateString('cs-CZ') : '';
+                rows.push([
+                    dateStr,
+                    t.type || '',
+                    t.category || '',
+                    Number(t.amount) || 0,
+                    "CZK",
+                    t.note || '',
+                    t.recurring ? "Ano" : "Ne"
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            ws['!cols'] = [
+                { wch: 14 },
+                { wch: 12 },
+                { wch: 20 },
+                { wch: 15 },
+                { wch: 8 },
+                { wch: 32 },
+                { wch: 16 }
+            ];
+
+            const wb = XLSX.utils.book_new();
+            const sheetName = onlyFiltered ? "Výběr transakcí" : "Historie transakcí";
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+            const nowD = new Date().toISOString().split('T')[0];
+            const filename = onlyFiltered 
+                ? `finance_transakce_${filter}_${nowD}.xlsx`
+                : `finance_transakce_kompletni_historie_${nowD}.xlsx`;
+
+            XLSX.writeFile(wb, filename);
+        };
+
+        // --- SPRÁVA KATEGORIÍ (DATA/DB) ---
+        window.renderCategoryManager = () => {
+            const expList = document.getElementById('expenseCategoriesList');
+            const incList = document.getElementById('incomeCategoriesList');
+            const expBadge = document.getElementById('expenseCategoryCountBadge');
+            const incBadge = document.getElementById('incomeCategoryCountBadge');
+            if (!expList || !incList) return;
+
+            const expCats = (userCategories && userCategories['Výdaj']) ? userCategories['Výdaj'] : [];
+            const incCats = (userCategories && userCategories['Příjem']) ? userCategories['Příjem'] : [];
+
+            if (expBadge) expBadge.textContent = `${expCats.length} kategorií`;
+            if (incBadge) incBadge.textContent = `${incCats.length} kategorií`;
+
+            expList.innerHTML = expCats.length === 0 ? '<div class="text-xs text-slate-500 py-3 text-center italic">Žádné kategorie výdajů</div>' : '';
+            expCats.forEach(cat => {
+                const count = allTx.filter(t => t.type === 'Výdaj' && t.category === cat).length;
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-slate-900 border border-slate-800/80 hover:border-slate-700 transition";
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 min-w-0 pr-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400 flex-shrink-0"></span>
+                        <span class="text-xs font-semibold text-white truncate">${escapeHtml(cat)}</span>
+                        <span class="text-[10px] text-slate-500 font-mono flex-shrink-0">(${count})</span>
+                    </div>
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                        <button onclick="window.editCategory('Výdaj', '${escapeHtml(cat)}')" title="Přejmenovat kategorii" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-blue-400 text-xs transition">
+                            ✏️
+                        </button>
+                        <button onclick="window.deleteCategory('Výdaj', '${escapeHtml(cat)}')" title="Smazat kategorii" class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/80 text-slate-400 hover:text-rose-400 text-xs transition">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+                expList.appendChild(row);
+            });
+
+            incList.innerHTML = incCats.length === 0 ? '<div class="text-xs text-slate-500 py-3 text-center italic">Žádné kategorie příjmů</div>' : '';
+            incCats.forEach(cat => {
+                const count = allTx.filter(t => t.type === 'Příjem' && t.category === cat).length;
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-slate-900 border border-slate-800/80 hover:border-slate-700 transition";
+                row.innerHTML = `
+                    <div class="flex items-center gap-2 min-w-0 pr-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0"></span>
+                        <span class="text-xs font-semibold text-white truncate">${escapeHtml(cat)}</span>
+                        <span class="text-[10px] text-slate-500 font-mono flex-shrink-0">(${count})</span>
+                    </div>
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                        <button onclick="window.editCategory('Příjem', '${escapeHtml(cat)}')" title="Přejmenovat kategorii" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-blue-400 text-xs transition">
+                            ✏️
+                        </button>
+                        <button onclick="window.deleteCategory('Příjem', '${escapeHtml(cat)}')" title="Smazat kategorii" class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-950/80 text-slate-400 hover:text-rose-400 text-xs transition">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+                incList.appendChild(row);
+            });
+        };
+
+        window.addCategory = (type) => {
+            const inputId = type === 'Výdaj' ? 'newExpenseCatInput' : 'newIncomeCatInput';
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const val = input.value.trim();
+            if (!val) return alert("Zadejte prosím název kategorie.");
+            if (val === "__custom__") return alert("Tento název je rezervován systémem.");
+
+            if (!userCategories[type]) userCategories[type] = [];
+            if (userCategories[type].some(c => c.toLowerCase() === val.toLowerCase())) {
+                return alert(`Kategorie "${val}" již v ${type === 'Výdaj' ? 'výdajích' : 'příjmech'} existuje.`);
+            }
+
+            userCategories[type].push(val);
+            saveUserCategories();
+            input.value = "";
+            input.focus();
+        };
+
+        window.editCategory = async (type, oldName) => {
+            const newName = prompt(`Zadejte nový název pro kategorii "${oldName}":`, oldName);
+            if (!newName) return;
+            const trimmed = newName.trim();
+            if (!trimmed || trimmed === oldName) return;
+
+            if (userCategories[type].some(c => c.toLowerCase() === trimmed.toLowerCase() && c.toLowerCase() !== oldName.toLowerCase())) {
+                return alert(`Kategorie "${trimmed}" již existuje.`);
+            }
+
+            const idx = userCategories[type].indexOf(oldName);
+            if (idx !== -1) {
+                userCategories[type][idx] = trimmed;
+            }
+
+            const matchingTx = allTx.filter(t => t.type === type && t.category === oldName);
+            if (matchingTx.length > 0) {
+                if (confirm(`Chcete přejmenovat kategorii "${oldName}" na "${trimmed}" také u všech ${matchingTx.length} existujících transakcí?`)) {
+                    for (const t of matchingTx) {
+                        t.category = trimmed;
+                        if (t.id && db) {
+                            try {
+                                await updateDoc(doc(db, "transactions", t.id), { category: trimmed });
+                            } catch(e) {}
+                        }
+                    }
+                }
+            }
+
+            saveUserCategories();
+            render();
+        };
+
+        window.deleteCategory = (type, catName) => {
+            if (userCategories[type].length <= 1) {
+                return alert("V seznamu musí zůstat alespoň jedna kategorie.");
+            }
+            const matchingCount = allTx.filter(t => t.type === type && t.category === catName).length;
+            const msg = matchingCount > 0 
+                ? `Kategorii "${catName}" má přiřazeno ${matchingCount} transakcí. Smazáním bude odebrána pouze z nabídky pro nové transakce, v historii zůstane zachována.\n\nOpravdu smazat ze seznamu?`
+                : `Opravdu chcete smazat kategorii "${catName}"?`;
+            
+            if (!confirm(msg)) return;
+
+            userCategories[type] = userCategories[type].filter(c => c !== catName);
+            saveUserCategories();
+        };
+
+        window.resetCategoriesToDefault = () => {
+            if (!confirm("Opravdu chcete obnovit výchozí seznam kategorií pro příjmy i výdaje?")) return;
+            userCategories = {
+                "Výdaj": [...defaultCategories["Výdaj"]],
+                "Příjem": [...defaultCategories["Příjem"]]
+            };
+            saveUserCategories();
         };
 
         // --- IMPORT Z JSON / ZÁLOHY ---
@@ -4088,6 +4537,12 @@ match /work_logs/{docId} {
                             if (workStorageMode === 'local') {
                                 saveLocalWorkLogs(allWorkLogs);
                                 renderWork();
+                            }
+                        }
+                        if (data.categories && typeof data.categories === 'object') {
+                            if (Array.isArray(data.categories['Výdaj']) && Array.isArray(data.categories['Příjem'])) {
+                                userCategories = data.categories;
+                                saveUserCategories();
                             }
                         }
                         alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů\n• ${projCount} projektů\n• ${workCount} záznamů odpracovaných hodin.`);
