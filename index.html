@@ -1630,14 +1630,51 @@
                     Ve vaší <strong>Firebase Console</strong> přejděte do <strong>Firestore Database</strong> ➔ záložka <strong>Rules (Pravidla)</strong> a vložte následující pravidla:
                 </p>
 
-                <div class="relative bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-emerald-400 leading-relaxed mb-4 selection:bg-emerald-600 selection:text-white">
-                    <pre id="firebaseRulesSnippet">match /work_projects/{docId} {
-  allow read, write: if request.auth != null;
-}
-match /work_logs/{docId} {
-  allow read, write: if request.auth != null;
+                <div class="relative bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-[11px] text-emerald-400 leading-relaxed mb-4 selection:bg-emerald-600 selection:text-white max-h-64 overflow-y-auto">
+                    <pre id="firebaseRulesSnippet">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1) Seznam povolených e-mailů (whitelist)
+    function isWhitelisted() {
+      return request.auth != null && 
+             request.auth.token.email in [
+               'vojtalisztwan@gmail.com',
+               'test@test.cz'
+             ];
+    }
+
+    // 2) Uživatel smí pracovat POUZE se svými daty
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    match /transactions/{docId} {
+      allow read, delete: if isWhitelisted() && isOwner(resource.data.userId);
+      allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
+      allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
+    }
+
+    match /btc_transactions/{docId} {
+      allow read, delete: if isWhitelisted() && isOwner(resource.data.userId);
+      allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
+      allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
+    }
+
+    match /work_projects/{docId} {
+      allow read, delete: if isWhitelisted() && isOwner(resource.data.userId);
+      allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
+      allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
+    }
+
+    match /work_logs/{docId} {
+      allow read, delete: if isWhitelisted() && isOwner(resource.data.userId);
+      allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
+      allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
+    }
+  }
 }</pre>
-                    <button id="btnCopyRules" onclick="window.copyFirebaseRules()" class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-sans font-medium transition flex items-center gap-1 shadow-sm">
+                    <button id="btnCopyRules" onclick="window.copyFirebaseRules()" class="sticky top-2.5 float-right -mt-2 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-sans font-medium transition flex items-center gap-1 shadow-sm">
                         <span>📋</span><span>Kopírovat</span>
                     </button>
                 </div>
@@ -2116,8 +2153,28 @@ match /work_logs/{docId} {
             }
         };
 
+        // =========================================================================
+        // --- BEZPEČNOSTNÍ WHITELIST POVOLENÝCH E-MAILŮ ---
+        // =========================================================================
+        // Zde jsou definovány e-maily, které mají oprávnění k přístupu do aplikace.
+        // Kdokoliv s jiným e-mailem se nemůže přihlásit, registrovat ani posílat resetovací e-maily.
+        const ALLOWED_EMAILS = [
+            "vojtalisztwan@gmail.com",
+            "test@test.cz"
+            // Pro přidání dalšího člena/kamaráda stačí připsat: "dalsi@email.cz"
+        ];
+
+        function isEmailAllowed(email) {
+            if (!email) return false;
+            const clean = email.trim().toLowerCase();
+            return ALLOWED_EMAILS.some(allowed => allowed.toLowerCase() === clean);
+        }
+
         window.sendPasswordReset = async () => {
             if (!currentUser || !currentUser.email) return;
+            if (!isEmailAllowed(currentUser.email)) {
+                return alert("⛔ Tento e-mail není na seznamu povolených uživatelů.");
+            }
             if (!confirm(`Opravdu si přejete odeslat resetovací odkaz na e-mail:\n${currentUser.email}?`)) return;
             try {
                 await sendPasswordResetEmail(auth, currentUser.email);
@@ -2132,16 +2189,28 @@ match /work_logs/{docId} {
             const defaultEmail = emailInput ? emailInput.value.trim() : '';
             const email = prompt("Zadejte e-mailovou adresu vašeho účtu pro zaslání odkazu na obnovu hesla:", defaultEmail);
             if (!email) return;
+            const clean = email.trim();
+            if (!isEmailAllowed(clean)) {
+                return alert("⛔ Na tento e-mail nelze odeslat resetovací odkaz.\nE-mail není v seznamu autorizovaných uživatelů aplikace.");
+            }
             try {
-                await sendPasswordResetEmail(auth, email.trim());
-                alert(`✅ Resetovací e-mail byl odeslán na adresu:\n${email.trim()}\n\nZkontrolujte prosím svoji e-mailovou schránku (včetně složky Nevyžádaná pošta / Spam).`);
+                await sendPasswordResetEmail(auth, clean);
+                alert(`✅ Resetovací e-mail byl odeslán na adresu:\n${clean}\n\nZkontrolujte prosím svoji e-mailovou schránku (včetně složky Nevyžádaná pošta / Spam).`);
             } catch (err) {
                 alert(`❌ Nepodařilo se odeslat resetovací e-mail:\n${err.message}`);
             }
         };
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) { 
+                if (!isEmailAllowed(user.email)) {
+                    alert(`⛔ Účet ${user.email} nemá oprávnění k používání této aplikace.\nByl automaticky odhlášen.`);
+                    clearAppState();
+                    await signOut(auth);
+                    document.getElementById('login-section').classList.remove('hidden'); 
+                    document.getElementById('app-section').classList.add('hidden'); 
+                    return;
+                }
                 clearAppState();
                 currentUser = user; 
                 document.getElementById('login-section').classList.add('hidden'); 
@@ -2167,8 +2236,19 @@ match /work_logs/{docId} {
         });
 
         document.getElementById('btnLogin').onclick = async () => {
-            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); }
-            catch (e) { alert("Chyba přihlášení. Zkontrolujte e-mail a heslo."); }
+            const email = (document.getElementById('email').value || '').trim();
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                return alert("Vyplňte prosím e-mail i heslo.");
+            }
+            if (!isEmailAllowed(email)) {
+                return alert("⛔ Přístup odepřen.\nTento e-mail není na seznamu povolených uživatelů (whitelist).");
+            }
+            try { 
+                await signInWithEmailAndPassword(auth, email, password); 
+            } catch (e) { 
+                alert("Chyba přihlášení. Zkontrolujte e-mail a heslo."); 
+            }
         };
 
         document.getElementById('password').addEventListener('keyup', (e) => {
@@ -2183,6 +2263,9 @@ match /work_logs/{docId} {
             const password = document.getElementById('password').value;
             if (!email || !password) {
                 return alert("Pro registraci nového účtu zadejte do políček výše požadovaný e-mail a heslo.");
+            }
+            if (!isEmailAllowed(email)) {
+                return alert("⛔ Registrace nepovolena.\nTento e-mail není na seznamu povolených uživatelů (whitelist).");
             }
             if (password.length < 6) {
                 return alert("Heslo musí mít alespoň 6 znaků.");
