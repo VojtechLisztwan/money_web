@@ -1661,7 +1661,7 @@ match /work_logs/{docId} {
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, setDoc, query, where, onSnapshot, orderBy, doc, deleteDoc, updateDoc, writeBatch, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1688,13 +1688,14 @@ match /work_logs/{docId} {
 
         function loadUserCategories() {
             try {
-                const uid = currentUser ? currentUser.uid : 'default';
-                const raw = localStorage.getItem(`user_categories_${uid}`);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && Array.isArray(parsed["Výdaj"]) && Array.isArray(parsed["Příjem"])) {
-                        userCategories = parsed;
-                        return;
+                if (currentUser && currentUser.uid) {
+                    const raw = localStorage.getItem(`user_categories_${currentUser.uid}`);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && Array.isArray(parsed["Výdaj"]) && Array.isArray(parsed["Příjem"])) {
+                            userCategories = parsed;
+                            return;
+                        }
                     }
                 }
             } catch(e) {}
@@ -1706,8 +1707,9 @@ match /work_logs/{docId} {
 
         function saveUserCategories() {
             try {
-                const uid = currentUser ? currentUser.uid : 'default';
-                localStorage.setItem(`user_categories_${uid}`, JSON.stringify(userCategories));
+                if (currentUser && currentUser.uid) {
+                    localStorage.setItem(`user_categories_${currentUser.uid}`, JSON.stringify(userCategories));
+                }
             } catch(e) {}
             updateCats();
             if (window.renderCategoryManager) window.renderCategoryManager();
@@ -1767,31 +1769,31 @@ match /work_logs/{docId} {
 
         function getLocalProjects() {
             try {
-                const uid = currentUser ? currentUser.uid : 'default';
-                const raw = localStorage.getItem(`work_projects_${uid}`);
+                if (!currentUser || !currentUser.uid) return [];
+                const raw = localStorage.getItem(`work_projects_${currentUser.uid}`);
                 return raw ? JSON.parse(raw) : [];
             } catch(e) { return []; }
         }
 
         function saveLocalProjects(projects) {
             try {
-                const uid = currentUser ? currentUser.uid : 'default';
-                localStorage.setItem(`work_projects_${uid}`, JSON.stringify(projects));
+                if (!currentUser || !currentUser.uid) return;
+                localStorage.setItem(`work_projects_${currentUser.uid}`, JSON.stringify(projects));
             } catch(e) {}
         }
 
         function getLocalWorkLogs() {
             try {
-                const uid = currentUser ? currentUser.uid : 'default';
-                const raw = localStorage.getItem(`work_logs_${uid}`);
+                if (!currentUser || !currentUser.uid) return [];
+                const raw = localStorage.getItem(`work_logs_${currentUser.uid}`);
                 return raw ? JSON.parse(raw) : [];
             } catch(e) { return []; }
         }
 
         function saveLocalWorkLogs(logs) {
             try {
-                const uid = currentUser ? currentUser.uid : 'default';
-                localStorage.setItem(`work_logs_${uid}`, JSON.stringify(logs));
+                if (!currentUser || !currentUser.uid) return;
+                localStorage.setItem(`work_logs_${currentUser.uid}`, JSON.stringify(logs));
             } catch(e) {}
         }
 
@@ -1823,7 +1825,7 @@ match /work_logs/{docId} {
         };
 
         window.syncWorkToCloud = async () => {
-            if (!currentUser) return alert("Musíte být přihlášeni.");
+            if (!currentUser || !currentUser.uid) return alert("Musíte být přihlášeni.");
             const localProj = getLocalProjects();
             const localLogs = getLocalWorkLogs();
             if (!localProj.length && !localLogs.length) return alert("Nemáte žádná lokální data k synchronizaci.");
@@ -1835,14 +1837,22 @@ match /work_logs/{docId} {
                     data.userId = currentUser.uid;
                     data.updatedAt = Timestamp.now();
                     data.createdAt = p.createdAt ? Timestamp.fromDate(new Date(p.createdAt)) : Timestamp.now();
-                    await setDoc(doc(db, "work_projects", id), data);
+                    if (id && id.startsWith('wp_')) {
+                        await addDoc(collection(db, "work_projects"), data);
+                    } else {
+                        await setDoc(doc(db, "work_projects", id), data);
+                    }
                     pCount++;
                 }
                 for (const l of localLogs) {
                     const { id, dateObj, ...data } = l;
                     data.userId = currentUser.uid;
                     data.createdAt = l.date ? Timestamp.fromDate(new Date(l.date)) : Timestamp.now();
-                    await setDoc(doc(db, "work_logs", id), data);
+                    if (id && id.startsWith('wl_')) {
+                        await addDoc(collection(db, "work_logs"), data);
+                    } else {
+                        await setDoc(doc(db, "work_logs", id), data);
+                    }
                     lCount++;
                 }
                 workStorageMode = 'cloud';
@@ -1958,8 +1968,181 @@ match /work_logs/{docId} {
             if (dt && !dt.value) dt.value = today;
         }
 
+        let activeUnsubscribers = [];
+
+        function resetTimerUI() {
+            const dispEl = document.getElementById('timerDisplay');
+            if (dispEl) dispEl.textContent = '00:00:00';
+            const headerText = document.getElementById('headerTimerText');
+            if (headerText) headerText.textContent = '00:00:00';
+            const drawerTimer = document.getElementById('drawerTimerText');
+            if (drawerTimer) drawerTimer.textContent = '00:00:00';
+            const earnDisp = document.getElementById('timerEarningsDisplay');
+            if (earnDisp) earnDisp.textContent = '0,00 Kč';
+            const headerEarn = document.getElementById('headerTimerEarnings');
+            if (headerEarn) headerEarn.textContent = '';
+            const badge = document.getElementById('timerStatusBadge');
+            if (badge) {
+                badge.textContent = "Připraveno";
+                badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700";
+            }
+            const btnStart = document.getElementById('btnTimerStart');
+            if (btnStart) btnStart.classList.remove('hidden');
+            const btnPause = document.getElementById('btnTimerPause');
+            if (btnPause) btnPause.classList.add('hidden');
+            const headerTimer = document.getElementById('headerActiveTimer');
+            if (headerTimer) {
+                headerTimer.classList.remove('flex');
+                headerTimer.classList.add('hidden');
+            }
+            const dBadge = document.getElementById('drawerTimerBadge');
+            if (dBadge) {
+                dBadge.classList.remove('flex');
+                dBadge.classList.add('hidden');
+            }
+            const rangeInfo = document.getElementById('timerTimeRangeInfo');
+            if (rangeInfo) rangeInfo.textContent = 'Start: --:--';
+            const descEl = document.getElementById('timerDescInput');
+            if (descEl) descEl.value = '';
+        }
+
+        function clearAppState() {
+            // Zrušit všechny aktivní Firestore listenery
+            activeUnsubscribers.forEach(unsub => {
+                try { unsub(); } catch(e) {}
+            });
+            activeUnsubscribers = [];
+
+            currentUser = null;
+
+            // Zastavit časovač stopek
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            timerRunning = false;
+            timerStartTime = null;
+            timerAccumulatedSeconds = 0;
+            timerStartedAtFormatted = null;
+            resetTimerUI();
+
+            // Vyčistit data v paměti
+            allTx = [];
+            allBtcTx = [];
+            allProjects = [];
+            allWorkLogs = [];
+            activeWorkProjectFilter = 'all';
+            currentNotesProjectId = null;
+            editingNoteId = null;
+
+            // Vyčistit labely v navigaci a nastavení
+            const navEmail = document.getElementById('navUserEmail');
+            if (navEmail) navEmail.textContent = '';
+            const drawerEmail = document.getElementById('drawerUserEmail');
+            if (drawerEmail) drawerEmail.textContent = '';
+            const settingsEmail = document.getElementById('settingsAccountEmail');
+            if (settingsEmail) settingsEmail.textContent = '';
+            const resetEmailPreview = document.getElementById('resetEmailPreview');
+            if (resetEmailPreview) resetEmailPreview.textContent = '';
+
+            // Vyčistit formulář pro změnu hesla
+            const cpCur = document.getElementById('changePassCurrent');
+            if (cpCur) cpCur.value = '';
+            const cpNew = document.getElementById('changePassNew');
+            if (cpNew) cpNew.value = '';
+            const cpConf = document.getElementById('changePassConfirm');
+            if (cpConf) cpConf.value = '';
+            const cpMsg = document.getElementById('changePassMessage');
+            if (cpMsg) cpMsg.textContent = '';
+
+            // Zničit instance grafů pro čisté načtení dat
+            if (expChart) { try { expChart.destroy(); } catch(e) {} expChart = null; }
+            if (incChart) { try { incChart.destroy(); } catch(e) {} incChart = null; }
+            if (salaryChart) { try { salaryChart.destroy(); } catch(e) {} salaryChart = null; }
+            if (trendChart) { try { trendChart.destroy(); } catch(e) {} trendChart = null; }
+            if (btcChartInstance) { try { btcChartInstance.destroy(); } catch(e) {} btcChartInstance = null; }
+            btcChartLoaded = false;
+        }
+
+        // --- ZMĚNA HESLA & OBNOVA HESLA ---
+        window.handlePasswordChange = async () => {
+            if (!currentUser || !currentUser.email) return;
+            const currentPass = document.getElementById('changePassCurrent').value;
+            const newPass = document.getElementById('changePassNew').value;
+            const confirmPass = document.getElementById('changePassConfirm').value;
+            const msgEl = document.getElementById('changePassMessage');
+            if (!msgEl) return;
+
+            if (!currentPass) {
+                msgEl.className = "text-xs mt-2 text-center text-rose-400 font-semibold";
+                msgEl.textContent = "Zadejte prosím současné heslo pro ověření totožnosti.";
+                return;
+            }
+            if (!newPass || newPass.length < 6) {
+                msgEl.className = "text-xs mt-2 text-center text-rose-400 font-semibold";
+                msgEl.textContent = "Nové heslo musí obsahovat alespoň 6 znaků.";
+                return;
+            }
+            if (newPass !== confirmPass) {
+                msgEl.className = "text-xs mt-2 text-center text-rose-400 font-semibold";
+                msgEl.textContent = "Zadaná nová hesla se neshodují.";
+                return;
+            }
+
+            msgEl.className = "text-xs mt-2 text-center text-blue-400 font-semibold";
+            msgEl.textContent = "⏳ Ověřování a ukládání nového hesla...";
+
+            try {
+                const credential = EmailAuthProvider.credential(currentUser.email, currentPass);
+                await reauthenticateWithCredential(currentUser, credential);
+                await updatePassword(currentUser, newPass);
+
+                document.getElementById('changePassCurrent').value = '';
+                document.getElementById('changePassNew').value = '';
+                document.getElementById('changePassConfirm').value = '';
+                msgEl.className = "text-xs mt-2 text-center text-emerald-400 font-bold";
+                msgEl.textContent = "✅ Heslo bylo úspěšně změněno!";
+                setTimeout(() => { if (msgEl) msgEl.textContent = ''; }, 4500);
+            } catch (err) {
+                console.error("Chyba při změně hesla:", err);
+                msgEl.className = "text-xs mt-2 text-center text-rose-400 font-semibold";
+                if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                    msgEl.textContent = "❌ Současné heslo není správné.";
+                } else if (err.code === 'auth/weak-password') {
+                    msgEl.textContent = "❌ Nové heslo je příliš slabé.";
+                } else {
+                    msgEl.textContent = `❌ Chyba: ${err.message || 'Nepodařilo se změnit heslo.'}`;
+                }
+            }
+        };
+
+        window.sendPasswordReset = async () => {
+            if (!currentUser || !currentUser.email) return;
+            if (!confirm(`Opravdu si přejete odeslat resetovací odkaz na e-mail:\n${currentUser.email}?`)) return;
+            try {
+                await sendPasswordResetEmail(auth, currentUser.email);
+                alert(`✅ Resetovací e-mail byl odeslán na adresu:\n${currentUser.email}\n\nZkontrolujte prosím svoji e-mailovou schránku (včetně složky Nevyžádaná pošta / Spam).`);
+            } catch (err) {
+                alert(`❌ Nepodařilo se odeslat resetovací e-mail:\n${err.message}`);
+            }
+        };
+
+        window.sendPasswordResetFromLogin = async () => {
+            const emailInput = document.getElementById('email');
+            const defaultEmail = emailInput ? emailInput.value.trim() : '';
+            const email = prompt("Zadejte e-mailovou adresu vašeho účtu pro zaslání odkazu na obnovu hesla:", defaultEmail);
+            if (!email) return;
+            try {
+                await sendPasswordResetEmail(auth, email.trim());
+                alert(`✅ Resetovací e-mail byl odeslán na adresu:\n${email.trim()}\n\nZkontrolujte prosím svoji e-mailovou schránku (včetně složky Nevyžádaná pošta / Spam).`);
+            } catch (err) {
+                alert(`❌ Nepodařilo se odeslat resetovací e-mail:\n${err.message}`);
+            }
+        };
+
         onAuthStateChanged(auth, (user) => {
             if (user) { 
+                clearAppState();
                 currentUser = user; 
                 document.getElementById('login-section').classList.add('hidden'); 
                 document.getElementById('app-section').classList.remove('hidden'); 
@@ -1967,11 +2150,17 @@ match /work_logs/{docId} {
                 if(navEmail) navEmail.textContent = user.email;
                 const drawerEmail = document.getElementById('drawerUserEmail');
                 if(drawerEmail) drawerEmail.textContent = user.email;
+                const settingsEmail = document.getElementById('settingsAccountEmail');
+                if(settingsEmail) settingsEmail.textContent = user.email;
+                const resetEmailPreview = document.getElementById('resetEmailPreview');
+                if(resetEmailPreview) resetEmailPreview.textContent = user.email;
+
                 loadUserCategories();
                 setDefaultDate(); 
                 init(); 
                 if (window.renderCategoryManager) window.renderCategoryManager();
             } else { 
+                clearAppState();
                 document.getElementById('login-section').classList.remove('hidden'); 
                 document.getElementById('app-section').classList.add('hidden'); 
             }
@@ -1990,17 +2179,46 @@ match /work_logs/{docId} {
         });
         
         document.getElementById('btnRegister').onclick = async () => {
-            alert("Pro vytvoření nového účtu prosím kontaktujte správce nebo použijte povolenou registraci ve Firebase.");
+            const email = (document.getElementById('email').value || '').trim();
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                return alert("Pro registraci nového účtu zadejte do políček výše požadovaný e-mail a heslo.");
+            }
+            if (password.length < 6) {
+                return alert("Heslo musí mít alespoň 6 znaků.");
+            }
+            if (!confirm(`Opravdu chcete vytvořit nový účet s e-mailem:\n${email}?`)) return;
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                alert(`✅ Nový účet byl úspěšně vytvořen! Jste přihlášeni jako: ${email}`);
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') {
+                    alert("Účet s tímto e-mailem již existuje. Přihlaste se prosím svým heslem nebo využijte možnost 'Zapomněli jste heslo?'.");
+                } else {
+                    alert(`❌ Registrace se nezdařila:\n${err.message}`);
+                }
+            }
         };
 
-        document.getElementById('btnLogout').onclick = () => signOut(auth);
+        document.getElementById('btnLogout').onclick = () => {
+            clearAppState();
+            signOut(auth);
+        };
 
         function init() {
+            if (!currentUser) return;
+
+            // Odhlásit předchozí listenery pro čistý stav
+            activeUnsubscribers.forEach(unsub => {
+                try { unsub(); } catch(e) {}
+            });
+            activeUnsubscribers = [];
+
             updateCats();
             
             // Standardní transakce
             const q = query(collection(db, "transactions"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snap) => {
+            const unsubTx = onSnapshot(q, (snap) => {
                 allTx = [];
                 snap.forEach(d => {
                     let data = d.data(); data.id = d.id;
@@ -2009,10 +2227,11 @@ match /work_logs/{docId} {
                 });
                 render();
             });
+            activeUnsubscribers.push(unsubTx);
 
             // BTC transakce
             const btcQ = query(collection(db, "btc_transactions"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
-            onSnapshot(btcQ, (snap) => {
+            const unsubBtc = onSnapshot(btcQ, (snap) => {
                 allBtcTx = [];
                 snap.forEach(d => {
                     let data = d.data(); data.id = d.id;
@@ -2021,10 +2240,11 @@ match /work_logs/{docId} {
                 });
                 renderBtc();
             });
+            activeUnsubscribers.push(unsubBtc);
 
             // Projekty
             const wpQ = query(collection(db, "work_projects"), where("userId", "==", currentUser.uid));
-            onSnapshot(wpQ, async (snap) => {
+            const unsubWp = onSnapshot(wpQ, async (snap) => {
                 workStorageMode = 'cloud';
                 updateWorkStorageNotice(false);
                 const cloudProjects = [];
@@ -2033,21 +2253,6 @@ match /work_logs/{docId} {
                     data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
                     cloudProjects.push(data);
                 });
-                if (cloudProjects.length === 0) {
-                    const local = getLocalProjects();
-                    if (local.length > 0) {
-                        for (const p of local) {
-                            try {
-                                const { id, dateObj, ...data } = p;
-                                data.userId = currentUser.uid;
-                                data.updatedAt = Timestamp.now();
-                                data.createdAt = p.createdAt ? Timestamp.fromDate(new Date(p.createdAt)) : Timestamp.now();
-                                await setDoc(doc(db, "work_projects", id), data);
-                            } catch(e) {}
-                        }
-                        return;
-                    }
-                }
                 allProjects = cloudProjects;
                 allProjects.sort((a,b) => (b.dateObj || 0) - (a.dateObj || 0));
                 saveLocalProjects(allProjects);
@@ -2069,10 +2274,11 @@ match /work_logs/{docId} {
                     if (curProj) renderProjectNotesList(curProj);
                 }
             });
+            activeUnsubscribers.push(unsubWp);
 
             // Záznamy odpracovaných hodin
             const wlQ = query(collection(db, "work_logs"), where("userId", "==", currentUser.uid));
-            onSnapshot(wlQ, async (snap) => {
+            const unsubWl = onSnapshot(wlQ, async (snap) => {
                 workStorageMode = 'cloud';
                 const cloudLogs = [];
                 snap.forEach(d => {
@@ -2080,20 +2286,6 @@ match /work_logs/{docId} {
                     data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
                     cloudLogs.push(data);
                 });
-                if (cloudLogs.length === 0) {
-                    const local = getLocalWorkLogs();
-                    if (local.length > 0) {
-                        for (const l of local) {
-                            try {
-                                const { id, dateObj, ...data } = l;
-                                data.userId = currentUser.uid;
-                                data.createdAt = l.date ? Timestamp.fromDate(new Date(l.date)) : Timestamp.now();
-                                await setDoc(doc(db, "work_logs", id), data);
-                            } catch(e) {}
-                        }
-                        return;
-                    }
-                }
                 allWorkLogs = cloudLogs;
                 allWorkLogs.sort((a,b) => {
                     const dateA = a.date ? new Date(a.date) : a.dateObj;
@@ -2115,6 +2307,7 @@ match /work_logs/{docId} {
                 });
                 renderWork();
             });
+            activeUnsubscribers.push(unsubWl);
 
             fetchBtcPrice(); 
             loadTimerFromStorage();
@@ -3486,8 +3679,8 @@ match /work_logs/{docId} {
         // =========================================================================
 
         function getTimerStorageKey() {
-            const uid = currentUser ? currentUser.uid : 'default';
-            return 'money_web_active_timer_' + uid;
+            if (!currentUser || !currentUser.uid) return null;
+            return 'money_web_active_timer_' + currentUser.uid;
         }
 
         function formatTimerSeconds(totalSecs) {
@@ -3569,6 +3762,8 @@ match /work_logs/{docId} {
 
         function saveTimerToStorage() {
             try {
+                const key = getTimerStorageKey();
+                if (!key) return;
                 const sel = document.getElementById('timerProjectSelect');
                 const descEl = document.getElementById('timerDescInput');
                 const rateEl = document.getElementById('timerRateInput');
@@ -3581,14 +3776,27 @@ match /work_logs/{docId} {
                     rate: rateEl ? rateEl.value : '',
                     description: descEl ? descEl.value : ''
                 };
-                localStorage.setItem(getTimerStorageKey(), JSON.stringify(data));
+                localStorage.setItem(key, JSON.stringify(data));
             } catch(e) {}
         }
 
         function loadTimerFromStorage() {
             try {
-                const raw = localStorage.getItem(getTimerStorageKey());
-                if (!raw) return;
+                const key = getTimerStorageKey();
+                if (!key) {
+                    resetTimerUI();
+                    return;
+                }
+                const raw = localStorage.getItem(key);
+                if (!raw) {
+                    timerAccumulatedSeconds = 0;
+                    timerStartedAtFormatted = null;
+                    timerRunning = false;
+                    timerStartTime = null;
+                    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                    resetTimerUI();
+                    return;
+                }
                 const data = JSON.parse(raw);
                 timerAccumulatedSeconds = parseInt(data.accumulatedSeconds) || 0;
                 timerStartedAtFormatted = data.startedAtFormatted || null;
@@ -3650,6 +3858,8 @@ match /work_logs/{docId} {
                     if (dBadge2) { dBadge2.classList.remove('hidden'); dBadge2.classList.add('flex'); }
                     updateHeaderTimerProjectLabel();
                     updateTimerTick();
+                } else {
+                    resetTimerUI();
                 }
             } catch(e) {}
         }
@@ -3795,7 +4005,8 @@ match /work_logs/{docId} {
             if (dBadgeReset) { dBadgeReset.classList.remove('flex'); dBadgeReset.classList.add('hidden'); }
             if (headerEarn) headerEarn.textContent = "";
             try {
-                localStorage.removeItem(getTimerStorageKey());
+                const k = getTimerStorageKey();
+                if (k) localStorage.removeItem(k);
             } catch(e) {}
         };
 
@@ -3861,7 +4072,8 @@ match /work_logs/{docId} {
             if (headerEarn) headerEarn.textContent = "";
             if (descEl) descEl.value = '';
             try {
-                localStorage.removeItem(getTimerStorageKey());
+                const k = getTimerStorageKey();
+                if (k) localStorage.removeItem(k);
             } catch(e) {}
         };
 
