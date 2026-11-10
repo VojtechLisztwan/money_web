@@ -311,6 +311,10 @@
                         class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
                         <span class="text-base">💼</span><span>Práce & Projekty</span>
                     </button>
+                    <button onclick="switchTab('vehicle')" data-tab="vehicle" data-mobile-tab="true"
+                        class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
+                        <span class="text-base">🚗</span><span>Vozidlo</span>
+                    </button>
                     <button onclick="switchTab('analysis')" data-tab="analysis" data-mobile-tab="true"
                         class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
                         <span class="text-base">📈</span><span>Analýza</span>
@@ -401,6 +405,10 @@
                     <button onclick="switchTab('work')" data-tab="work"
                         class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
                         <span>💼</span><span>Práce</span>
+                    </button>
+                    <button onclick="switchTab('vehicle')" data-tab="vehicle"
+                        class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
+                        <span>🚗</span><span>Vozidlo</span>
                     </button>
                     <button onclick="switchTab('analysis')" data-tab="analysis"
                         class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
@@ -636,6 +644,45 @@
                                 / detail</label>
                             <input id="txNote" type="text" placeholder="Např. nákup na víkend, nájem..."
                                 class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-blue-500 transition">
+                        </div>
+
+                        <!-- Propojení s kartou vozidla (zobrazí se při kategorii Vozidlo) -->
+                        <div id="txVehicleSyncBox" class="hidden p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/30 space-y-2.5 animate-fadeIn">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input id="txSyncToVehicle" type="checkbox" checked onchange="document.getElementById('txVehicleExtraFields').classList.toggle('hidden', !this.checked)"
+                                    class="w-4 h-4 rounded text-cyan-500 focus:ring-0 bg-slate-900 border-slate-600">
+                                <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                                    <span>🚗</span><span>Zapsat i do Karty vozidla (Servisní knížka)</span>
+                                </span>
+                            </label>
+                            <div id="txVehicleExtraFields" class="grid grid-cols-1 gap-2 pt-1 border-t border-cyan-500/20">
+                                <div>
+                                    <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-0.5">Typ události vozidla</label>
+                                    <select id="txVehicleEventType" class="w-full p-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-medium focus:outline-none focus:border-cyan-500">
+                                        <option value="Oprava">🔧 Oprava / Závada</option>
+                                        <option value="Servis">🛠️ Pravidelný servis / Údržba</option>
+                                        <option value="Palivo">⛽ Tankování / Palivo</option>
+                                        <option value="STK">📋 STK a Emise</option>
+                                        <option value="Dálnička">🛣️ Dálniční známka</option>
+                                        <option value="Pojištění">🛡️ Pojištění (Povinné / Havarijní)</option>
+                                        <option value="Pneuservis">🛞 Pneuservis / Přezutí</option>
+                                        <option value="Myčka">🧼 Myčka / Kosmetika</option>
+                                        <option value="Ostatní">📦 Ostatní</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-0.5">Stav km</label>
+                                        <input id="txVehicleKm" type="number" min="0" step="1" placeholder="Např. 185000"
+                                            class="w-full p-2 rounded-lg bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-400 uppercase mb-0.5">Čas / Doba</label>
+                                        <input id="txVehicleTime" type="text" placeholder="Např. 14:30 / 2h"
+                                            class="w-full p-2 rounded-lg bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-500">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="pt-0.5">
@@ -1066,6 +1113,554 @@
                         <div id="workCalendarGrid"
                             class="grid grid-cols-7 divide-x divide-y divide-slate-800/80 text-xs bg-slate-950/40">
                             <!-- Dynamically generated days -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- TAB: VEHICLE (KARTA VOZIDLA, KM, OPRAVY, DOKUMENTY & PROPOJENÍ S FINANCEMI) -->
+        <div id="tab-vehicle" class="tab-content hidden space-y-6 sm:space-y-8 w-full">
+
+            <!-- Notice pro Firebase pravidla při lokálním režimu -->
+            <div id="vehicleStorageNotice"
+                class="hidden bg-amber-950/40 border border-amber-500/40 p-4 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs animate-fadeIn no-print">
+                <div class="flex items-center gap-3 text-amber-300">
+                    <span class="text-xl">⚠️</span>
+                    <div>
+                        <span class="font-bold text-amber-200">Lokální úložiště vozidla aktivní:</span> Data karty vozidla, kilometrů, oprav a dokumentů jsou bezpečně uložena v prohlížeči (IndexedDB & LocalStorage) a zahrnuta v zálohách. Pro synchronizaci přes Firebase Firestore stačí aktualizovat pravidla (Rules).
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button onclick="window.syncVehiclesToCloud()"
+                        class="px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 font-bold border border-emerald-500/40 whitespace-nowrap transition text-xs shadow-sm flex items-center gap-1.5">
+                        <span>🔄</span><span>Nahrát do cloudu</span>
+                    </button>
+                    <button onclick="window.showFirebaseRulesModal()"
+                        class="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold border border-amber-500/40 whitespace-nowrap transition text-xs shadow-sm">
+                        📋 Návod na pravidla
+                    </button>
+                </div>
+            </div>
+
+            <!-- HLAVNÍ KARTA VOZIDLA (HERO CARD) -->
+            <div id="vehicleMainCard"
+                class="glass-card p-5 sm:p-7 rounded-3xl border border-cyan-500/30 bg-gradient-to-br from-slate-900/95 via-slate-900/90 to-cyan-950/20 shadow-2xl relative overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- Top Bar: Vehicle Selector, Title, SPZ, VIN & Actions -->
+                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-6 mb-6 border-b border-slate-800/90 relative z-10">
+
+                    <!-- Left: Car Identity -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full xl:w-auto">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-3xl shadow-lg shadow-cyan-500/25 shrink-0 border border-cyan-400/30">
+                            🚗
+                        </div>
+                        <div class="space-y-1.5 flex-1">
+                            <div class="flex flex-wrap items-center gap-2.5">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Karta vozidla</span>
+                                <select id="vehicleSelectDropdown" onchange="window.selectActiveVehicle(this.value)"
+                                    class="px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700 text-xs font-bold text-cyan-300 outline-none focus:border-cyan-500 cursor-pointer transition">
+                                </select>
+                            </div>
+                            <h1 id="vehCardName" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                                Moje vozidlo
+                            </h1>
+                            <p id="vehCardSubtitle" class="text-xs text-slate-400 font-medium">
+                                Klikněte na „Upravit kartu vozidla“ pro zadání SPZ, VIN, platnosti STK a dálniční známky
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Center/Right: SPZ Plate, VIN Badge & Action Buttons -->
+                    <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-start xl:justify-end">
+
+                        <!-- Realistic EU/CZ License Plate (SPZ) -->
+                        <div onclick="window.openVehicleProfileModal()" title="Kliknutím upravíte SPZ a údaje vozidla"
+                            class="inline-flex items-stretch rounded-xl overflow-hidden border-2 border-slate-300 shadow-lg cursor-pointer hover:scale-[1.02] transition select-none bg-white text-slate-950">
+                            <div class="bg-blue-700 text-white px-2 py-1 flex flex-col items-center justify-between text-[9px] font-bold leading-none">
+                                <span class="text-[10px]">🇪🇺</span>
+                                <span class="tracking-tighter font-extrabold">CZ</span>
+                            </div>
+                            <div id="vehCardSpz" class="px-3.5 py-1.5 font-mono font-extrabold text-sm sm:text-base tracking-widest flex items-center justify-center min-w-[110px]">
+                                NASTAVIT SPZ
+                            </div>
+                        </div>
+
+                        <!-- VIN Code Badge -->
+                        <div class="flex items-center gap-1.5 bg-slate-950/90 px-3.5 py-2 rounded-xl border border-slate-800">
+                            <div>
+                                <span class="text-[9px] font-bold uppercase tracking-wider text-slate-500 block leading-none mb-0.5">VIN kód vozidla</span>
+                                <span id="vehCardVin" class="font-mono font-bold text-xs sm:text-sm text-cyan-300 tracking-wider">Nenastaveno</span>
+                            </div>
+                            <button onclick="window.copyVehicleVin()" id="btnCopyVin" title="Kopírovat VIN do schránky"
+                                class="ml-1.5 p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition">
+                                📋
+                            </button>
+                        </div>
+
+                        <!-- Edit & Add Vehicle Buttons -->
+                        <div class="flex items-center gap-2 no-print">
+                            <button onclick="window.openVehicleProfileModal()"
+                                class="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-cyan-600/25 flex items-center gap-1.5">
+                                <span>✏️</span><span>Upravit kartu vozidla</span>
+                            </button>
+                            <button onclick="window.openVehicleProfileModal(true)" title="Přidat další vozidlo"
+                                class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white font-bold text-xs transition flex items-center gap-1">
+                                <span>➕</span><span class="hidden sm:inline">Další auto</span>
+                            </button>
+                            <button id="btnDeleteVehicle" onclick="window.deleteActiveVehicle()" title="Smazat toto vozidlo"
+                                class="hidden p-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/70 border border-rose-800/50 text-rose-400 hover:text-white text-xs transition">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Klíčové panely na Kartě Vozidla: STAV KM, PLATNOST STK, PLATNOST DÁLNIČKY, NÁKLADY -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+
+                    <!-- 1. AKTUÁLNÍ STAV KM (TACHOMETR) + RYCHLÝ ZÁPIS -->
+                    <div class="bg-slate-950/85 p-4 sm:p-5 rounded-2xl border border-cyan-500/30 flex flex-col justify-between shadow-inner">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <span>🛣️</span><span>Aktuální stav km</span>
+                                </span>
+                                <button onclick="document.getElementById('vehicleKmSection').scrollIntoView({behavior:'smooth'})"
+                                    class="text-[10px] font-bold text-cyan-400 hover:underline">Historie km ➔</button>
+                            </div>
+                            <div id="vehCardKm" class="text-2xl sm:text-3xl font-extrabold font-mono text-cyan-400 tracking-tight">
+                                0 km
+                            </div>
+                            <p id="vehCardKmSub" class="text-[11px] text-slate-400 mt-1 font-mono">
+                                Zatím žádný záznam tachometru
+                            </p>
+                        </div>
+
+                        <!-- Rychlá aktualizace stavu km -->
+                        <div class="mt-3.5 pt-3 border-t border-slate-800/80 no-print">
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Rychle aktualizovat stav km:</label>
+                            <div class="flex items-center gap-1.5">
+                                <input id="quickKmInput" type="number" min="0" step="1" placeholder="Nový stav km..."
+                                    onkeydown="if(event.key==='Enter') window.quickAddVehicleKm()"
+                                    class="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono font-bold text-xs focus:outline-none focus:border-cyan-500 transition">
+                                <button onclick="window.quickAddVehicleKm()"
+                                    class="px-3 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition whitespace-nowrap shadow-md shadow-cyan-600/20">
+                                    ➕ Uložit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. PLATNOST STK -->
+                    <div class="bg-slate-950/85 p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-inner">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <span>📋</span><span>Platnost STK</span>
+                                </span>
+                                <span id="vehCardStkBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                                    Nenastaveno
+                                </span>
+                            </div>
+                            <div id="vehCardStkDate" class="text-xl sm:text-2xl font-extrabold font-mono text-white mt-1">
+                                --.--.----
+                            </div>
+                            <p id="vehCardStkDays" class="text-[11px] text-slate-400 mt-1 font-medium">
+                                Zadejte datum platnosti STK
+                            </p>
+                            <div class="w-full bg-slate-900 h-1.5 rounded-full mt-2.5 overflow-hidden border border-slate-800">
+                                <div id="vehCardStkBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3.5 pt-3 border-t border-slate-800/80 flex items-center gap-1.5 no-print">
+                            <input id="quickStkDateInput" type="date" onchange="window.quickUpdateVehicleDate('stkUntil', this.value)"
+                                title="Změnit datum platnosti STK"
+                                class="w-full p-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-300 text-xs font-mono focus:outline-none focus:border-cyan-500 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- 3. PLATNOST DÁLNIČNÍ ZNÁMKY -->
+                    <div class="bg-slate-950/85 p-4 sm:p-5 rounded-2xl border border-slate-800 flex flex-col justify-between shadow-inner">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <span>🛣️</span><span>Platnost dálničky</span>
+                                </span>
+                                <span id="vehCardVignetteBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                                    Nenastaveno
+                                </span>
+                            </div>
+                            <div id="vehCardVignetteDate" class="text-xl sm:text-2xl font-extrabold font-mono text-white mt-1">
+                                --.--.----
+                            </div>
+                            <p id="vehCardVignetteDays" class="text-[11px] text-slate-400 mt-1 font-medium">
+                                Zadejte platnost dálniční známky
+                            </p>
+                            <div class="w-full bg-slate-900 h-1.5 rounded-full mt-2.5 overflow-hidden border border-slate-800">
+                                <div id="vehCardVignetteBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3.5 pt-3 border-t border-slate-800/80 flex items-center gap-1.5 no-print">
+                            <input id="quickVignetteDateInput" type="date" onchange="window.quickUpdateVehicleDate('vignetteUntil', this.value)"
+                                title="Změnit datum platnosti dálniční známky"
+                                class="w-full p-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-300 text-xs font-mono focus:outline-none focus:border-cyan-500 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- 4. CELKOVÉ NÁKLADY NA VOZIDLO & PROPOJENÍ S FINANCEMI -->
+                    <div class="bg-slate-950/85 p-4 sm:p-5 rounded-2xl border border-rose-500/30 flex flex-col justify-between shadow-inner">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <span>💸</span><span>Náklady na vozidlo</span>
+                                </span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                                    Kategorie: Vozidlo
+                                </span>
+                            </div>
+                            <div id="vehCardTotalCost" class="text-2xl sm:text-3xl font-extrabold font-mono text-rose-400 tracking-tight">
+                                0 Kč
+                            </div>
+                            <p id="vehCardPeriodCost" class="text-[11px] text-slate-300 mt-1 font-mono font-semibold">
+                                V období: 0 Kč
+                            </p>
+                            <p id="vehCardCostSub" class="text-[10px] text-slate-500 mt-1 font-mono">
+                                Opravy: 0 Kč • 0 událostí
+                            </p>
+                        </div>
+
+                        <div class="mt-3.5 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] no-print">
+                            <span id="vehCardInsuranceInfo" class="text-slate-400 truncate">Pojištění: --</span>
+                            <button onclick="document.getElementById('vehicleFinanceLinkSection').scrollIntoView({behavior:'smooth'})"
+                                class="text-cyan-400 hover:text-cyan-300 font-bold whitespace-nowrap ml-2">Výdaje ➔</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- HLAVNÍ SEKCE: FORMULÁŘ UDÁLOSTI/OPRAVY (VLEVO) + SERVISNÍ KNÍŽKA A HISTORIE UDÁLOSTÍ (VPRAVO) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- Left (4 cols): Přidat událost / opravu -->
+                <div class="glass-card p-5 sm:p-6 rounded-2xl col-span-1 lg:col-span-4 h-fit border border-slate-800/80 shadow-xl no-print">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+                        <h2 id="vehEventFormTitle" class="text-base font-bold text-white flex items-center gap-2">
+                            <span>🔧</span><span>Nová událost / Oprava</span>
+                        </h2>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 uppercase tracking-wider">Servisní knížka</span>
+                    </div>
+
+                    <input type="hidden" id="editVehEventId">
+
+                    <div class="space-y-3.5">
+                        <!-- Typ události -->
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Typ události *</label>
+                            <select id="vehEventType" onchange="window.onVehEventTypeChange()"
+                                class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-semibold focus:outline-none focus:border-cyan-500 transition cursor-pointer">
+                                <option value="Oprava" selected>🔧 Oprava / Závada</option>
+                                <option value="Servis">🛠️ Pravidelný servis / Údržba (olej, filtry...)</option>
+                                <option value="Palivo">⛽ Tankování / Palivo</option>
+                                <option value="STK">📋 STK a Emise</option>
+                                <option value="Dálnička">🛣️ Dálniční známka</option>
+                                <option value="Pojištění">🛡️ Pojištění (Povinné / Havarijní)</option>
+                                <option value="Pneuservis">🛞 Pneuservis / Přezutí / Pneumatiky</option>
+                                <option value="Myčka">🧼 Myčka / Kosmetika</option>
+                                <option value="Ostatní">📦 Ostatní / Doplňky / Pokuta</option>
+                            </select>
+                        </div>
+
+                        <!-- Název / Co se dělalo -->
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Popis události / Opravy *</label>
+                            <input id="vehEventTitle" type="text" placeholder="Např. Výměna brzd, výměna oleje a filtrů..."
+                                class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-medium focus:outline-none focus:border-cyan-500 transition">
+                        </div>
+
+                        <!-- Cena a Kilometry -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Cena (Kč)</label>
+                                <div class="relative">
+                                    <input id="vehEventPrice" type="number" step="1" min="0" placeholder="0"
+                                        class="w-full p-2.5 pr-9 rounded-xl bg-slate-900 border border-slate-700/80 text-rose-400 font-mono font-bold text-sm focus:outline-none focus:border-cyan-500 transition">
+                                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-bold pointer-events-none">Kč</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Stav km</label>
+                                    <button type="button" onclick="window.fillCurrentVehicleKmToForm()" class="text-[10px] text-cyan-400 hover:underline font-mono">📍 Aktuální</button>
+                                </div>
+                                <div class="relative">
+                                    <input id="vehEventKm" type="number" step="1" min="0" placeholder="Např. 185000"
+                                        class="w-full p-2.5 pr-9 rounded-xl bg-slate-900 border border-slate-700/80 text-cyan-300 font-mono font-bold text-sm focus:outline-none focus:border-cyan-500 transition">
+                                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] font-bold pointer-events-none">km</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Datum a Čas / Doba -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Datum *</label>
+                                <input id="vehEventDate" type="date"
+                                    class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-xs sm:text-sm font-medium focus:outline-none focus:border-cyan-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Čas / Doba opravy</label>
+                                <input id="vehEventTime" type="text" placeholder="Např. 14:30 nebo 3 hod"
+                                    class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono text-xs sm:text-sm focus:outline-none focus:border-cyan-500 transition">
+                            </div>
+                        </div>
+
+                        <!-- Dynamické pole pro prodloužení STK / Dálničky / Pojištění při vybrání daného typu -->
+                        <div id="vehEventValidityBox" class="hidden p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 animate-fadeIn">
+                            <label id="vehEventValidityLabel" class="block text-[10px] font-bold text-emerald-300 uppercase tracking-wider mb-1">
+                                📅 Nová platnost do (automaticky propíše do Karty vozidla):
+                            </label>
+                            <input id="vehEventNewValidityDate" type="date"
+                                class="w-full p-2 rounded-lg bg-slate-900 border border-emerald-500/40 text-white text-xs font-mono focus:outline-none focus:border-emerald-400">
+                        </div>
+
+                        <!-- Podrobná poznámka (servis, díly, záruka) -->
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Poznámka / Autoservis / Díly</label>
+                            <textarea id="vehEventNote" rows="2" placeholder="Např. Autoservis Novák, použité díly Bosch, faktura č. 202605..."
+                                class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-cyan-500 transition font-sans"></textarea>
+                        </div>
+
+                        <!-- Volitelná příloha přímo k události (účtenka, faktura, fotka) -->
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Přiložit soubor / účtenku / fotku (nepovinné)</label>
+                            <input id="vehEventFileInput" type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                                class="block w-full text-[11px] text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-cyan-600/20 file:text-cyan-300 hover:file:bg-cyan-600/30 cursor-pointer bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                        </div>
+
+                        <!-- Checkbox: Propojit s výdaji ve správě financí (Kategorie: Vozidlo) -->
+                        <div class="pt-0.5">
+                            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-rose-950/25 border border-rose-500/30 cursor-pointer hover:bg-rose-950/40 transition">
+                                <input id="vehEventSyncFinance" type="checkbox" checked
+                                    class="w-4 h-4 mt-0.5 rounded text-rose-500 focus:ring-0 bg-slate-900 border-slate-600">
+                                <div>
+                                    <span class="text-xs font-bold text-rose-300 block">Zaúčtovat do výdajů ve Správě financí</span>
+                                    <span class="text-[10px] text-slate-400 block mt-0.5">Automaticky vytvoří výdaj v kategorii <strong>„Vozidlo“</strong></span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="pt-2">
+                            <button id="btnSaveVehEvent" onclick="window.saveVehicleEvent()"
+                                class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 p-3.5 rounded-xl font-bold transition-all shadow-lg shadow-cyan-600/25 active:scale-[0.99] flex items-center justify-center gap-2 text-white text-sm">
+                                <span>💾 ULOŽIT UDÁLOST VOZIDLA</span>
+                            </button>
+                            <button id="btnCancelVehEvent" onclick="window.cancelEditVehicleEvent()"
+                                class="hidden w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl mt-2 font-semibold text-xs text-slate-300 transition">
+                                ZRUŠIT ÚPRAVY
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right (8 cols): Servisní knížka & Historie událostí -->
+                <div class="glass-card p-5 sm:p-6 rounded-2xl col-span-1 lg:col-span-8 border border-slate-800/80 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5 pb-4 border-b border-slate-800">
+                            <div>
+                                <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                                    <span>📋</span><span>Servisní knížka & Historie událostí</span>
+                                </h2>
+                                <p class="text-xs text-slate-400 mt-0.5">Přehled všech oprav, servisních zásahů, tankování a poplatků včetně stavu km, času a ceny</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end no-print">
+                                <button onclick="window.exportVehicleEventsXlsx()"
+                                    class="px-3 py-1.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/70 border border-emerald-800/60 text-emerald-300 text-xs font-semibold transition flex items-center gap-1.5">
+                                    <span>📊</span><span>Export XLSX</span>
+                                </button>
+                                <span id="vehEventsCountBadge" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-cyan-300">
+                                    0 událostí
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Filter & Search Bar -->
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 no-print">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <select id="vehEventFilterType" onchange="window.renderVehicle()"
+                                    class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs font-bold text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer">
+                                    <option value="all">🔍 Všechny typy událostí</option>
+                                    <option value="Oprava">🔧 Opravy / Závady</option>
+                                    <option value="Servis">🛠️ Pravidelný servis / Údržba</option>
+                                    <option value="Palivo">⛽ Tankování / Palivo</option>
+                                    <option value="STK">📋 STK a Emise</option>
+                                    <option value="Dálnička">🛣️ Dálniční známka</option>
+                                    <option value="Pojištění">🛡️ Pojištění</option>
+                                    <option value="Pneuservis">🛞 Pneuservis / Přezutí</option>
+                                    <option value="Myčka">🧼 Myčka / Kosmetika</option>
+                                    <option value="Ostatní">📦 Ostatní</option>
+                                </select>
+                                <input id="vehEventSearch" type="text" oninput="window.renderVehicle()" placeholder="Hledat opravu, díl, poznámku..."
+                                    class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-white focus:outline-none focus:border-cyan-500 min-w-[200px]">
+                            </div>
+                            <div class="text-xs font-mono text-slate-400 self-end sm:self-center">
+                                Součet zobrazených: <span id="vehEventsFilteredSum" class="font-bold text-rose-400">0 Kč</span>
+                            </div>
+                        </div>
+
+                        <!-- Events Table -->
+                        <div class="overflow-x-auto max-h-[560px] rounded-xl border border-slate-800/80 bg-slate-900/40">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 border-b border-slate-800 text-slate-400 text-[11px] uppercase font-semibold">
+                                    <tr>
+                                        <th class="p-3">Datum & Čas</th>
+                                        <th class="p-3">Typ</th>
+                                        <th class="p-3">Popis události / Opravy</th>
+                                        <th class="p-3 text-right">Stav km</th>
+                                        <th class="p-3 text-right">Cena</th>
+                                        <th class="p-3 text-center no-print">Finance</th>
+                                        <th class="p-3 text-center w-20 no-print">Akce</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vehEventsTableBody" class="divide-y divide-slate-800/60 text-xs sm:text-sm">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SEKCE: DOKUMENTY A SOUBORY VOZIDLA (POJISTKA, FOTKA TECHNIČÁKU, FAKTURY...) -->
+            <div class="glass-card p-5 sm:p-7 rounded-3xl border border-slate-800/80 shadow-xl">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
+                            <span>📁</span><span>Dokumenty a soubory vozidla (Pojistka, Techničák, Faktury, Fotky)</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Uložte si fotku velkého i malého technického průkazu, zelenou kartu / pojistku, protokoly z STK nebo účtenky ze servisu</p>
+                    </div>
+                    <span id="vehFilesCountBadge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        0 souborů
+                    </span>
+                </div>
+
+                <!-- Upload Form Bar -->
+                <div class="bg-slate-900/80 p-4 sm:p-5 rounded-2xl border border-slate-800 mb-6 no-print">
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                        <div class="sm:col-span-3">
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Typ dokumentu</label>
+                            <select id="vehFileCategory"
+                                class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-xs font-semibold focus:outline-none focus:border-cyan-500 cursor-pointer">
+                                <option value="Technický průkaz">📘 Technický průkaz (Techničák)</option>
+                                <option value="Pojistka">🛡️ Pojistka / Zelená karta</option>
+                                <option value="Faktura / Servis">🧾 Faktura / Účtenka z opravy</option>
+                                <option value="STK / Emise">📋 Protokol STK / Emise</option>
+                                <option value="Dálniční známka">🛣️ Potvrzení dálniční známky</option>
+                                <option value="Fotka vozidla">📸 Fotka vozidla / Poškození</option>
+                                <option value="Ostatní">📎 Ostatní dokument</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-4">
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Název / Popis souboru</label>
+                            <input id="vehFileTitle" type="text" placeholder="Např. Fotka velkého techničáku, Zelená karta 2026..."
+                                class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div class="sm:col-span-3">
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Vyberte soubor(y) (Foto, PDF...)</label>
+                            <input id="vehFileInput" type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                                class="block w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-600/20 file:text-cyan-300 hover:file:bg-cyan-600/30 cursor-pointer bg-slate-950 p-1 rounded-xl border border-slate-800">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <button id="btnUploadVehFile" onclick="window.uploadVehicleFiles()"
+                                class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-cyan-600/25 flex items-center justify-center gap-1.5">
+                                <span>📤</span><span>Nahrát</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Files Gallery Grid -->
+                <div id="vehFilesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Dynamic file cards -->
+                </div>
+            </div>
+
+            <!-- SPODNÍ DVOJSLOUPEC: HISTORIE STAVU KM & GRAFY + PROPOJENÍ S VÝDAJI V KATEGORII "VOZIDLO" -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Left: Historie stavu tachometru (KM) & Graf vývoje km -->
+                <div id="vehicleKmSection" class="glass-card p-5 sm:p-6 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                            <div>
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <span>🛣️</span><span>Vývoj a historie stavu tachometru (km)</span>
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Sledování nájezdu kilometrů v čase</p>
+                            </div>
+                            <span id="vehTotalDrivenBadge" class="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                                Najeto: 0 km
+                            </span>
+                        </div>
+
+                        <!-- Chart KM -->
+                        <div class="h-[220px] w-full mb-5 bg-slate-950/50 p-3 rounded-xl border border-slate-800/80">
+                            <canvas id="vehicleKmChart"></canvas>
+                        </div>
+
+                        <!-- KM Logs Table -->
+                        <div class="overflow-x-auto max-h-[280px] rounded-xl border border-slate-800 bg-slate-900/40">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="sticky top-0 bg-slate-900 text-slate-400 text-[11px] uppercase border-b border-slate-800">
+                                    <tr>
+                                        <th class="p-2.5">Datum</th>
+                                        <th class="p-2.5 text-right">Stav tachometru</th>
+                                        <th class="p-2.5 text-right">Nájezd</th>
+                                        <th class="p-2.5">Poznámka / Zdroj</th>
+                                        <th class="p-2.5 text-center w-10 no-print"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vehicleKmHistoryBody" class="divide-y divide-slate-800/60 text-xs">
+                                    <!-- Dynamic KM rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Propojení s výdaji ve správě financí (Kategorie: Vozidlo) & Graf nákladů -->
+                <div id="vehicleFinanceLinkSection" class="glass-card p-5 sm:p-6 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+                            <div>
+                                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                    <span>🔗</span><span>Propojené výdaje ve financích (Kategorie: Vozidlo)</span>
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Všechny finanční transakce zařazené v kategorii <strong>Vozidlo</strong> a struktura nákladů</p>
+                            </div>
+                            <button onclick="window.goToOverviewWithVehicleCategory()"
+                                class="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-rose-300 text-xs font-bold transition no-print">
+                                ➕ Nový výdaj
+                            </button>
+                        </div>
+
+                        <!-- Chart Costs -->
+                        <div class="h-[220px] w-full mb-5 bg-slate-950/50 p-3 rounded-xl border border-slate-800/80">
+                            <canvas id="vehicleCostChart"></canvas>
+                        </div>
+
+                        <!-- Linked Finance Transactions List -->
+                        <div id="vehicleLinkedFinanceList" class="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+                            <!-- Dynamic finance items -->
                         </div>
                     </div>
                 </div>
@@ -2203,7 +2798,8 @@ service cloud.firestore {
       return request.auth != null && 
              request.auth.token.email in [
                'vojtalisztwan@gmail.com',
-               'test@test.cz'
+               'test@test.cz',
+               'david.krop.x@gmail.com'
              ];
     }
 
@@ -2235,6 +2831,24 @@ service cloud.firestore {
       allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
       allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
     }
+
+    match /vehicles/{docId} {
+      allow read, delete: if isWhitelisted() && isOwner(resource.data.userId);
+      allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
+      allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
+    }
+
+    match /vehicle_events/{docId} {
+      allow read, delete: if isWhitelisted() && isOwner(resource.data.userId);
+      allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
+      allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
+    }
+
+    match /vehicle_files/{docId} {
+      allow read, delete: if isWhitelisted() && isOwner(resource.data.userId);
+      allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
+      allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
+    }
   }
 }</pre>
                     <button id="btnCopyRules" onclick="window.copyFirebaseRules()"
@@ -2249,7 +2863,7 @@ service cloud.firestore {
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <button onclick="window.syncWorkToCloud()"
+                    <button onclick="window.syncWorkToCloud(); window.syncVehiclesToCloud();"
                         class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-1.5">
                         <span>🔄</span><span>Zkusit nahrát data do cloudu</span>
                     </button>
@@ -2257,6 +2871,124 @@ service cloud.firestore {
                         class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
                         Zavřít
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: NASTAVENÍ / ÚPRAVA KARTY VOZIDLA -->
+        <div id="modalVehicleProfile"
+            class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+            onclick="if(event.target === this) window.closeVehicleProfileModal()">
+            <div class="glass-card border border-slate-700/80 rounded-3xl p-6 sm:p-8 max-w-xl w-full relative shadow-2xl animate-fadeIn">
+                <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-800">
+                    <h3 id="modalVehicleProfileTitle" class="text-lg font-bold text-white flex items-center gap-2">
+                        <span>🚗</span><span>Karta vozidla – Nastavení údajů</span>
+                    </h3>
+                    <button onclick="window.closeVehicleProfileModal()"
+                        class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 text-sm">✕</button>
+                </div>
+
+                <input type="hidden" id="vehModalId">
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Název / Značka a model vozidla *</label>
+                            <input id="vehModalName" type="text" placeholder="Např. Škoda Octavia III 2.0 TDI"
+                                class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-bold focus:outline-none focus:border-cyan-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Rok výroby</label>
+                            <input id="vehModalYear" type="number" min="1950" max="2035" placeholder="Např. 2019"
+                                class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono text-sm focus:outline-none focus:border-cyan-500 transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">SPZ (Registrační značka)</label>
+                            <input id="vehModalSpz" type="text" placeholder="Např. 1AB 2345"
+                                class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white font-mono font-extrabold text-sm uppercase tracking-wider focus:outline-none focus:border-cyan-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">VIN kód vozidla</label>
+                            <input id="vehModalVin" type="text" maxlength="20" placeholder="17místný VIN kód..."
+                                class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-cyan-300 font-mono font-bold text-sm uppercase tracking-wider focus:outline-none focus:border-cyan-500 transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Aktuální stav tachometru (km)</label>
+                            <input id="vehModalKm" type="number" min="0" step="1" placeholder="Např. 184500"
+                                class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-cyan-400 font-mono font-extrabold text-sm focus:outline-none focus:border-cyan-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Motorizace / Palivo</label>
+                            <input id="vehModalEngine" type="text" placeholder="Např. Nafta 2.0 TDI 110 kW"
+                                class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm focus:outline-none focus:border-cyan-500 transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800">
+                        <div>
+                            <label class="block text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1">📋 Platnost STK do</label>
+                            <input id="vehModalStkDate" type="date"
+                                class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-emerald-500 cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-1">🛣️ Platnost dálničky do</label>
+                            <input id="vehModalVignetteDate" type="date"
+                                class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-blue-500 cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">🛡️ Pojištění do (nepov.)</label>
+                            <input id="vehModalInsuranceDate" type="date"
+                                class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-amber-500 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Technická poznámka (olej, rozměr pneu, pojišťovna...)</label>
+                        <textarea id="vehModalNotes" rows="2" placeholder="Např. Olej 5W-30 LL, pneumatiky 225/45 R17, pojišťovna Kooperativa..."
+                            class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-xs focus:outline-none focus:border-cyan-500 transition font-sans"></textarea>
+                    </div>
+                </div>
+
+                <div class="pt-5 mt-5 border-t border-slate-800 flex items-center justify-end gap-3">
+                    <button onclick="window.closeVehicleProfileModal()"
+                        class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
+                        Zrušit
+                    </button>
+                    <button onclick="window.saveVehicleProfile()"
+                        class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs transition shadow-lg shadow-cyan-600/30">
+                        💾 Uložit kartu vozidla
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: NÁHLED SOUBORU / FOTKY TECHNIČÁKU / POJISTKY -->
+        <div id="modalVehFilePreview"
+            class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+            onclick="if(event.target === this) window.closeVehFilePreviewModal()">
+            <div class="glass-card border border-slate-700/80 rounded-3xl p-4 sm:p-6 max-w-4xl w-full relative shadow-2xl animate-fadeIn max-h-[92vh] flex flex-col">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800 flex-shrink-0">
+                    <div class="min-w-0 pr-3">
+                        <span id="previewVehFileCat" class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 uppercase">Dokument</span>
+                        <h3 id="previewVehFileTitle" class="text-base sm:text-lg font-bold text-white truncate mt-1">Náhled souboru</h3>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <button id="btnPreviewDownload"
+                            class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition flex items-center gap-1.5">
+                            <span>📥</span><span>Stáhnout</span>
+                        </button>
+                        <button onclick="window.closeVehFilePreviewModal()"
+                            class="text-slate-400 hover:text-white p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm">✕</button>
+                    </div>
+                </div>
+                <div id="previewVehFileContainer" class="flex-1 overflow-auto flex items-center justify-center bg-slate-950/90 rounded-2xl border border-slate-800 p-2 min-h-[300px]">
+                    <!-- Dynamic image or iframe/PDF -->
                 </div>
             </div>
         </div>
@@ -2282,7 +3014,7 @@ service cloud.firestore {
 
         // Výchozí a uživatelsky editovatelné kategorie
         const defaultCategories = {
-            "Výdaj": ["Jídlo", "Bydlení", "Doprava", "Zábava", "Sport", "Dar", "Ostatní"],
+            "Výdaj": ["Jídlo", "Bydlení", "Vozidlo", "Doprava", "Zábava", "Sport", "Dar", "Ostatní"],
             "Příjem": ["Mzda", "Investice", "Dar", "Ostatní"]
         };
         let userCategories = {
@@ -2298,6 +3030,16 @@ service cloud.firestore {
                         const parsed = JSON.parse(raw);
                         if (parsed && Array.isArray(parsed["Výdaj"]) && Array.isArray(parsed["Příjem"])) {
                             userCategories = parsed;
+                            const migratedKey = `vehicle_cat_migrated_${currentUser.uid}`;
+                            if (!localStorage.getItem(migratedKey)) {
+                                if (!userCategories["Výdaj"].some(c => c.toLowerCase() === "vozidlo")) {
+                                    const dopIdx = userCategories["Výdaj"].indexOf("Doprava");
+                                    if (dopIdx !== -1) userCategories["Výdaj"].splice(dopIdx, 0, "Vozidlo");
+                                    else userCategories["Výdaj"].push("Vozidlo");
+                                    localStorage.setItem(`user_categories_${currentUser.uid}`, JSON.stringify(userCategories));
+                                }
+                                localStorage.setItem(migratedKey, "1");
+                            }
                             return;
                         }
                     }
@@ -2363,6 +3105,12 @@ service cloud.firestore {
         let activeWorkView = 'table'; // 'table' | 'calendar'
         let currentCalendarMonth = new Date().getMonth();
         let currentCalendarYear = new Date().getFullYear();
+
+        // Vozidlo (Karta vozidla, KM, Události/Opravy, Soubory) Proměnné
+        let allVehicles = [], allVehicleEvents = [], allVehicleFiles = [];
+        let activeVehicleId = null;
+        let vehicleStorageMode = 'cloud'; // 'cloud' | 'local'
+        let vehKmChartInstance = null, vehCostChartInstance = null;
 
         // Stopky (Live Timer) proměnné
         let timerInterval = null;
@@ -2552,6 +3300,9 @@ service cloud.firestore {
             if (id === 'work') {
                 renderWork();
             }
+            if (id === 'vehicle' && window.renderVehicle) {
+                window.renderVehicle();
+            }
             if (id === 'settings' && window.renderCategoryManager) {
                 window.renderCategoryManager();
             }
@@ -2565,6 +3316,8 @@ service cloud.firestore {
             document.getElementById('btcDateInput').value = today;
             const workDate = document.getElementById('workLogModalDate');
             if (workDate && !workDate.value) workDate.value = today;
+            const vehDate = document.getElementById('vehEventDate');
+            if (vehDate && !vehDate.value) vehDate.value = today;
 
             const df = document.getElementById('filterDateFrom');
             const dt = document.getElementById('filterDateTo');
@@ -2635,6 +3388,10 @@ service cloud.firestore {
             allBtcTx = [];
             allProjects = [];
             allWorkLogs = [];
+            allVehicles = [];
+            allVehicleEvents = [];
+            allVehicleFiles = [];
+            activeVehicleId = null;
             activeWorkProjectFilter = 'all';
             currentNotesProjectId = null;
             editingNoteId = null;
@@ -2665,6 +3422,8 @@ service cloud.firestore {
             if (salaryChart) { try { salaryChart.destroy(); } catch (e) { } salaryChart = null; }
             if (trendChart) { try { trendChart.destroy(); } catch (e) { } trendChart = null; }
             if (btcChartInstance) { try { btcChartInstance.destroy(); } catch (e) { } btcChartInstance = null; }
+            if (vehKmChartInstance) { try { vehKmChartInstance.destroy(); } catch (e) { } vehKmChartInstance = null; }
+            if (vehCostChartInstance) { try { vehCostChartInstance.destroy(); } catch (e) { } vehCostChartInstance = null; }
             btcChartLoaded = false;
         }
 
@@ -2877,6 +3636,7 @@ service cloud.firestore {
                     allTx.push(data);
                 });
                 render();
+                if (window.renderVehicle) window.renderVehicle();
             });
             activeUnsubscribers.push(unsubTx);
 
@@ -2893,16 +3653,43 @@ service cloud.firestore {
             });
             activeUnsubscribers.push(unsubBtc);
 
-            // Projekty
+            const toSafeDate = (val, fallbackStr) => {
+                if (val && typeof val.toDate === 'function') return val.toDate();
+                if (val instanceof Date && !isNaN(val.getTime())) return val;
+                if (typeof val === 'string' && val) {
+                    const d = new Date(val);
+                    if (!isNaN(d.getTime())) return d;
+                }
+                if (fallbackStr) {
+                    const d2 = new Date(fallbackStr);
+                    if (!isNaN(d2.getTime())) return d2;
+                }
+                return new Date();
+            };
+
+            // Projekty & Vozidla (využívá autorizovanou kolekci work_projects pro bezchybný cloud sync bez permission-denied)
             const wpQ = query(collection(db, "work_projects"), where("userId", "==", currentUser.uid));
             const unsubWp = onSnapshot(wpQ, async (snap) => {
                 workStorageMode = 'cloud';
+                vehicleStorageMode = 'cloud';
                 updateWorkStorageNotice(false);
+                updateVehicleStorageNotice(false);
                 const cloudProjects = [];
+                const cloudVehicles = [];
+                const cloudVehEvents = [];
+                const cloudVehFiles = [];
                 snap.forEach(d => {
                     let data = d.data(); data.id = d.id;
-                    data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
-                    cloudProjects.push(data);
+                    data.dateObj = toSafeDate(data.createdAt, data.date);
+                    if (data.recordType === 'vehicle') {
+                        cloudVehicles.push(data);
+                    } else if (data.recordType === 'vehicle_event') {
+                        cloudVehEvents.push(data);
+                    } else if (data.recordType === 'vehicle_file') {
+                        cloudVehFiles.push(data);
+                    } else {
+                        cloudProjects.push(data);
+                    }
                 });
                 allProjects = cloudProjects;
                 allProjects.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
@@ -2912,18 +3699,72 @@ service cloud.firestore {
                     const curProj = allProjects.find(p => p.id === currentNotesProjectId);
                     if (curProj) renderProjectNotesList(curProj);
                 }
-            }, (err) => {
+
+                // Aktualizace vozidel z cloudu
+                if (cloudVehicles.length > 0) {
+                    allVehicles = cloudVehicles;
+                    saveLocalVehicles(allVehicles.map(v => ({ ...v, createdAt: v.dateObj ? v.dateObj.toISOString() : new Date().toISOString() })));
+                } else if (allVehicles.length === 0) {
+                    allVehicles = getLocalVehicles();
+                }
+                if (allVehicles.length > 0 && (!activeVehicleId || !allVehicles.some(v => v.id === activeVehicleId))) {
+                    activeVehicleId = allVehicles[0].id;
+                }
+
+                // Aktualizace událostí vozidla z cloudu
+                if (cloudVehEvents.length > 0 || getLocalVehicleEvents().length === 0) {
+                    allVehicleEvents = cloudVehEvents;
+                    allVehicleEvents.sort((a, b) => {
+                        const dA = a.date ? new Date(a.date) : (a.dateObj || 0);
+                        const dB = b.date ? new Date(b.date) : (b.dateObj || 0);
+                        return (dB || 0) - (dA || 0);
+                    });
+                    saveLocalVehicleEvents(allVehicleEvents.map(ev => ({ ...ev, createdAt: ev.dateObj ? ev.dateObj.toISOString() : new Date().toISOString() })));
+                } else if (allVehicleEvents.length === 0) {
+                    const localEv = getLocalVehicleEvents();
+                    allVehicleEvents = localEv.map(ev => ({ ...ev, dateObj: toSafeDate(ev.createdAt, ev.date) }));
+                    allVehicleEvents.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
+                }
+
+                // Sloučení souborů vozidla z cloudu a IndexedDB
+                const localIdb = await getAllFilesFromIdb(currentUser.uid);
+                const mapById = new Map();
+                localIdb.forEach(f => mapById.set(f.id, { ...f, dateObj: toSafeDate(f.createdAt) }));
+                for (const f of cloudVehFiles) {
+                    const existing = mapById.get(f.id);
+                    const merged = { ...(existing || {}), ...f, dataUrl: f.dataUrl || (existing ? existing.dataUrl : '') };
+                    mapById.set(f.id, merged);
+                    await saveFileToIdb({ ...merged, createdAt: merged.dateObj ? merged.dateObj.toISOString() : new Date().toISOString() });
+                }
+                allVehicleFiles = Array.from(mapById.values());
+                allVehicleFiles.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
+
+                if (window.renderVehicle) window.renderVehicle();
+            }, async (err) => {
                 console.warn("Firestore work_projects není povolen v Security Rules (permission-denied). Používám lokální úložiště:", err.message);
                 workStorageMode = 'local';
+                vehicleStorageMode = 'local';
                 updateWorkStorageNotice(true);
+                updateVehicleStorageNotice(true);
                 const local = getLocalProjects();
-                allProjects = local.map(p => ({ ...p, dateObj: p.createdAt ? new Date(p.createdAt) : new Date() }));
+                allProjects = local.map(p => ({ ...p, dateObj: toSafeDate(p.createdAt) }));
                 allProjects.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
                 renderWork();
                 if (currentNotesProjectId) {
                     const curProj = allProjects.find(p => p.id === currentNotesProjectId);
                     if (curProj) renderProjectNotesList(curProj);
                 }
+                allVehicles = getLocalVehicles();
+                if (allVehicles.length > 0 && (!activeVehicleId || !allVehicles.some(v => v.id === activeVehicleId))) {
+                    activeVehicleId = allVehicles[0].id;
+                }
+                const localEv = getLocalVehicleEvents();
+                allVehicleEvents = localEv.map(ev => ({ ...ev, dateObj: toSafeDate(ev.createdAt, ev.date) }));
+                allVehicleEvents.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
+                const localIdb = await getAllFilesFromIdb(currentUser.uid);
+                allVehicleFiles = localIdb.map(f => ({ ...f, dateObj: toSafeDate(f.createdAt) }));
+                allVehicleFiles.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
+                if (window.renderVehicle) window.renderVehicle();
             });
             activeUnsubscribers.push(unsubWp);
 
@@ -2963,6 +3804,7 @@ service cloud.firestore {
             fetchBtcPrice();
             loadTimerFromStorage();
             updateTimerProjectsDropdown();
+            if (window.initVehicleData) window.initVehicleData();
         }
 
         const txType = document.getElementById('txType'), catSel = document.getElementById('txCategorySelect'), catCust = document.getElementById('txCategoryCustom');
@@ -3004,10 +3846,16 @@ service cloud.firestore {
 
         function checkCust() {
             catCust.classList.toggle("hidden", catSel.value !== "__custom__");
+            const vehBox = document.getElementById('txVehicleSyncBox');
+            if (vehBox) {
+                const isVehCat = txType.value === 'Výdaj' && (catSel.value === 'Vozidlo' || (catSel.value === '__custom__' && catCust.value.trim().toLowerCase() === 'vozidlo'));
+                vehBox.classList.toggle('hidden', !isVehCat);
+            }
         }
 
         txType.onchange = updateCats;
         catSel.onchange = checkCust;
+        if (catCust) catCust.oninput = checkCust;
 
         document.getElementById('btnAddTx').onclick = async () => {
             const editId = document.getElementById('editTxId').value;
@@ -3017,13 +3865,14 @@ service cloud.firestore {
             const category = catSel.value === "__custom__" ? (catCust.value.trim() || "Ostatní") : catSel.value;
             const txDateInputVal = document.getElementById('txDateInput').value;
             const txDate = txDateInputVal ? new Date(txDateInputVal) : new Date();
+            const noteVal = document.getElementById('txNote').value.trim();
 
             const data = {
                 userId: currentUser.uid,
                 type: txType.value,
                 category,
                 amount,
-                note: document.getElementById('txNote').value.trim(),
+                note: noteVal,
                 recurring: document.getElementById('txRecurring').checked,
                 createdAt: Timestamp.fromDate(txDate)
             };
@@ -3031,7 +3880,15 @@ service cloud.firestore {
             if (editId) {
                 await updateDoc(doc(db, "transactions", editId), data);
             } else {
-                await addDoc(collection(db, "transactions"), data);
+                const docRef = await addDoc(collection(db, "transactions"), data);
+                // Pokud je kategorie Vozidlo a je zaškrtnuto propsání do Karty vozidla
+                const syncCb = document.getElementById('txSyncToVehicle');
+                if (txType.value === 'Výdaj' && category === 'Vozidlo' && syncCb && syncCb.checked && window.createVehicleEventFromOverviewTx) {
+                    const evType = document.getElementById('txVehicleEventType')?.value || 'Oprava';
+                    const evKm = parseInt(document.getElementById('txVehicleKm')?.value) || 0;
+                    const evTime = document.getElementById('txVehicleTime')?.value.trim() || '';
+                    await window.createVehicleEventFromOverviewTx(docRef.id, amount, noteVal, txDateInputVal, evType, evKm, evTime);
+                }
             }
             cancelEdit();
         };
@@ -5134,6 +5991,1641 @@ service cloud.firestore {
             URL.revokeObjectURL(url);
         };
 
+        // =========================================================================
+        // --- KARTA VOZIDLA, STAV KM, UDÁLOSTI (OPRAVY), SOUBORY & FINANCE SYNC ---
+        // =========================================================================
+
+        function updateVehicleStorageNotice(show) {
+            const el = document.getElementById('vehicleStorageNotice');
+            if (el) el.classList.toggle('hidden', !show);
+        }
+
+        function getLocalVehicles() {
+            try {
+                if (!currentUser || !currentUser.uid) return [];
+                const raw = localStorage.getItem(`vehicles_${currentUser.uid}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveLocalVehicles(list) {
+            try {
+                if (!currentUser || !currentUser.uid) return;
+                localStorage.setItem(`vehicles_${currentUser.uid}`, JSON.stringify(list));
+            } catch (e) { }
+        }
+
+        function getLocalVehicleEvents() {
+            try {
+                if (!currentUser || !currentUser.uid) return [];
+                const raw = localStorage.getItem(`vehicle_events_${currentUser.uid}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function saveLocalVehicleEvents(list) {
+            try {
+                if (!currentUser || !currentUser.uid) return;
+                localStorage.setItem(`vehicle_events_${currentUser.uid}`, JSON.stringify(list));
+            } catch (e) { }
+        }
+
+        // IndexedDB úložiště pro soubory vozidla (fotky techničáku, PDF pojistky, faktury)
+        function openVehFilesIdb() {
+            return new Promise((resolve, reject) => {
+                if (!window.indexedDB) return resolve(null);
+                const req = window.indexedDB.open('money_web_vehicle_files_db', 1);
+                req.onupgradeneeded = (e) => {
+                    const dbIdb = e.target.result;
+                    if (!dbIdb.objectStoreNames.contains('files')) {
+                        const store = dbIdb.createObjectStore('files', { keyPath: 'id' });
+                        store.createIndex('userId', 'userId', { unique: false });
+                    }
+                };
+                req.onsuccess = (e) => resolve(e.target.result);
+                req.onerror = () => resolve(null);
+            });
+        }
+
+        async function saveFileToIdb(fileObj) {
+            try {
+                const dbIdb = await openVehFilesIdb();
+                if (!dbIdb) return;
+                await new Promise((resolve) => {
+                    const tx = dbIdb.transaction('files', 'readwrite');
+                    tx.objectStore('files').put(fileObj);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => resolve();
+                });
+            } catch (e) { }
+        }
+
+        async function getAllFilesFromIdb(uid) {
+            try {
+                const dbIdb = await openVehFilesIdb();
+                if (!dbIdb) return [];
+                return await new Promise((resolve) => {
+                    const tx = dbIdb.transaction('files', 'readonly');
+                    const store = tx.objectStore('files');
+                    const req = store.getAll();
+                    req.onsuccess = () => {
+                        const all = req.result || [];
+                        resolve(all.filter(f => f.userId === uid));
+                    };
+                    req.onerror = () => resolve([]);
+                });
+            } catch (e) { return []; }
+        }
+
+        async function deleteFileFromIdb(fileId) {
+            try {
+                const dbIdb = await openVehFilesIdb();
+                if (!dbIdb) return;
+                await new Promise((resolve) => {
+                    const tx = dbIdb.transaction('files', 'readwrite');
+                    tx.objectStore('files').delete(fileId);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => resolve();
+                });
+            } catch (e) { }
+        }
+
+        function cleanFirestoreData(obj) {
+            const out = {};
+            for (const [k, v] of Object.entries(obj || {})) {
+                if (k === 'id' || k === 'dateObj') continue;
+                if (v !== undefined) out[k] = v;
+            }
+            return out;
+        }
+
+        function isLocalTempId(id) {
+            if (!id || typeof id !== 'string') return true;
+            return id.startsWith('veh_') || id.startsWith('vev_') || id.startsWith('vf_');
+        }
+
+        window.initVehicleData = async () => {
+            if (!currentUser) return;
+
+            // Načíst lokální data a soubory z IndexedDB ihned jako základ (cloud sync běží přes work_projects listener v init())
+            if (allVehicles.length === 0) {
+                const localV = getLocalVehicles();
+                if (localV.length > 0) {
+                    allVehicles = localV;
+                    if (!activeVehicleId || !allVehicles.some(v => v.id === activeVehicleId)) {
+                        activeVehicleId = allVehicles[0].id;
+                    }
+                }
+            }
+            if (allVehicleEvents.length === 0) {
+                const localEv = getLocalVehicleEvents();
+                if (localEv.length > 0) {
+                    allVehicleEvents = localEv.map(ev => ({
+                        ...ev,
+                        dateObj: ev.date ? new Date(ev.date) : (ev.createdAt ? new Date(ev.createdAt) : new Date())
+                    }));
+                    allVehicleEvents.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
+                }
+            }
+            const idbFiles = await getAllFilesFromIdb(currentUser.uid);
+            if (idbFiles.length > 0 && allVehicleFiles.length === 0) {
+                allVehicleFiles = idbFiles.map(f => ({ ...f, dateObj: f.createdAt ? new Date(f.createdAt) : new Date() }));
+                allVehicleFiles.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
+            }
+            window.renderVehicle();
+        };
+
+        window.syncVehiclesToCloud = async () => {
+            if (!currentUser || !currentUser.uid) return alert("Musíte být přihlášeni.");
+            const localV = getLocalVehicles();
+            const localEv = getLocalVehicleEvents();
+            const localF = await getAllFilesFromIdb(currentUser.uid);
+
+            try {
+                let vCount = 0, eCount = 0, fCount = 0;
+                for (const v of localV) {
+                    const data = cleanFirestoreData(v);
+                    data.recordType = 'vehicle';
+                    data.userId = currentUser.uid;
+                    data.updatedAt = Timestamp.now();
+                    const d = v.createdAt ? new Date(v.createdAt) : new Date();
+                    data.createdAt = !isNaN(d.getTime()) ? Timestamp.fromDate(d) : Timestamp.now();
+                    if (isLocalTempId(v.id)) {
+                        await addDoc(collection(db, "work_projects"), data);
+                    } else {
+                        await updateDoc(doc(db, "work_projects", v.id), data);
+                    }
+                    vCount++;
+                }
+                for (const ev of localEv) {
+                    const data = cleanFirestoreData(ev);
+                    data.recordType = 'vehicle_event';
+                    data.userId = currentUser.uid;
+                    const d = ev.date ? new Date(ev.date) : new Date();
+                    data.createdAt = !isNaN(d.getTime()) ? Timestamp.fromDate(d) : Timestamp.now();
+                    if (isLocalTempId(ev.id)) {
+                        await addDoc(collection(db, "work_projects"), data);
+                    } else {
+                        await updateDoc(doc(db, "work_projects", ev.id), data);
+                    }
+                    eCount++;
+                }
+                for (const f of localF) {
+                    const data = cleanFirestoreData(f);
+                    data.recordType = 'vehicle_file';
+                    data.userId = currentUser.uid;
+                    const d = f.createdAt ? new Date(f.createdAt) : new Date();
+                    data.createdAt = !isNaN(d.getTime()) ? Timestamp.fromDate(d) : Timestamp.now();
+                    if (!data.dataUrl || data.dataUrl.length < 850000) {
+                        if (isLocalTempId(f.id)) {
+                            await addDoc(collection(db, "work_projects"), data);
+                        } else {
+                            await updateDoc(doc(db, "work_projects", f.id), data);
+                        }
+                        fCount++;
+                    }
+                }
+                vehicleStorageMode = 'cloud';
+                updateVehicleStorageNotice(false);
+                alert(`✅ Synchronizace vozidel do cloudu dokončena!\n• ${vCount} vozidel\n• ${eCount} událostí servisní knížky\n• ${fCount} dokumentů/souborů`);
+            } catch (e) {
+                alert(`❌ Synchronizace vozidel do Firebase cloudu se nezdařila:\n${e.message}\n\nZkontrolujte prosím pravidla (Rules) ve Firebase Console.`);
+            }
+        };
+
+        function getActiveVehicle() {
+            if (allVehicles.length > 0) {
+                const found = allVehicles.find(v => v.id === activeVehicleId);
+                if (found) return found;
+                activeVehicleId = allVehicles[0].id;
+                return allVehicles[0];
+            }
+            return {
+                id: 'veh_' + (currentUser ? currentUser.uid.slice(0, 8) : 'default'),
+                userId: currentUser ? currentUser.uid : '',
+                recordType: 'vehicle',
+                name: 'Moje vozidlo',
+                spz: '',
+                vin: '',
+                currentKm: 0,
+                stkUntil: '',
+                vignetteUntil: '',
+                insuranceUntil: '',
+                year: '',
+                engine: '',
+                notes: '',
+                kmLogs: []
+            };
+        }
+
+        async function saveVehicleObject(vehObj) {
+            if (!currentUser) return;
+            vehObj.userId = currentUser.uid;
+            vehObj.recordType = 'vehicle';
+            if (!vehObj.id) vehObj.id = 'veh_' + Date.now();
+            const oldId = vehObj.id;
+
+            if (vehicleStorageMode === 'cloud') {
+                try {
+                    const cloudData = cleanFirestoreData(vehObj);
+                    cloudData.recordType = 'vehicle';
+                    cloudData.userId = currentUser.uid;
+                    cloudData.updatedAt = Timestamp.now();
+                    cloudData.createdAt = Timestamp.now();
+                    if (isLocalTempId(vehObj.id)) {
+                        const docRef = await addDoc(collection(db, "work_projects"), cloudData);
+                        vehObj.id = docRef.id;
+                    } else {
+                        await updateDoc(doc(db, "work_projects", vehObj.id), cloudData);
+                    }
+                } catch (e) {
+                    console.warn("Uložení vozidla do Firestore selhalo, uloženo lokálně:", e.message);
+                    vehicleStorageMode = 'local';
+                    updateVehicleStorageNotice(true);
+                }
+            }
+
+            activeVehicleId = vehObj.id;
+            const idx = allVehicles.findIndex(v => v.id === vehObj.id || v.id === oldId);
+            if (idx !== -1) {
+                allVehicles[idx] = { ...allVehicles[idx], ...vehObj };
+            } else {
+                allVehicles.push(vehObj);
+            }
+            saveLocalVehicles(allVehicles);
+            window.renderVehicle();
+        }
+
+        window.selectActiveVehicle = (vehId) => {
+            activeVehicleId = vehId;
+            window.renderVehicle();
+        };
+
+        window.openVehicleProfileModal = (isNew = false) => {
+            const modal = document.getElementById('modalVehicleProfile');
+            const titleEl = document.getElementById('modalVehicleProfileTitle');
+            if (!modal) return;
+
+            if (isNew) {
+                titleEl.innerHTML = "<span>➕</span><span>Přidat nové vozidlo</span>";
+                document.getElementById('vehModalId').value = 'veh_' + Date.now();
+                document.getElementById('vehModalName').value = '';
+                document.getElementById('vehModalYear').value = '';
+                document.getElementById('vehModalSpz').value = '';
+                document.getElementById('vehModalVin').value = '';
+                document.getElementById('vehModalKm').value = '';
+                document.getElementById('vehModalEngine').value = '';
+                document.getElementById('vehModalStkDate').value = '';
+                document.getElementById('vehModalVignetteDate').value = '';
+                document.getElementById('vehModalInsuranceDate').value = '';
+                document.getElementById('vehModalNotes').value = '';
+            } else {
+                const v = getActiveVehicle();
+                titleEl.innerHTML = "<span>🚗</span><span>Upravit kartu vozidla</span>";
+                document.getElementById('vehModalId').value = v.id || 'veh_default';
+                document.getElementById('vehModalName').value = v.name && v.name !== 'Moje vozidlo' ? v.name : '';
+                document.getElementById('vehModalYear').value = v.year || '';
+                document.getElementById('vehModalSpz').value = v.spz || '';
+                document.getElementById('vehModalVin').value = v.vin || '';
+                document.getElementById('vehModalKm').value = v.currentKm || '';
+                document.getElementById('vehModalEngine').value = v.engine || '';
+                document.getElementById('vehModalStkDate').value = v.stkUntil || '';
+                document.getElementById('vehModalVignetteDate').value = v.vignetteUntil || '';
+                document.getElementById('vehModalInsuranceDate').value = v.insuranceUntil || '';
+                document.getElementById('vehModalNotes').value = v.notes || '';
+            }
+
+            modal.classList.remove('hidden');
+            document.getElementById('vehModalName').focus();
+        };
+
+        window.closeVehicleProfileModal = () => {
+            const modal = document.getElementById('modalVehicleProfile');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.saveVehicleProfile = async () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            const id = document.getElementById('vehModalId').value || 'veh_default';
+            const name = document.getElementById('vehModalName').value.trim() || 'Moje vozidlo';
+            const year = document.getElementById('vehModalYear').value.trim();
+            const spz = document.getElementById('vehModalSpz').value.trim().toUpperCase();
+            const vin = document.getElementById('vehModalVin').value.trim().toUpperCase();
+            const newKm = parseInt(document.getElementById('vehModalKm').value) || 0;
+            const engine = document.getElementById('vehModalEngine').value.trim();
+            const stkUntil = document.getElementById('vehModalStkDate').value;
+            const vignetteUntil = document.getElementById('vehModalVignetteDate').value;
+            const insuranceUntil = document.getElementById('vehModalInsuranceDate').value;
+            const notes = document.getElementById('vehModalNotes').value.trim();
+
+            const existing = allVehicles.find(v => v.id === id) || getActiveVehicle();
+            const kmLogs = Array.isArray(existing.kmLogs) ? [...existing.kmLogs] : [];
+
+            if (newKm > 0 && newKm !== (parseInt(existing.currentKm) || 0)) {
+                kmLogs.unshift({
+                    id: 'kml_' + Date.now(),
+                    km: newKm,
+                    date: new Date().toISOString().split('T')[0],
+                    note: 'Nastavení stavu tachometru na kartě vozidla',
+                    createdAt: new Date().toISOString()
+                });
+            }
+
+            const vehObj = {
+                ...(existing.id === id ? existing : {}),
+                id,
+                userId: currentUser.uid,
+                name,
+                year,
+                spz,
+                vin,
+                currentKm: newKm > 0 ? newKm : (parseInt(existing.currentKm) || 0),
+                engine,
+                stkUntil,
+                vignetteUntil,
+                insuranceUntil,
+                notes,
+                kmLogs
+            };
+
+            await saveVehicleObject(vehObj);
+            window.closeVehicleProfileModal();
+        };
+
+        window.deleteActiveVehicle = async () => {
+            if (allVehicles.length <= 1) return alert("Nelze smazat jediné vozidlo. Můžete upravit jeho údaje.");
+            const v = getActiveVehicle();
+            if (!confirm(`Opravdu chcete smazat kartu vozidla "${v.name}" (${v.spz || 'bez SPZ'})?`)) return;
+
+            if (vehicleStorageMode === 'cloud' && !isLocalTempId(v.id)) {
+                try {
+                    await deleteDoc(doc(db, "work_projects", v.id));
+                } catch (e) { }
+            }
+            allVehicles = allVehicles.filter(x => x.id !== v.id);
+            saveLocalVehicles(allVehicles);
+            activeVehicleId = allVehicles.length > 0 ? allVehicles[0].id : null;
+            window.renderVehicle();
+        };
+
+        window.copyVehicleVin = () => {
+            const v = getActiveVehicle();
+            if (!v.vin) {
+                window.openVehicleProfileModal();
+                return;
+            }
+            navigator.clipboard.writeText(v.vin).then(() => {
+                const btn = document.getElementById('btnCopyVin');
+                if (btn) {
+                    btn.textContent = "✅";
+                    setTimeout(() => { btn.textContent = "📋"; }, 1800);
+                }
+            });
+        };
+
+        // Rychlý zápis aktuálního stavu km přímo na kartě vozidla
+        window.quickAddVehicleKm = async () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            const input = document.getElementById('quickKmInput');
+            if (!input) return;
+            const newKm = parseInt(input.value);
+            if (isNaN(newKm) || newKm <= 0) return alert("Zadejte prosím platný stav kilometrů (větší než 0).");
+
+            const v = { ...getActiveVehicle() };
+            const prevKm = parseInt(v.currentKm) || 0;
+            if (newKm < prevKm) {
+                if (!confirm(`Zadaný stav (${newKm.toLocaleString('cs-CZ')} km) je nižší než aktuální evidovaný stav (${prevKm.toLocaleString('cs-CZ')} km). Přesto uložit?`)) {
+                    return;
+                }
+            }
+
+            const kmLogs = Array.isArray(v.kmLogs) ? [...v.kmLogs] : [];
+            const diff = prevKm > 0 && newKm > prevKm ? newKm - prevKm : 0;
+            kmLogs.unshift({
+                id: 'kml_' + Date.now(),
+                km: newKm,
+                delta: diff,
+                date: new Date().toISOString().split('T')[0],
+                note: diff > 0 ? `Rychlý zápis km (+${diff.toLocaleString('cs-CZ')} km)` : 'Zápis stavu tachometru',
+                createdAt: new Date().toISOString()
+            });
+
+            v.currentKm = newKm;
+            v.kmLogs = kmLogs;
+            input.value = '';
+            await saveVehicleObject(v);
+        };
+
+        window.deleteVehicleKmLog = async (logId) => {
+            const v = { ...getActiveVehicle() };
+            if (!Array.isArray(v.kmLogs)) return;
+            if (!confirm("Opravdu smazat tento záznam stavu kilometrů z historie?")) return;
+            v.kmLogs = v.kmLogs.filter(l => l.id !== logId);
+            await saveVehicleObject(v);
+        };
+
+        // Rychlá změna data platnosti STK nebo Dálničky přímo z karty
+        window.quickUpdateVehicleDate = async (field, dateVal) => {
+            if (!currentUser) return;
+            const v = { ...getActiveVehicle() };
+            v[field] = dateVal;
+            await saveVehicleObject(v);
+        };
+
+        window.fillCurrentVehicleKmToForm = () => {
+            const v = getActiveVehicle();
+            const kmEl = document.getElementById('vehEventKm');
+            if (kmEl && v.currentKm > 0) {
+                kmEl.value = v.currentKm;
+            }
+        };
+
+        window.onVehEventTypeChange = () => {
+            const typeEl = document.getElementById('vehEventType');
+            const box = document.getElementById('vehEventValidityBox');
+            const label = document.getElementById('vehEventValidityLabel');
+            if (!typeEl || !box || !label) return;
+
+            const t = typeEl.value;
+            if (t === 'STK') {
+                box.classList.remove('hidden');
+                label.textContent = "📋 Nová platnost STK do (automaticky aktualizuje Kartu vozidla):";
+            } else if (t === 'Dálnička') {
+                box.classList.remove('hidden');
+                label.textContent = "🛣️ Nová platnost dálniční známky do (aktualizuje Kartu vozidla):";
+            } else if (t === 'Pojištění') {
+                box.classList.remove('hidden');
+                label.textContent = "🛡️ Nová platnost pojištění do (aktualizuje Kartu vozidla):";
+            } else {
+                box.classList.add('hidden');
+            }
+        };
+
+        // Komprese obrázků (např. fotka techničáku, zelená karta, účtenka) pro rychlé uložení a čitelnost
+        function processVehicleFileToDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                if (file.type && file.type.startsWith('image/') && !file.type.includes('svg')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const maxDim = 1650;
+                            let w = img.width, h = img.height;
+                            if (w > maxDim || h > maxDim) {
+                                if (w > h) {
+                                    h = Math.round((h * maxDim) / w);
+                                    w = maxDim;
+                                } else {
+                                    w = Math.round((w * maxDim) / h);
+                                    h = maxDim;
+                                }
+                            }
+                            const canvas = document.createElement('canvas');
+                            canvas.width = w;
+                            canvas.height = h;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, w, h);
+                            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                            resolve({ dataUrl: compressedDataUrl, mimeType: 'image/jpeg' });
+                        };
+                        img.onerror = () => resolve({ dataUrl: e.target.result, mimeType: file.type });
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve({ dataUrl: e.target.result, mimeType: file.type || 'application/octet-stream' });
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Uložení události vozidla (Oprava, Servis, Palivo, STK, Dálnička...) + Propojení s výdaji (Kategorie: Vozidlo)
+        window.saveVehicleEvent = async () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            const editId = document.getElementById('editVehEventId').value;
+            const type = document.getElementById('vehEventType').value || 'Oprava';
+            const title = document.getElementById('vehEventTitle').value.trim();
+            if (!title) return alert("Zadejte prosím popis události nebo opravy (např. Výměna oleje, Oprava brzd).");
+
+            const price = parseFloat(document.getElementById('vehEventPrice').value) || 0;
+            const km = parseInt(document.getElementById('vehEventKm').value) || 0;
+            const dateVal = document.getElementById('vehEventDate').value || new Date().toISOString().split('T')[0];
+            const timeVal = document.getElementById('vehEventTime').value.trim();
+            const noteVal = document.getElementById('vehEventNote').value.trim();
+            const newValidityDate = document.getElementById('vehEventNewValidityDate')?.value || '';
+            const syncFinance = document.getElementById('vehEventSyncFinance').checked;
+            const fileInput = document.getElementById('vehEventFileInput');
+
+            const v = { ...getActiveVehicle() };
+            let attachedFileId = '';
+            let attachedFileName = '';
+
+            // Pokud je přiložen soubor přímo k události (např. faktura ze servisu)
+            if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                const f = fileInput.files[0];
+                const processed = await processVehicleFileToDataUrl(f);
+                attachedFileId = 'vf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+                attachedFileName = f.name;
+                const fileDoc = {
+                    id: attachedFileId,
+                    recordType: 'vehicle_file',
+                    userId: currentUser.uid,
+                    vehicleId: v.id,
+                    category: type === 'Pojištění' ? 'Pojistka' : (type === 'STK' ? 'STK / Emise' : 'Faktura / Servis'),
+                    title: `${type}: ${title}`,
+                    fileName: f.name,
+                    mimeType: processed.mimeType,
+                    size: f.size,
+                    dataUrl: processed.dataUrl,
+                    createdAt: new Date().toISOString(),
+                    dateObj: new Date()
+                };
+                if (vehicleStorageMode === 'cloud' && processed.dataUrl.length < 850000) {
+                    try {
+                        const fCloud = cleanFirestoreData(fileDoc);
+                        fCloud.recordType = 'vehicle_file';
+                        fCloud.createdAt = Timestamp.now();
+                        const docRef = await addDoc(collection(db, "work_projects"), fCloud);
+                        attachedFileId = docRef.id;
+                        fileDoc.id = docRef.id;
+                    } catch (e) { }
+                }
+                await saveFileToIdb(fileDoc);
+                if (!allVehicleFiles.some(x => x.id === fileDoc.id)) {
+                    allVehicleFiles.unshift(fileDoc);
+                }
+            }
+
+            // Aktualizace stavu km a platnosti STK/Dálničky/Pojištění na Kartě vozidla
+            let vehicleChanged = false;
+            const prevKm = parseInt(v.currentKm) || 0;
+            if (km > 0 && km >= prevKm) {
+                if (km > prevKm) {
+                    const kmLogs = Array.isArray(v.kmLogs) ? [...v.kmLogs] : [];
+                    kmLogs.unshift({
+                        id: 'kml_' + Date.now(),
+                        km: km,
+                        delta: prevKm > 0 ? (km - prevKm) : 0,
+                        date: dateVal,
+                        note: `${type}: ${title}`,
+                        createdAt: new Date().toISOString()
+                    });
+                    v.kmLogs = kmLogs;
+                }
+                v.currentKm = km;
+                vehicleChanged = true;
+            }
+            if (newValidityDate) {
+                if (type === 'STK') { v.stkUntil = newValidityDate; vehicleChanged = true; }
+                else if (type === 'Dálnička') { v.vignetteUntil = newValidityDate; vehicleChanged = true; }
+                else if (type === 'Pojištění') { v.insuranceUntil = newValidityDate; vehicleChanged = true; }
+            }
+            if (vehicleChanged || allVehicles.length === 0) {
+                await saveVehicleObject(v);
+            }
+
+            // Propojení s výdaji ve Správě financí (Kategorie: Vozidlo)
+            let linkedTxId = '';
+            const existingEv = editId ? allVehicleEvents.find(x => x.id === editId) : null;
+            if (existingEv && existingEv.linkedTxId) {
+                linkedTxId = existingEv.linkedTxId;
+            }
+            if (!attachedFileId && existingEv && existingEv.fileId) {
+                attachedFileId = existingEv.fileId;
+                attachedFileName = existingEv.fileName || '';
+            }
+
+            if (syncFinance && price > 0) {
+                // Ujistit se, že "Vozidlo" je v kategoriích výdajů
+                if (!userCategories["Výdaj"].includes("Vozidlo")) {
+                    userCategories["Výdaj"].push("Vozidlo");
+                    saveUserCategories();
+                }
+                const spzPrefix = v.spz ? `[${v.spz}] ` : `[${v.name || 'Vozidlo'}] `;
+                const kmSuffix = km > 0 ? ` (${km.toLocaleString('cs-CZ')} km)` : '';
+                const txNote = `${spzPrefix}${type}: ${title}${kmSuffix}${noteVal ? ' – ' + noteVal : ''}`;
+                const parsedTxDate = new Date(dateVal);
+                const txDateObj = !isNaN(parsedTxDate.getTime()) ? parsedTxDate : new Date();
+
+                const txPayload = {
+                    userId: currentUser.uid,
+                    type: "Výdaj",
+                    category: "Vozidlo",
+                    amount: price,
+                    note: txNote,
+                    recurring: false,
+                    createdAt: Timestamp.fromDate(txDateObj)
+                };
+
+                try {
+                    if (linkedTxId && allTx.some(t => t.id === linkedTxId)) {
+                        await updateDoc(doc(db, "transactions", linkedTxId), txPayload);
+                    } else {
+                        const docRef = await addDoc(collection(db, "transactions"), txPayload);
+                        linkedTxId = docRef.id;
+                    }
+                } catch (e) {
+                    console.error("Chyba při zápisu výdaje vozidla do financí:", e);
+                }
+            }
+
+            let eventId = editId || ('vev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4));
+            const parsedEvDate = new Date(dateVal);
+            const safeEvDate = !isNaN(parsedEvDate.getTime()) ? parsedEvDate : new Date();
+            const evObj = {
+                id: eventId,
+                recordType: 'vehicle_event',
+                userId: currentUser.uid,
+                vehicleId: v.id,
+                vehicleName: v.name || 'Moje vozidlo',
+                vehicleSpz: v.spz || '',
+                type,
+                title,
+                price,
+                km,
+                date: dateVal,
+                time: timeVal,
+                note: noteVal,
+                fileId: attachedFileId,
+                fileName: attachedFileName,
+                linkedTxId: linkedTxId,
+                createdAt: safeEvDate.toISOString(),
+                dateObj: safeEvDate
+            };
+
+            if (vehicleStorageMode === 'cloud') {
+                try {
+                    const cloudEv = cleanFirestoreData(evObj);
+                    cloudEv.recordType = 'vehicle_event';
+                    cloudEv.createdAt = Timestamp.fromDate(safeEvDate);
+                    if (isLocalTempId(eventId)) {
+                        const docRef = await addDoc(collection(db, "work_projects"), cloudEv);
+                        eventId = docRef.id;
+                        evObj.id = docRef.id;
+                    } else {
+                        await updateDoc(doc(db, "work_projects", eventId), cloudEv);
+                    }
+                } catch (e) {
+                    vehicleStorageMode = 'local';
+                    updateVehicleStorageNotice(true);
+                }
+            }
+
+            if (editId) {
+                allVehicleEvents = allVehicleEvents.map(x => (x.id === editId || x.id === eventId) ? evObj : x);
+            } else {
+                const idx = allVehicleEvents.findIndex(x => x.id === eventId);
+                if (idx !== -1) allVehicleEvents[idx] = evObj;
+                else allVehicleEvents.unshift(evObj);
+            }
+            allVehicleEvents.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
+            saveLocalVehicleEvents(allVehicleEvents);
+
+            window.cancelEditVehicleEvent();
+            window.renderVehicle();
+        };
+
+        window.editVehicleEvent = (eventId) => {
+            const ev = allVehicleEvents.find(x => x.id === eventId);
+            if (!ev) return;
+
+            document.getElementById('editVehEventId').value = ev.id;
+            document.getElementById('vehEventType').value = ev.type || 'Oprava';
+            window.onVehEventTypeChange();
+            document.getElementById('vehEventTitle').value = ev.title || '';
+            document.getElementById('vehEventPrice').value = ev.price || '';
+            document.getElementById('vehEventKm').value = ev.km || '';
+            document.getElementById('vehEventDate').value = ev.date || (ev.dateObj ? ev.dateObj.toISOString().split('T')[0] : '');
+            document.getElementById('vehEventTime').value = ev.time || '';
+            document.getElementById('vehEventNote').value = ev.note || '';
+            document.getElementById('vehEventSyncFinance').checked = !!ev.linkedTxId || (ev.price > 0);
+
+            document.getElementById('vehEventFormTitle').innerHTML = "<span>✏️</span><span>Upravit událost / Opravu</span>";
+            const btnSave = document.getElementById('btnSaveVehEvent');
+            if (btnSave) btnSave.innerHTML = "<span>💾 AKTUALIZOVAT UDÁLOST</span>";
+            document.getElementById('btnCancelVehEvent').classList.remove('hidden');
+            document.getElementById('vehEventTitle').focus();
+        };
+
+        window.cancelEditVehicleEvent = () => {
+            document.getElementById('editVehEventId').value = '';
+            document.getElementById('vehEventType').value = 'Oprava';
+            window.onVehEventTypeChange();
+            document.getElementById('vehEventTitle').value = '';
+            document.getElementById('vehEventPrice').value = '';
+            document.getElementById('vehEventKm').value = '';
+            document.getElementById('vehEventDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('vehEventTime').value = '';
+            document.getElementById('vehEventNote').value = '';
+            const valDate = document.getElementById('vehEventNewValidityDate');
+            if (valDate) valDate.value = '';
+            const fileIn = document.getElementById('vehEventFileInput');
+            if (fileIn) fileIn.value = '';
+            document.getElementById('vehEventSyncFinance').checked = true;
+
+            document.getElementById('vehEventFormTitle').innerHTML = "<span>🔧</span><span>Nová událost / Oprava</span>";
+            const btnSave = document.getElementById('btnSaveVehEvent');
+            if (btnSave) btnSave.innerHTML = "<span>💾 ULOŽIT UDÁLOST VOZIDLA</span>";
+            document.getElementById('btnCancelVehEvent').classList.add('hidden');
+        };
+
+        window.deleteVehicleEvent = async (eventId) => {
+            const ev = allVehicleEvents.find(x => x.id === eventId);
+            if (!ev) return;
+            if (!confirm(`Opravdu smazat událost "${ev.title}" ze servisní knížky?`)) return;
+
+            if (ev.linkedTxId && allTx.some(t => t.id === ev.linkedTxId)) {
+                if (confirm("Tato událost je propojena s výdajem v hlavní Správě financí (kategorie Vozidlo). Chcete smazat i tento finanční výdaj?")) {
+                    try {
+                        await deleteDoc(doc(db, "transactions", ev.linkedTxId));
+                    } catch (e) { }
+                }
+            }
+
+            if (vehicleStorageMode === 'cloud' && !isLocalTempId(eventId)) {
+                try {
+                    await deleteDoc(doc(db, "work_projects", eventId));
+                } catch (e) { }
+            }
+            allVehicleEvents = allVehicleEvents.filter(x => x.id !== eventId);
+            saveLocalVehicleEvents(allVehicleEvents);
+            window.renderVehicle();
+        };
+
+        // Dodatečné zaúčtování události vozidla do výdajů (Kategorie: Vozidlo)
+        window.syncSingleEventToFinance = async (eventId) => {
+            if (!currentUser) return;
+            const ev = allVehicleEvents.find(x => x.id === eventId);
+            if (!ev) return;
+            if (!ev.price || ev.price <= 0) return alert("Tato událost má nulovou cenu (0 Kč). Upravte událost a zadejte částku.");
+            if (ev.linkedTxId && allTx.some(t => t.id === ev.linkedTxId)) {
+                return alert("Tato událost je již zaúčtována ve výdajích.");
+            }
+
+            const v = getActiveVehicle();
+            const spzPrefix = (ev.vehicleSpz || v.spz) ? `[${ev.vehicleSpz || v.spz}] ` : `[${ev.vehicleName || v.name || 'Vozidlo'}] `;
+            const kmSuffix = ev.km > 0 ? ` (${ev.km.toLocaleString('cs-CZ')} km)` : '';
+            const txNote = `${spzPrefix}${ev.type}: ${ev.title}${kmSuffix}${ev.note ? ' – ' + ev.note : ''}`;
+            const parsedDate = ev.date ? new Date(ev.date) : (ev.dateObj || new Date());
+            const txDateObj = !isNaN(parsedDate.getTime()) ? parsedDate : new Date();
+
+            try {
+                const docRef = await addDoc(collection(db, "transactions"), {
+                    userId: currentUser.uid,
+                    type: "Výdaj",
+                    category: "Vozidlo",
+                    amount: parseFloat(ev.price) || 0,
+                    note: txNote,
+                    recurring: false,
+                    createdAt: Timestamp.fromDate(txDateObj)
+                });
+                ev.linkedTxId = docRef.id;
+                saveLocalVehicleEvents(allVehicleEvents);
+                if (vehicleStorageMode === 'cloud' && !isLocalTempId(ev.id)) {
+                    try {
+                        await updateDoc(doc(db, "work_projects", ev.id), { linkedTxId: docRef.id });
+                    } catch (e) { }
+                }
+                window.renderVehicle();
+            } catch (e) {
+                alert("Chyba při zápisu do výdajů: " + e.message);
+            }
+        };
+
+        // Vytvoření události v Kartě vozidla přímo z transakce v Přehledu (Kategorie: Vozidlo)
+        window.createVehicleEventFromOverviewTx = async (txId, amount, note, dateStr, evType = 'Oprava', evKm = 0, evTime = '') => {
+            if (!currentUser) return;
+            const v = { ...getActiveVehicle() };
+            const dateVal = dateStr || new Date().toISOString().split('T')[0];
+
+            if (evKm > 0 && evKm > (parseInt(v.currentKm) || 0)) {
+                const prevKm = parseInt(v.currentKm) || 0;
+                const kmLogs = Array.isArray(v.kmLogs) ? [...v.kmLogs] : [];
+                kmLogs.unshift({
+                    id: 'kml_' + Date.now(),
+                    km: evKm,
+                    delta: prevKm > 0 ? (evKm - prevKm) : 0,
+                    date: dateVal,
+                    note: `${evType}: ${note || 'Výdaj vozidla'}`,
+                    createdAt: new Date().toISOString()
+                });
+                v.currentKm = evKm;
+                v.kmLogs = kmLogs;
+                await saveVehicleObject(v);
+            } else if (allVehicles.length === 0) {
+                await saveVehicleObject(v);
+            }
+
+            let eventId = 'vev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+            const parsedDate = new Date(dateVal);
+            const safeDateObj = !isNaN(parsedDate.getTime()) ? parsedDate : new Date();
+            const evObj = {
+                id: eventId,
+                recordType: 'vehicle_event',
+                userId: currentUser.uid,
+                vehicleId: v.id,
+                vehicleName: v.name || 'Moje vozidlo',
+                vehicleSpz: v.spz || '',
+                type: evType,
+                title: note || `${evType} vozidla`,
+                price: parseFloat(amount) || 0,
+                km: parseInt(evKm) || (parseInt(v.currentKm) || 0),
+                date: dateVal,
+                time: evTime || '',
+                note: 'Vytvořeno z finančních výdajů (Kategorie: Vozidlo)',
+                fileId: '',
+                fileName: '',
+                linkedTxId: txId,
+                createdAt: safeDateObj.toISOString(),
+                dateObj: safeDateObj
+            };
+
+            if (vehicleStorageMode === 'cloud') {
+                try {
+                    const cloudEv = cleanFirestoreData(evObj);
+                    cloudEv.recordType = 'vehicle_event';
+                    cloudEv.createdAt = Timestamp.fromDate(safeDateObj);
+                    const docRef = await addDoc(collection(db, "work_projects"), cloudEv);
+                    eventId = docRef.id;
+                    evObj.id = docRef.id;
+                } catch (e) { }
+            }
+
+            if (!allVehicleEvents.some(x => x.id === evObj.id)) {
+                allVehicleEvents.unshift(evObj);
+            }
+            allVehicleEvents.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
+            saveLocalVehicleEvents(allVehicleEvents);
+            window.renderVehicle();
+        };
+
+        window.importFinanceTxToVehicle = async (txId) => {
+            const t = allTx.find(x => x.id === txId);
+            if (!t) return;
+            const dateStr = t.dateObj ? t.dateObj.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+            await window.createVehicleEventFromOverviewTx(t.id, t.amount, t.note || 'Výdaj na vozidlo', dateStr, 'Oprava', 0, '');
+        };
+
+        window.goToOverviewWithVehicleCategory = () => {
+            switchTab('overview');
+            window.setTxType('Výdaj');
+            if (!userCategories["Výdaj"].includes("Vozidlo")) {
+                userCategories["Výdaj"].push("Vozidlo");
+                saveUserCategories();
+            }
+            catSel.value = 'Vozidlo';
+            checkCust();
+            document.getElementById('txAmount').focus();
+        };
+
+        // --- NAHRÁVÁNÍ A SPRÁVA SOUBORŮ VOZIDLA (POJISTKA, FOTKA TECHNIČÁKU...) ---
+        window.uploadVehicleFiles = async () => {
+            if (!currentUser) return alert("Musíte být přihlášeni.");
+            const fileInput = document.getElementById('vehFileInput');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                return alert("Vyberte prosím alespoň jeden soubor (fotku techničáku, pojistku, PDF nebo účtenku).");
+            }
+            const category = document.getElementById('vehFileCategory').value || 'Technický průkaz';
+            const customTitle = document.getElementById('vehFileTitle').value.trim();
+            const btn = document.getElementById('btnUploadVehFile');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = "<span>⏳</span><span>Ukládám...</span>";
+            }
+
+            try {
+                const v = { ...getActiveVehicle() };
+                if (allVehicles.length === 0) {
+                    await saveVehicleObject(v);
+                }
+
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    const f = fileInput.files[i];
+                    const processed = await processVehicleFileToDataUrl(f);
+                    let fileId = 'vf_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 4);
+                    const title = customTitle
+                        ? (fileInput.files.length > 1 ? `${customTitle} (${i + 1})` : customTitle)
+                        : f.name.replace(/\.[^/.]+$/, "");
+
+                    const fileDoc = {
+                        id: fileId,
+                        recordType: 'vehicle_file',
+                        userId: currentUser.uid,
+                        vehicleId: v.id,
+                        category,
+                        title,
+                        fileName: f.name,
+                        mimeType: processed.mimeType,
+                        size: f.size,
+                        dataUrl: processed.dataUrl,
+                        createdAt: new Date().toISOString(),
+                        dateObj: new Date()
+                    };
+
+                    if (vehicleStorageMode === 'cloud' && processed.dataUrl.length < 850000) {
+                        try {
+                            const fCloud = cleanFirestoreData(fileDoc);
+                            fCloud.recordType = 'vehicle_file';
+                            fCloud.createdAt = Timestamp.now();
+                            const docRef = await addDoc(collection(db, "work_projects"), fCloud);
+                            fileId = docRef.id;
+                            fileDoc.id = docRef.id;
+                        } catch (e) {
+                            vehicleStorageMode = 'local';
+                            updateVehicleStorageNotice(true);
+                        }
+                    }
+
+                    await saveFileToIdb(fileDoc);
+                    if (!allVehicleFiles.some(x => x.id === fileDoc.id)) {
+                        allVehicleFiles.unshift(fileDoc);
+                    }
+                }
+
+                fileInput.value = '';
+                document.getElementById('vehFileTitle').value = '';
+                window.renderVehicle();
+            } catch (err) {
+                alert("Chyba při nahrávání souboru: " + err.message);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = "<span>📤</span><span>Nahrát</span>";
+                }
+            }
+        };
+
+        window.previewVehicleFile = (fileId) => {
+            const f = allVehicleFiles.find(x => x.id === fileId);
+            if (!f || !f.dataUrl) return alert("Soubor není k dispozici pro náhled.");
+
+            const modal = document.getElementById('modalVehFilePreview');
+            const container = document.getElementById('previewVehFileContainer');
+            document.getElementById('previewVehFileCat').textContent = f.category || 'Dokument';
+            document.getElementById('previewVehFileTitle').textContent = `${f.title} (${f.fileName || ''})`;
+
+            const btnDl = document.getElementById('btnPreviewDownload');
+            if (btnDl) {
+                btnDl.onclick = () => window.downloadVehicleFile(f.id);
+            }
+
+            if (f.mimeType && f.mimeType.startsWith('image/')) {
+                container.innerHTML = `<img src="${f.dataUrl}" alt="${escapeHtml(f.title)}" class="max-w-full max-h-[75vh] object-contain rounded-xl shadow-lg">`;
+            } else if (f.mimeType === 'application/pdf' || (f.fileName && f.fileName.toLowerCase().endsWith('.pdf'))) {
+                container.innerHTML = `<iframe src="${f.dataUrl}" class="w-full h-[75vh] rounded-xl border-0 bg-white"></iframe>`;
+            } else {
+                container.innerHTML = `
+                    <div class="text-center p-8 space-y-4">
+                        <div class="text-5xl">📄</div>
+                        <div class="text-white font-bold text-base">${escapeHtml(f.fileName || f.title)}</div>
+                        <p class="text-xs text-slate-400">Tento typ souboru nelze zobrazit přímo v prohlížeči. Klikněte na tlačítko Stáhnout.</p>
+                        <button onclick="window.downloadVehicleFile('${f.id}')" class="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition">
+                            📥 Stáhnout soubor
+                        </button>
+                    </div>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeVehFilePreviewModal = () => {
+            const modal = document.getElementById('modalVehFilePreview');
+            if (modal) modal.classList.add('hidden');
+            const container = document.getElementById('previewVehFileContainer');
+            if (container) container.innerHTML = '';
+        };
+
+        window.downloadVehicleFile = (fileId) => {
+            const f = allVehicleFiles.find(x => x.id === fileId);
+            if (!f || !f.dataUrl) return alert("Soubor nelze stáhnout.");
+            const a = document.createElement('a');
+            a.href = f.dataUrl;
+            a.download = f.fileName || `${f.title || 'dokument_vozidla'}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+        window.deleteVehicleFile = async (fileId) => {
+            const f = allVehicleFiles.find(x => x.id === fileId);
+            if (!f) return;
+            if (!confirm(`Opravdu smazat soubor "${f.title}"?`)) return;
+
+            await deleteFileFromIdb(fileId);
+            if (vehicleStorageMode === 'cloud' && !isLocalTempId(fileId)) {
+                try {
+                    await deleteDoc(doc(db, "work_projects", fileId));
+                } catch (e) { }
+            }
+            allVehicleFiles = allVehicleFiles.filter(x => x.id !== fileId);
+            window.renderVehicle();
+        };
+
+        // Pomocná funkce pro výpočet platnosti STK / Dálničky / Pojištění
+        function computeValidityStatus(dateStr) {
+            if (!dateStr) {
+                return {
+                    formattedDate: '--.--.----',
+                    daysText: 'Klikněte nebo vyberte datum níže',
+                    badgeText: 'Nenastaveno',
+                    badgeClass: 'bg-slate-800 text-slate-400 border-slate-700',
+                    barColor: 'bg-slate-700',
+                    barWidth: '0%'
+                };
+            }
+            const target = new Date(dateStr + 'T23:59:59');
+            const now = new Date();
+            const diffDays = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+            const formattedDate = new Date(dateStr).toLocaleDateString('cs-CZ');
+
+            if (diffDays < 0) {
+                return {
+                    formattedDate,
+                    daysText: `Propadlo před ${Math.abs(diffDays)} dny!`,
+                    badgeText: '🔴 Propadlé',
+                    badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+                    barColor: 'bg-rose-500',
+                    barWidth: '100%'
+                };
+            } else if (diffDays <= 30) {
+                const pct = Math.max(8, Math.round((diffDays / 365) * 100));
+                return {
+                    formattedDate,
+                    daysText: `Brzy vyprší! Zbývá ${diffDays} dní`,
+                    badgeText: `🟡 Zbývá ${diffDays} dní`,
+                    badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+                    barColor: 'bg-amber-500',
+                    barWidth: `${pct}%`
+                };
+            } else {
+                const pct = Math.min(100, Math.max(15, Math.round((diffDays / 365) * 100)));
+                return {
+                    formattedDate,
+                    daysText: `Platné ještě ${diffDays} dní`,
+                    badgeText: `🟢 Platné (${diffDays} d)`,
+                    badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+                    barColor: 'bg-emerald-500',
+                    barWidth: `${pct}%`
+                };
+            }
+        }
+
+        // Hlavní vykreslovací funkce pro sekci Vozidlo
+        window.renderVehicle = () => {
+            const v = getActiveVehicle();
+
+            // 1. Přepínač vozidel v hlavičce
+            const selEl = document.getElementById('vehicleSelectDropdown');
+            if (selEl) {
+                selEl.innerHTML = '';
+                if (allVehicles.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = 'veh_default';
+                    opt.textContent = `🚗 ${v.name}${v.spz ? ' (' + v.spz + ')' : ''}`;
+                    selEl.appendChild(opt);
+                } else {
+                    allVehicles.forEach(veh => {
+                        const opt = document.createElement('option');
+                        opt.value = veh.id;
+                        opt.textContent = `🚗 ${veh.name || 'Vozidlo'}${veh.spz ? ' • ' + veh.spz : ''}`;
+                        selEl.appendChild(opt);
+                    });
+                    selEl.value = v.id;
+                }
+            }
+
+            const btnDelVeh = document.getElementById('btnDeleteVehicle');
+            if (btnDelVeh) {
+                btnDelVeh.classList.toggle('hidden', allVehicles.length <= 1);
+            }
+
+            // 2. Identita vozidla na Hlavní Kartě
+            const nameEl = document.getElementById('vehCardName');
+            if (nameEl) nameEl.textContent = v.name || 'Moje vozidlo';
+
+            const subParts = [];
+            if (v.year) subParts.push(`Rok výroby: ${v.year}`);
+            if (v.engine) subParts.push(v.engine);
+            if (v.notes) subParts.push(v.notes);
+            const subEl = document.getElementById('vehCardSubtitle');
+            if (subEl) {
+                subEl.textContent = subParts.length > 0
+                    ? subParts.join(' • ')
+                    : 'Klikněte na „Upravit kartu vozidla“ pro zadání SPZ, VIN, platnosti STK a dálniční známky';
+            }
+
+            const spzEl = document.getElementById('vehCardSpz');
+            if (spzEl) spzEl.textContent = v.spz ? v.spz : 'NASTAVIT SPZ';
+
+            const vinEl = document.getElementById('vehCardVin');
+            if (vinEl) vinEl.textContent = v.vin ? v.vin : 'Nenastaveno';
+
+            // Filtrovat události a soubory pro aktivní vozidlo (nebo bez vehicleId pokud jde o první vozidlo)
+            const isPrimaryVehicle = allVehicles.length <= 1 || (allVehicles[0] && allVehicles[0].id === v.id);
+            const vehEvents = allVehicleEvents.filter(ev => ev.vehicleId === v.id || (isPrimaryVehicle && (!ev.vehicleId || ev.vehicleId === 'veh_default')));
+            const vehFiles = allVehicleFiles.filter(f => f.vehicleId === v.id || (isPrimaryVehicle && (!f.vehicleId || f.vehicleId === 'veh_default')));
+
+            // 3. Výpočet historie KM a aktuálního stavu tachometru
+            const kmEntriesMap = new Map();
+            if (Array.isArray(v.kmLogs)) {
+                v.kmLogs.forEach(l => {
+                    if (l.km > 0) {
+                        kmEntriesMap.set(l.id || (`log_${l.date}_${l.km}`), {
+                            id: l.id,
+                            km: parseInt(l.km) || 0,
+                            date: l.date || (l.createdAt ? l.createdAt.split('T')[0] : ''),
+                            note: l.note || 'Zápis stavu km',
+                            isManual: true
+                        });
+                    }
+                });
+            }
+            vehEvents.forEach(ev => {
+                if (ev.km > 0) {
+                    kmEntriesMap.set(`ev_${ev.id}`, {
+                        id: ev.id,
+                        km: parseInt(ev.km) || 0,
+                        date: ev.date || (ev.dateObj ? ev.dateObj.toISOString().split('T')[0] : ''),
+                        note: `${ev.type}: ${ev.title}`,
+                        isManual: false
+                    });
+                }
+            });
+
+            const allKmRecordsAsc = Array.from(kmEntriesMap.values()).sort((a, b) => {
+                const dDiff = new Date(a.date || 0) - new Date(b.date || 0);
+                if (dDiff !== 0) return dDiff;
+                return a.km - b.km;
+            });
+
+            // Spočítat delty mezi záznamy km
+            for (let i = 0; i < allKmRecordsAsc.length; i++) {
+                if (i === 0) {
+                    allKmRecordsAsc[i].delta = 0;
+                } else {
+                    const diff = allKmRecordsAsc[i].km - allKmRecordsAsc[i - 1].km;
+                    allKmRecordsAsc[i].delta = diff > 0 ? diff : 0;
+                }
+            }
+
+            const maxRecordedKm = allKmRecordsAsc.reduce((max, r) => Math.max(max, r.km), 0);
+            const displayKm = Math.max(parseInt(v.currentKm) || 0, maxRecordedKm);
+            const minRecordedKm = allKmRecordsAsc.length > 0 ? allKmRecordsAsc[0].km : displayKm;
+            const totalDrivenKm = displayKm > minRecordedKm && minRecordedKm > 0 ? (displayKm - minRecordedKm) : 0;
+
+            const kmEl = document.getElementById('vehCardKm');
+            if (kmEl) kmEl.textContent = `${displayKm.toLocaleString('cs-CZ')} km`;
+
+            const kmSubEl = document.getElementById('vehCardKmSub');
+            if (kmSubEl) {
+                if (allKmRecordsAsc.length > 0) {
+                    const lastRec = allKmRecordsAsc[allKmRecordsAsc.length - 1];
+                    const dStr = lastRec.date ? new Date(lastRec.date).toLocaleDateString('cs-CZ') : 'Dnes';
+                    kmSubEl.textContent = `Aktualizováno: ${dStr}${totalDrivenKm > 0 ? ` • Najeto +${totalDrivenKm.toLocaleString('cs-CZ')} km` : ''}`;
+                } else if (displayKm > 0) {
+                    kmSubEl.textContent = `Evidovaný stav tachometru`;
+                } else {
+                    kmSubEl.textContent = `Zadejte aktuální stav km níže`;
+                }
+            }
+
+            const totalDrivenBadge = document.getElementById('vehTotalDrivenBadge');
+            if (totalDrivenBadge) {
+                totalDrivenBadge.textContent = `Najeto: +${totalDrivenKm.toLocaleString('cs-CZ')} km`;
+            }
+
+            // 4. Platnost STK a Platnost Dálniční známky
+            const stkStatus = computeValidityStatus(v.stkUntil);
+            const stkDateEl = document.getElementById('vehCardStkDate');
+            if (stkDateEl) stkDateEl.textContent = stkStatus.formattedDate;
+            const stkDaysEl = document.getElementById('vehCardStkDays');
+            if (stkDaysEl) stkDaysEl.textContent = stkStatus.daysText;
+            const stkBadgeEl = document.getElementById('vehCardStkBadge');
+            if (stkBadgeEl) {
+                stkBadgeEl.textContent = stkStatus.badgeText;
+                stkBadgeEl.className = `px-2 py-0.5 rounded-full text-[10px] font-bold border ${stkStatus.badgeClass}`;
+            }
+            const stkBarEl = document.getElementById('vehCardStkBar');
+            if (stkBarEl) {
+                stkBarEl.className = `${stkStatus.barColor} h-full rounded-full transition-all duration-500`;
+                stkBarEl.style.width = stkStatus.barWidth;
+            }
+            const quickStkIn = document.getElementById('quickStkDateInput');
+            if (quickStkIn) quickStkIn.value = v.stkUntil || '';
+
+            const vigStatus = computeValidityStatus(v.vignetteUntil);
+            const vigDateEl = document.getElementById('vehCardVignetteDate');
+            if (vigDateEl) vigDateEl.textContent = vigStatus.formattedDate;
+            const vigDaysEl = document.getElementById('vehCardVignetteDays');
+            if (vigDaysEl) vigDaysEl.textContent = vigStatus.daysText;
+            const vigBadgeEl = document.getElementById('vehCardVignetteBadge');
+            if (vigBadgeEl) {
+                vigBadgeEl.textContent = vigStatus.badgeText;
+                vigBadgeEl.className = `px-2 py-0.5 rounded-full text-[10px] font-bold border ${vigStatus.badgeClass}`;
+            }
+            const vigBarEl = document.getElementById('vehCardVignetteBar');
+            if (vigBarEl) {
+                vigBarEl.className = `${vigStatus.barColor} h-full rounded-full transition-all duration-500`;
+                vigBarEl.style.width = vigStatus.barWidth;
+            }
+            const quickVigIn = document.getElementById('quickVignetteDateInput');
+            if (quickVigIn) quickVigIn.value = v.vignetteUntil || '';
+
+            const insInfoEl = document.getElementById('vehCardInsuranceInfo');
+            if (insInfoEl) {
+                if (v.insuranceUntil) {
+                    const insStatus = computeValidityStatus(v.insuranceUntil);
+                    insInfoEl.textContent = `🛡️ Pojištění do: ${insStatus.formattedDate}`;
+                } else {
+                    insInfoEl.textContent = `🛡️ Pojištění: Nenastaveno`;
+                }
+            }
+
+            // 5. Náklady na vozidlo (z událostí + nepropojené transakce kategorie Vozidlo)
+            const vehicleFinanceTxs = allTx.filter(t => t.type === 'Výdaj' && t.category === 'Vozidlo');
+            const linkedTxIds = new Set(vehEvents.map(ev => ev.linkedTxId).filter(Boolean));
+            const unlinkedFinanceTxs = vehicleFinanceTxs.filter(t => !linkedTxIds.has(t.id));
+
+            const eventsTotalCost = vehEvents.reduce((acc, ev) => acc + (parseFloat(ev.price) || 0), 0);
+            const unlinkedTotalCost = isPrimaryVehicle ? unlinkedFinanceTxs.reduce((acc, t) => acc + (parseFloat(t.amount) || 0), 0) : 0;
+            const grandTotalVehicleCost = eventsTotalCost + unlinkedTotalCost;
+
+            // Náklady ve zvoleném období
+            const periodFilteredTx = (window.currentFilteredTx || allTx).filter(t => t.type === 'Výdaj' && t.category === 'Vozidlo');
+            const periodCost = periodFilteredTx.reduce((acc, t) => acc + (parseFloat(t.amount) || 0), 0);
+
+            const repairsCost = vehEvents
+                .filter(ev => ev.type === 'Oprava' || ev.type === 'Servis')
+                .reduce((acc, ev) => acc + (parseFloat(ev.price) || 0), 0);
+
+            const totCostEl = document.getElementById('vehCardTotalCost');
+            if (totCostEl) totCostEl.textContent = `${grandTotalVehicleCost.toLocaleString('cs-CZ')} Kč`;
+            const perCostEl = document.getElementById('vehCardPeriodCost');
+            if (perCostEl) perCostEl.textContent = `Ve zvoleném období (Vozidlo): ${periodCost.toLocaleString('cs-CZ')} Kč`;
+            const subCostEl = document.getElementById('vehCardCostSub');
+            if (subCostEl) {
+                const costPerKm = totalDrivenKm > 0 ? ` • ${(grandTotalVehicleCost / totalDrivenKm).toFixed(2)} Kč/km` : '';
+                subCostEl.textContent = `Opravy & servis: ${repairsCost.toLocaleString('cs-CZ')} Kč • ${vehEvents.length} událostí${costPerKm}`;
+            }
+
+            // 6. Tabulka událostí a oprav (Servisní knížka)
+            const filterType = document.getElementById('vehEventFilterType')?.value || 'all';
+            const searchQ = (document.getElementById('vehEventSearch')?.value || '').trim().toLowerCase();
+
+            let filteredEvents = vehEvents;
+            if (filterType !== 'all') {
+                filteredEvents = filteredEvents.filter(ev => ev.type === filterType);
+            }
+            if (searchQ) {
+                filteredEvents = filteredEvents.filter(ev =>
+                    (ev.title || '').toLowerCase().includes(searchQ) ||
+                    (ev.note || '').toLowerCase().includes(searchQ) ||
+                    (ev.type || '').toLowerCase().includes(searchQ)
+                );
+            }
+
+            const evCountBadge = document.getElementById('vehEventsCountBadge');
+            if (evCountBadge) evCountBadge.textContent = `${vehEvents.length} událostí`;
+
+            const filteredSum = filteredEvents.reduce((acc, ev) => acc + (parseFloat(ev.price) || 0), 0);
+            const evSumEl = document.getElementById('vehEventsFilteredSum');
+            if (evSumEl) evSumEl.textContent = `${filteredSum.toLocaleString('cs-CZ')} Kč`;
+
+            const eventTypeBadges = {
+                'Oprava': { icon: '🔧', cls: 'bg-rose-500/15 text-rose-300 border-rose-500/30' },
+                'Servis': { icon: '🛠️', cls: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' },
+                'Palivo': { icon: '⛽', cls: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
+                'STK': { icon: '📋', cls: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
+                'Dálnička': { icon: '🛣️', cls: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
+                'Pojištění': { icon: '🛡️', cls: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30' },
+                'Pneuservis': { icon: '🛞', cls: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
+                'Myčka': { icon: '🧼', cls: 'bg-teal-500/15 text-teal-300 border-teal-500/30' },
+                'Ostatní': { icon: '📦', cls: 'bg-slate-800 text-slate-300 border-slate-700' }
+            };
+
+            const evTbody = document.getElementById('vehEventsTableBody');
+            if (evTbody) {
+                evTbody.innerHTML = '';
+                if (filteredEvents.length === 0) {
+                    evTbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 text-xs">
+                        <div class="text-2xl mb-1.5">🔧</div>
+                        <div>Zatím žádné události ani opravy. Přidejte první záznam pomocí formuláře vlevo.</div>
+                    </td></tr>`;
+                } else {
+                    filteredEvents.forEach(ev => {
+                        const b = eventTypeBadges[ev.type] || eventTypeBadges['Ostatní'];
+                        const dStr = ev.date ? new Date(ev.date).toLocaleDateString('cs-CZ') : (ev.dateObj ? ev.dateObj.toLocaleDateString('cs-CZ') : '-');
+                        const priceVal = parseFloat(ev.price) || 0;
+                        const kmVal = parseInt(ev.km) || 0;
+                        const isSynced = ev.linkedTxId && allTx.some(t => t.id === ev.linkedTxId);
+
+                        const fileBtnHtml = ev.fileId
+                            ? `<button onclick="window.previewVehicleFile('${ev.fileId}')" class="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/40 text-[10px] text-cyan-300 hover:bg-cyan-900/60 transition">📎 ${escapeHtml(ev.fileName || 'Příloha')}</button>`
+                            : '';
+
+                        evTbody.innerHTML += `
+                            <tr class="hover:bg-slate-800/60 transition-colors">
+                                <td class="p-3 text-xs font-mono whitespace-nowrap">
+                                    <div class="font-bold text-slate-200">${dStr}</div>
+                                    ${ev.time ? `<div class="text-[10px] text-cyan-400">🕒 ${escapeHtml(ev.time)}</div>` : ''}
+                                </td>
+                                <td class="p-3 whitespace-nowrap">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${b.cls}">
+                                        <span>${b.icon}</span><span>${escapeHtml(ev.type || 'Oprava')}</span>
+                                    </span>
+                                </td>
+                                <td class="p-3">
+                                    <div class="font-bold text-white text-xs sm:text-sm">${escapeHtml(ev.title)}</div>
+                                    ${ev.note ? `<div class="text-[11px] text-slate-400 mt-0.5 leading-snug">${escapeHtml(ev.note)}</div>` : ''}
+                                    ${fileBtnHtml}
+                                </td>
+                                <td class="p-3 text-right font-mono font-bold text-cyan-300 whitespace-nowrap text-xs">
+                                    ${kmVal > 0 ? kmVal.toLocaleString('cs-CZ') + ' km' : '-'}
+                                </td>
+                                <td class="p-3 text-right font-mono font-bold text-rose-400 whitespace-nowrap text-xs sm:text-sm">
+                                    ${priceVal > 0 ? priceVal.toLocaleString('cs-CZ') + ' Kč' : '0 Kč'}
+                                </td>
+                                <td class="p-3 text-center whitespace-nowrap no-print">
+                                    ${isSynced
+                                        ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30" title="Propojeno s výdajem v kategorii Vozidlo">✓ Ve výdajích</span>`
+                                        : (priceVal > 0
+                                            ? `<button onclick="window.syncSingleEventToFinance('${ev.id}')" class="px-2 py-1 rounded-lg bg-rose-950/50 hover:bg-rose-900/70 border border-rose-700/50 text-rose-300 text-[10px] font-bold transition">💰 Do výdajů</button>`
+                                            : `<span class="text-[10px] text-slate-600">-</span>`)
+                                    }
+                                </td>
+                                <td class="p-3 text-center whitespace-nowrap no-print">
+                                    <button onclick="window.editVehicleEvent('${ev.id}')" title="Upravit událost" class="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition">✏️</button>
+                                    <button onclick="window.deleteVehicleEvent('${ev.id}')" title="Smazat událost" class="p-1.5 hover:bg-rose-950/40 rounded-lg text-rose-500 hover:text-rose-400 transition ml-0.5">🗑️</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+
+            // 7. Dokumenty a soubory vozidla (Fotka techničáku, Pojistka, Faktury...)
+            const filesCountEl = document.getElementById('vehFilesCountBadge');
+            if (filesCountEl) filesCountEl.textContent = `${vehFiles.length} souborů`;
+
+            const filesGrid = document.getElementById('vehFilesGrid');
+            if (filesGrid) {
+                filesGrid.innerHTML = '';
+                if (vehFiles.length === 0) {
+                    filesGrid.innerHTML = `
+                        <div class="col-span-full py-10 px-4 text-center rounded-2xl bg-slate-950/50 border border-slate-800/80 text-slate-400 text-xs">
+                            <div class="text-3xl mb-2">📘</div>
+                            <p class="font-bold text-slate-200 text-sm">Zatím nemáte nahrané žádné soubory ani fotky dokladů</p>
+                            <p class="mt-1 text-slate-500">Nahrajte si fotku velkého či malého techničáku, pojistku (zelenou kartu) nebo faktury ze servisu pomocí panelu výše.</p>
+                        </div>
+                    `;
+                } else {
+                    vehFiles.forEach(f => {
+                        const isImg = f.mimeType && f.mimeType.startsWith('image/');
+                        const isPdf = f.mimeType === 'application/pdf' || (f.fileName && f.fileName.toLowerCase().endsWith('.pdf'));
+                        const dStr = f.dateObj ? f.dateObj.toLocaleDateString('cs-CZ') : '';
+                        const sizeKb = f.size ? `${Math.round(f.size / 1024)} KB` : '';
+
+                        const previewThumb = isImg && f.dataUrl
+                            ? `<div onclick="window.previewVehicleFile('${f.id}')" class="h-36 w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 cursor-pointer relative group/img">
+                                <img src="${f.dataUrl}" alt="${escapeHtml(f.title)}" class="w-full h-full object-cover group-hover/img:scale-105 transition duration-300">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center text-white font-bold text-xs gap-1">
+                                    <span>🔍</span><span>Zvětšit</span>
+                                </div>
+                               </div>`
+                            : `<div onclick="window.previewVehicleFile('${f.id}')" class="h-36 w-full rounded-xl bg-slate-950 border border-slate-800 cursor-pointer flex flex-col items-center justify-center gap-2 hover:border-cyan-500/40 transition">
+                                <span class="text-4xl">${isPdf ? '📕' : '📄'}</span>
+                                <span class="text-[11px] font-mono text-slate-400 truncate max-w-[90%] px-2">${escapeHtml(f.fileName || 'Dokument')}</span>
+                               </div>`;
+
+                        const card = document.createElement('div');
+                        card.className = "bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800 hover:border-cyan-500/40 transition flex flex-col justify-between gap-3 shadow-md";
+                        card.innerHTML = `
+                            <div>
+                                ${previewThumb}
+                                <div class="mt-3">
+                                    <div class="flex items-center justify-between gap-1 mb-1">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 truncate">${escapeHtml(f.category || 'Dokument')}</span>
+                                        <span class="text-[10px] font-mono text-slate-500">${dStr}</span>
+                                    </div>
+                                    <h4 class="font-bold text-white text-xs sm:text-sm truncate" title="${escapeHtml(f.title)}">${escapeHtml(f.title)}</h4>
+                                    <p class="text-[10px] text-slate-500 font-mono truncate mt-0.5">${escapeHtml(f.fileName || '')} ${sizeKb ? '• ' + sizeKb : ''}</p>
+                                </div>
+                            </div>
+                            <div class="pt-2.5 border-t border-slate-800/80 flex items-center justify-between gap-1.5 no-print">
+                                <button onclick="window.previewVehicleFile('${f.id}')" class="flex-1 py-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs transition flex items-center justify-center gap-1">
+                                    <span>👁️</span><span>Zobrazit</span>
+                                </button>
+                                <button onclick="window.downloadVehicleFile('${f.id}')" title="Stáhnout soubor" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition">
+                                    📥
+                                </button>
+                                <button onclick="window.deleteVehicleFile('${f.id}')" title="Smazat soubor" class="p-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/70 text-rose-400 text-xs transition">
+                                    🗑️
+                                </button>
+                            </div>
+                        `;
+                        filesGrid.appendChild(card);
+                    });
+                }
+            }
+
+            // 8. Historie stavu tachometru (KM) + Graf KM
+            const kmTbody = document.getElementById('vehicleKmHistoryBody');
+            if (kmTbody) {
+                kmTbody.innerHTML = '';
+                const descKmRecords = [...allKmRecordsAsc].reverse();
+                if (descKmRecords.length === 0) {
+                    kmTbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500 text-xs italic">Zatím žádné záznamy kilometrů. Zadejte stav km nahoře na kartě vozidla.</td></tr>`;
+                } else {
+                    descKmRecords.forEach(r => {
+                        const dStr = r.date ? new Date(r.date).toLocaleDateString('cs-CZ') : '-';
+                        kmTbody.innerHTML += `
+                            <tr class="hover:bg-slate-800/50 transition">
+                                <td class="p-2.5 font-mono text-slate-400">${dStr}</td>
+                                <td class="p-2.5 text-right font-mono font-bold text-cyan-300">${r.km.toLocaleString('cs-CZ')} km</td>
+                                <td class="p-2.5 text-right font-mono font-semibold text-emerald-400">${r.delta > 0 ? '+' + r.delta.toLocaleString('cs-CZ') + ' km' : '-'}</td>
+                                <td class="p-2.5 text-slate-300 truncate max-w-[180px]" title="${escapeHtml(r.note)}">${escapeHtml(r.note)}</td>
+                                <td class="p-2.5 text-center no-print">
+                                    ${r.isManual ? `<button onclick="window.deleteVehicleKmLog('${r.id}')" title="Smazat záznam km" class="text-rose-400 hover:text-rose-300">🗑️</button>` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+
+            const vehTabEl = document.getElementById('tab-vehicle');
+            const isVehTabVisible = vehTabEl && !vehTabEl.classList.contains('hidden');
+
+            const kmCanvas = document.getElementById('vehicleKmChart');
+            if (kmCanvas && typeof Chart !== 'undefined' && isVehTabVisible) {
+                if (vehKmChartInstance) vehKmChartInstance.destroy();
+                const labels = allKmRecordsAsc.length > 0
+                    ? allKmRecordsAsc.map(r => r.date ? new Date(r.date).toLocaleDateString('cs-CZ') : 'Zápis')
+                    : ['Aktuální stav'];
+                const dataPts = allKmRecordsAsc.length > 0
+                    ? allKmRecordsAsc.map(r => r.km)
+                    : [displayKm];
+
+                vehKmChartInstance = new Chart(kmCanvas, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Stav tachometru (km)',
+                            data: dataPts,
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.15)',
+                            borderWidth: 2.5,
+                            fill: true,
+                            tension: 0.25,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#22d3ee'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } } },
+                            y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // 9. Propojené výdaje ze Správy financí (Kategorie: Vozidlo) & Graf nákladů
+            const finListEl = document.getElementById('vehicleLinkedFinanceList');
+            if (finListEl) {
+                finListEl.innerHTML = '';
+                if (vehicleFinanceTxs.length === 0) {
+                    finListEl.innerHTML = `
+                        <div class="p-6 text-center text-slate-500 text-xs italic bg-slate-900/40 rounded-xl border border-slate-800">
+                            Zatím žádné výdaje v kategorii <strong>Vozidlo</strong>. Při uložení opravy vlevo se výdaj vytvoří automaticky.
+                        </div>
+                    `;
+                } else {
+                    vehicleFinanceTxs.forEach(t => {
+                        const isLinked = linkedTxIds.has(t.id);
+                        const dStr = t.dateObj ? t.dateObj.toLocaleDateString('cs-CZ') : '-';
+                        finListEl.innerHTML += `
+                            <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition text-xs">
+                                <div class="min-w-0 pr-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono text-slate-400 text-[11px]">${dStr}</span>
+                                        ${isLinked
+                                            ? `<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">🔗 V servisní knížce</span>`
+                                            : `<button onclick="window.importFinanceTxToVehicle('${t.id}')" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition no-print">➕ Přidat do servisní knížky</button>`
+                                        }
+                                    </div>
+                                    <div class="text-slate-200 font-medium truncate mt-0.5">${escapeHtml(t.note || 'Výdaj v kategorii Vozidlo')}</div>
+                                </div>
+                                <div class="font-mono font-bold text-rose-400 whitespace-nowrap">
+                                    -${t.amount.toLocaleString('cs-CZ')} Kč
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+
+            const costCanvas = document.getElementById('vehicleCostChart');
+            if (costCanvas && typeof Chart !== 'undefined' && isVehTabVisible) {
+                if (vehCostChartInstance) vehCostChartInstance.destroy();
+                const costByType = {};
+                vehEvents.forEach(ev => {
+                    const p = parseFloat(ev.price) || 0;
+                    if (p > 0) {
+                        const k = ev.type || 'Ostatní';
+                        costByType[k] = (costByType[k] || 0) + p;
+                    }
+                });
+                if (unlinkedTotalCost > 0) {
+                    costByType['Ostatní (Finance)'] = (costByType['Ostatní (Finance)'] || 0) + unlinkedTotalCost;
+                }
+
+                const labels = Object.keys(costByType);
+                const vals = Object.values(costByType);
+
+                vehCostChartInstance = new Chart(costCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels.length > 0 ? labels : ['Žádné náklady'],
+                        datasets: [{
+                            data: vals.length > 0 ? vals : [1],
+                            backgroundColor: vals.length > 0
+                                ? ['#f43f5e', '#06b6d4', '#f59e0b', '#10b981', '#6366f1', '#a855f7', '#ec4899', '#64748b']
+                                : ['#1e293b'],
+                            borderWidth: 2,
+                            borderColor: '#0f172a'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right', labels: { color: '#cbd5e1', font: { family: 'Outfit', size: 11 } } }
+                        }
+                    }
+                });
+            }
+        };
+
+        // Export servisní knížky a karty vozidla do Excelu (.xlsx)
+        window.exportVehicleEventsXlsx = () => {
+            if (typeof XLSX === 'undefined') return alert("Knihovna XLSX není načtena.");
+            const v = getActiveVehicle();
+            const isPrimaryVehicle = allVehicles.length <= 1 || (allVehicles[0] && allVehicles[0].id === v.id);
+            const vehEvents = allVehicleEvents.filter(ev => ev.vehicleId === v.id || (isPrimaryVehicle && (!ev.vehicleId || ev.vehicleId === 'veh_default')));
+
+            const wb = XLSX.utils.book_new();
+
+            // List 1: Karta vozidla
+            const cardRows = [
+                ["KARTA VOZIDLA", ""],
+                ["Název / Model", v.name || "Moje vozidlo"],
+                ["SPZ (Registrační značka)", v.spz || "-"],
+                ["VIN kód", v.vin || "-"],
+                ["Aktuální stav km", Number(v.currentKm) || 0],
+                ["Platnost STK do", v.stkUntil || "-"],
+                ["Platnost dálniční známky do", v.vignetteUntil || "-"],
+                ["Platnost pojištění do", v.insuranceUntil || "-"],
+                ["Rok výroby", v.year || "-"],
+                ["Motorizace / Palivo", v.engine || "-"],
+                ["Poznámka", v.notes || "-"]
+            ];
+            const wsCard = XLSX.utils.aoa_to_sheet(cardRows);
+            wsCard['!cols'] = [{ wch: 28 }, { wch: 36 }];
+            XLSX.utils.book_append_sheet(wb, wsCard, "Karta vozidla");
+
+            // List 2: Servisní knížka & Události
+            const evRows = [
+                ["Datum", "Čas / Doba", "Typ události", "Popis opravy / události", "Stav km", "Cena (Kč)", "Poznámka / Díly / Servis", "Příloha"]
+            ];
+            vehEvents.forEach(ev => {
+                evRows.push([
+                    ev.date || '',
+                    ev.time || '',
+                    ev.type || '',
+                    ev.title || '',
+                    Number(ev.km) || 0,
+                    Number(ev.price) || 0,
+                    ev.note || '',
+                    ev.fileName || ''
+                ]);
+            });
+            const wsEv = XLSX.utils.aoa_to_sheet(evRows);
+            wsEv['!cols'] = [{ wch: 14 }, { wch: 14 }, { wch: 16 }, { wch: 32 }, { wch: 14 }, { wch: 14 }, { wch: 35 }, { wch: 24 }];
+            XLSX.utils.book_append_sheet(wb, wsEv, "Servisní knížka");
+
+            const safeSpz = (v.spz || v.name || 'vozidlo').replace(/[^a-zA-Z0-9_-]/g, '_');
+            XLSX.writeFile(wb, `karta_vozidla_${safeSpz}_${new Date().toISOString().split('T')[0]}.xlsx`);
+        };
+
         document.getElementById('globalPeriodFilter').onchange = (e) => {
             const customBox = document.getElementById('customDateRangeContainer');
             if (customBox) {
@@ -5145,12 +7637,13 @@ service cloud.firestore {
             }
             render();
             renderWork();
+            if (window.renderVehicle) window.renderVehicle();
         };
 
         const df = document.getElementById('filterDateFrom');
         const dt = document.getElementById('filterDateTo');
-        if (df) df.onchange = () => { render(); renderWork(); };
-        if (dt) dt.onchange = () => { render(); renderWork(); };
+        if (df) df.onchange = () => { render(); renderWork(); if (window.renderVehicle) window.renderVehicle(); };
+        if (dt) dt.onchange = () => { render(); renderWork(); if (window.renderVehicle) window.renderVehicle(); };
 
         document.getElementById('topTxCount').onchange = render;
         window.toggleSelectAll = (src) => document.querySelectorAll('.tx-checkbox').forEach(cb => cb.checked = src.checked);
@@ -5165,7 +7658,10 @@ service cloud.firestore {
                 transactions: allTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
                 btc_transactions: allBtcTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
                 work_projects: allProjects.map(p => ({ ...p, createdAt: p.dateObj.toISOString() })),
-                work_logs: allWorkLogs.map(l => ({ ...l, createdAt: l.dateObj.toISOString() }))
+                work_logs: allWorkLogs.map(l => ({ ...l, createdAt: l.dateObj.toISOString() })),
+                vehicles: allVehicles,
+                vehicle_events: allVehicleEvents.map(ev => ({ ...ev, createdAt: ev.dateObj ? ev.dateObj.toISOString() : ev.createdAt })),
+                vehicle_files: allVehicleFiles.map(f => ({ ...f, createdAt: f.dateObj ? f.dateObj.toISOString() : f.createdAt }))
             };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -5215,6 +7711,22 @@ service cloud.firestore {
                 const descEsc = (l.description || "").replace(/'/g, "''");
                 const dateStr = l.dateObj.toISOString().slice(0, 19).replace('T', ' ');
                 sql += `INSERT INTO work_logs (id, user_id, project_id, project_name, hours, hourly_rate, description, is_billed, date, time_from, time_to, created_at) VALUES ('${l.id}', '${currentUser.uid}', '${l.projectId || ''}', '${pNameEsc}', ${l.hours || 0}, ${l.hourlyRate || 0}, '${descEsc}', ${l.isBilled ? 1 : 0}, '${l.date || ''}', '${l.timeFrom || ''}', '${l.timeTo || ''}', '${dateStr}');\n`;
+            });
+
+            // Vozidla a servisní knížka
+            sql += `\nCREATE TABLE IF NOT EXISTS vehicles (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  name VARCHAR(128),\n  spz VARCHAR(32),\n  vin VARCHAR(64),\n  current_km INT,\n  stk_until VARCHAR(32),\n  vignette_until VARCHAR(32)\n);\n\n`;
+            allVehicles.forEach(v => {
+                const nameEsc = (v.name || "").replace(/'/g, "''");
+                const spzEsc = (v.spz || "").replace(/'/g, "''");
+                const vinEsc = (v.vin || "").replace(/'/g, "''");
+                sql += `INSERT INTO vehicles (id, user_id, name, spz, vin, current_km, stk_until, vignette_until) VALUES ('${v.id}', '${currentUser.uid}', '${nameEsc}', '${spzEsc}', '${vinEsc}', ${v.currentKm || 0}, '${v.stkUntil || ''}', '${v.vignetteUntil || ''}');\n`;
+            });
+
+            sql += `\nCREATE TABLE IF NOT EXISTS vehicle_events (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  vehicle_id VARCHAR(64),\n  type VARCHAR(64),\n  title VARCHAR(255),\n  price DECIMAL(15,2),\n  km INT,\n  date VARCHAR(32),\n  time VARCHAR(64),\n  note TEXT\n);\n\n`;
+            allVehicleEvents.forEach(ev => {
+                const titleEsc = (ev.title || "").replace(/'/g, "''");
+                const noteEsc = (ev.note || "").replace(/'/g, "''");
+                sql += `INSERT INTO vehicle_events (id, user_id, vehicle_id, type, title, price, km, date, time, note) VALUES ('${ev.id}', '${currentUser.uid}', '${ev.vehicleId || ''}', '${ev.type || ''}', '${titleEsc}', ${ev.price || 0}, ${ev.km || 0}, '${ev.date || ''}', '${(ev.time || '').replace(/'/g, "''")}', '${noteEsc}');\n`;
             });
 
             const blob = new Blob([sql], { type: 'text/sql' });
@@ -5443,7 +7955,7 @@ service cloud.firestore {
             reader.onload = async (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    let txCount = 0, btcCount = 0, projCount = 0, workCount = 0;
+                    let txCount = 0, btcCount = 0, projCount = 0, workCount = 0, vehCount = 0, vehEvCount = 0;
 
                     if (data.transactions && Array.isArray(data.transactions)) {
                         for (const tx of data.transactions) {
@@ -5548,7 +8060,69 @@ service cloud.firestore {
                                 saveUserCategories();
                             }
                         }
-                        alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů\n• ${projCount} projektů\n• ${workCount} záznamů odpracovaných hodin.`);
+                        if (data.vehicles && Array.isArray(data.vehicles)) {
+                            for (const v of data.vehicles) {
+                                const vData = {
+                                    ...v,
+                                    id: v.id || ('veh_' + Date.now() + '_' + vehCount),
+                                    userId: currentUser.uid
+                                };
+                                await saveVehicleObject(vData);
+                                vehCount++;
+                            }
+                        }
+                        if (data.vehicle_events && Array.isArray(data.vehicle_events)) {
+                            for (const ev of data.vehicle_events) {
+                                let evId = ev.id || ('vev_' + Date.now() + '_' + vehEvCount);
+                                const parsedD = ev.createdAt ? new Date(ev.createdAt) : (ev.date ? new Date(ev.date) : new Date());
+                                const d = !isNaN(parsedD.getTime()) ? parsedD : new Date();
+                                const evData = {
+                                    ...ev,
+                                    id: evId,
+                                    recordType: 'vehicle_event',
+                                    userId: currentUser.uid,
+                                    createdAt: d.toISOString(),
+                                    dateObj: d
+                                };
+                                if (vehicleStorageMode === 'cloud') {
+                                    try {
+                                        const evCloud = cleanFirestoreData(evData);
+                                        evCloud.recordType = 'vehicle_event';
+                                        evCloud.createdAt = Timestamp.fromDate(d);
+                                        const docRef = await addDoc(collection(db, "work_projects"), evCloud);
+                                        evId = docRef.id;
+                                        evData.id = docRef.id;
+                                    } catch (e) {
+                                        vehicleStorageMode = 'local';
+                                        updateVehicleStorageNotice(true);
+                                    }
+                                }
+                                const idx = allVehicleEvents.findIndex(x => x.id === evId);
+                                if (idx !== -1) allVehicleEvents[idx] = evData;
+                                else allVehicleEvents.push(evData);
+                                vehEvCount++;
+                            }
+                            saveLocalVehicleEvents(allVehicleEvents);
+                        }
+                        if (data.vehicle_files && Array.isArray(data.vehicle_files)) {
+                            for (const f of data.vehicle_files) {
+                                const fId = f.id || ('vf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4));
+                                const d = f.createdAt ? new Date(f.createdAt) : new Date();
+                                const fDoc = {
+                                    ...f,
+                                    id: fId,
+                                    userId: currentUser.uid,
+                                    createdAt: d.toISOString(),
+                                    dateObj: d
+                                };
+                                await saveFileToIdb(fDoc);
+                                const idx = allVehicleFiles.findIndex(x => x.id === fId);
+                                if (idx !== -1) allVehicleFiles[idx] = fDoc;
+                                else allVehicleFiles.push(fDoc);
+                            }
+                        }
+                        if (window.renderVehicle) window.renderVehicle();
+                        alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů\n• ${projCount} projektů\n• ${workCount} záznamů odpracovaných hodin\n• ${vehCount} vozidel a ${vehEvCount} záznamů servisní knížky.`);
                     } else if (Array.isArray(data)) {
                         for (const tx of data) {
                             let d = new Date();
