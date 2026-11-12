@@ -6388,20 +6388,26 @@ service cloud.firestore {
         };
 
         const VEHICLE_COLORS = {
-            cyan: { hex: '#06b6d4', bg: 'rgba(6, 182, 212, 0.16)', dot: 'bg-cyan-400', border: 'border-cyan-500/40', text: 'text-cyan-300' },
-            emerald: { hex: '#10b981', bg: 'rgba(16, 185, 129, 0.16)', dot: 'bg-emerald-400', border: 'border-emerald-500/40', text: 'text-emerald-300' },
-            amber: { hex: '#f59e0b', bg: 'rgba(245, 158, 11, 0.16)', dot: 'bg-amber-400', border: 'border-amber-500/40', text: 'text-amber-300' },
-            rose: { hex: '#f43f5e', bg: 'rgba(244, 63, 94, 0.16)', dot: 'bg-rose-400', border: 'border-rose-500/40', text: 'text-rose-300' },
-            indigo: { hex: '#6366f1', bg: 'rgba(99, 102, 241, 0.16)', dot: 'bg-indigo-400', border: 'border-indigo-500/40', text: 'text-indigo-300' },
-            blue: { hex: '#3b82f6', bg: 'rgba(59, 130, 246, 0.16)', dot: 'bg-blue-400', border: 'border-blue-500/40', text: 'text-blue-300' }
+            cyan: { hex: '#06b6d4', rgb: '6, 182, 212', bg: 'rgba(6, 182, 212, 0.16)', dot: 'bg-cyan-400', border: 'border-cyan-500/40', text: 'text-cyan-300' },
+            emerald: { hex: '#10b981', rgb: '16, 185, 129', bg: 'rgba(16, 185, 129, 0.16)', dot: 'bg-emerald-400', border: 'border-emerald-500/40', text: 'text-emerald-300' },
+            amber: { hex: '#f59e0b', rgb: '245, 158, 11', bg: 'rgba(245, 158, 11, 0.16)', dot: 'bg-amber-400', border: 'border-amber-500/40', text: 'text-amber-300' },
+            rose: { hex: '#f43f5e', rgb: '244, 63, 94', bg: 'rgba(244, 63, 94, 0.16)', dot: 'bg-rose-400', border: 'border-rose-500/40', text: 'text-rose-300' },
+            indigo: { hex: '#6366f1', rgb: '99, 102, 241', bg: 'rgba(99, 102, 241, 0.16)', dot: 'bg-indigo-400', border: 'border-indigo-500/40', text: 'text-indigo-300' },
+            blue: { hex: '#3b82f6', rgb: '59, 130, 246', bg: 'rgba(59, 130, 246, 0.16)', dot: 'bg-blue-400', border: 'border-blue-500/40', text: 'text-blue-300' }
         };
         const VEHICLE_COLOR_KEYS = Object.keys(VEHICLE_COLORS);
 
         function getVehicleColorTheme(veh, fallbackIdx = 0) {
+            const safeIdx = Math.abs(parseInt(fallbackIdx, 10) || 0);
             const key = veh && veh.color && VEHICLE_COLORS[veh.color]
                 ? veh.color
-                : VEHICLE_COLOR_KEYS[fallbackIdx % VEHICLE_COLOR_KEYS.length];
-            return { key, ...VEHICLE_COLORS[key] };
+                : VEHICLE_COLOR_KEYS[safeIdx % VEHICLE_COLOR_KEYS.length];
+            const theme = VEHICLE_COLORS[key] || VEHICLE_COLORS.cyan;
+            return {
+                key,
+                ...theme,
+                rgba: (alpha = 0.16) => `rgba(${theme.rgb}, ${alpha})`
+            };
         }
 
         function getPrimaryVehicleId() {
