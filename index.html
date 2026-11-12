@@ -1207,9 +1207,9 @@
                 <!-- Top Bar: Vehicle Selector, Title, SPZ, VIN & Actions -->
                 <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-6 mb-6 border-b border-slate-800/90 relative z-10">
 
-                    <!-- Left: Car Identity -->
+                    <!-- Left: Car/Moto Identity -->
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full xl:w-auto">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-3xl shadow-lg shadow-cyan-500/25 shrink-0 border border-cyan-400/30">
+                        <div id="vehCardTypeIcon" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-3xl shadow-lg shadow-cyan-500/25 shrink-0 border border-cyan-400/30">
                             🚗
                         </div>
                         <div class="space-y-1.5 flex-1">
@@ -1263,7 +1263,7 @@
                             </button>
                             <button onclick="window.openVehicleProfileModal(true)" title="Přidat další vozidlo"
                                 class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white font-bold text-xs transition flex items-center gap-1">
-                                <span>➕</span><span class="hidden sm:inline">Další auto</span>
+                                <span>➕</span><span class="hidden sm:inline">Další vozidlo</span>
                             </button>
                             <button id="btnDeleteVehicle" onclick="window.deleteActiveVehicle()" title="Smazat toto vozidlo"
                                 class="hidden p-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/70 border border-rose-800/50 text-rose-400 hover:text-white text-xs transition">
@@ -1348,7 +1348,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                    <span>🛣️</span><span>Platnost dálničky</span>
+                                    <span>🛣️</span><span id="vehCardVignetteTitle">Platnost dálničky</span>
                                 </span>
                                 <span id="vehCardVignetteBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
                                     Nenastaveno
@@ -1365,10 +1365,14 @@
                             </div>
                         </div>
 
-                        <div class="mt-3.5 pt-3 border-t border-slate-800/80 flex items-center gap-1.5 no-print">
+                        <div id="vehCardVignetteQuickWrap" class="mt-3.5 pt-3 border-t border-slate-800/80 flex items-center gap-1.5 no-print">
                             <input id="quickVignetteDateInput" type="date" onchange="window.quickUpdateVehicleDate('vignetteUntil', this.value)"
                                 title="Změnit datum platnosti dálniční známky"
                                 class="w-full p-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-slate-300 text-xs font-mono focus:outline-none focus:border-cyan-500 cursor-pointer">
+                        </div>
+                        <div id="vehCardVignetteMotoExemptWrap" class="hidden mt-3.5 pt-3 border-t border-emerald-500/20 flex items-center justify-between gap-2 text-[11px]">
+                            <span class="text-emerald-300 font-semibold">✅ ČR dálnice bez známky</span>
+                            <button type="button" onclick="window.openVehicleProfileModal(false)" class="text-[10px] text-slate-400 hover:text-cyan-300 underline no-print">Zahraniční?</button>
                         </div>
                     </div>
 
@@ -2983,10 +2987,18 @@ service cloud.firestore {
                 <input type="hidden" id="vehModalId">
 
                 <div class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Typ vozidla</label>
+                            <select id="vehModalType" onchange="window.onVehModalTypeChange()"
+                                class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-bold focus:outline-none focus:border-cyan-500 transition cursor-pointer">
+                                <option value="car">🚗 Auto</option>
+                                <option value="moto">🏍️ Motorka</option>
+                            </select>
+                        </div>
                         <div class="sm:col-span-2">
                             <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Název / Značka a model vozidla *</label>
-                            <input id="vehModalName" type="text" placeholder="Např. Škoda Octavia III 2.0 TDI"
+                            <input id="vehModalName" type="text" placeholder="Např. Škoda Octavia / Yamaha MT-07"
                                 class="w-full p-3 rounded-xl bg-slate-900 border border-slate-700/80 text-white text-sm font-bold focus:outline-none focus:border-cyan-500 transition">
                         </div>
                         <div>
@@ -3041,9 +3053,10 @@ service cloud.firestore {
                                 class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-emerald-500 cursor-pointer">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-1">🛣️ Platnost dálničky do</label>
+                            <label id="vehModalVignetteLabel" class="block text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-1">🛣️ Platnost dálničky do</label>
                             <input id="vehModalVignetteDate" type="date"
                                 class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-mono focus:outline-none focus:border-blue-500 cursor-pointer">
+                            <p id="vehModalVignetteHint" class="hidden text-[10px] text-emerald-400 mt-1 font-medium">✅ Motorky mají v ČR dálnice zdarma (vyplňte jen pro zahraniční dálnici).</p>
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">🛡️ Pojištění do</label>
@@ -4001,16 +4014,18 @@ service cloud.firestore {
             const prevVal = preferredVehicleId || sel.value || activeVehicleId;
             sel.innerHTML = '';
             if (allVehicles.length === 0) {
-                const v = typeof getActiveVehicle === 'function' ? getActiveVehicle() : { id: 'veh_default', name: 'Moje vozidlo', spz: '' };
+                const v = typeof getActiveVehicle === 'function' ? getActiveVehicle() : { id: 'veh_default', vehicleType: 'car', name: 'Moje vozidlo', spz: '' };
+                const tMeta = typeof getVehicleTypeMeta === 'function' ? getVehicleTypeMeta(v) : { icon: '🚗' };
                 const opt = document.createElement('option');
                 opt.value = v.id;
-                opt.textContent = `🚗 ${v.name || 'Moje vozidlo'}${v.spz ? ' (' + v.spz + ')' : ''}`;
+                opt.textContent = `${tMeta.icon} ${v.name || 'Moje vozidlo'}${v.spz ? ' (' + v.spz + ')' : ''}`;
                 sel.appendChild(opt);
             } else {
                 allVehicles.forEach(v => {
+                    const tMeta = typeof getVehicleTypeMeta === 'function' ? getVehicleTypeMeta(v) : { icon: '🚗' };
                     const opt = document.createElement('option');
                     opt.value = v.id;
-                    opt.textContent = `🚗 ${v.name || 'Vozidlo'}${v.spz ? ' • ' + v.spz : ''}`;
+                    opt.textContent = `${tMeta.icon} ${v.name || 'Vozidlo'}${v.spz ? ' • ' + v.spz : ''}`;
                     sel.appendChild(opt);
                 });
                 if (prevVal && allVehicles.some(v => v.id === prevVal)) {
@@ -6430,6 +6445,20 @@ service cloud.firestore {
             };
         }
 
+        function isMotorcycle(veh) {
+            return Boolean(veh && veh.vehicleType === 'moto');
+        }
+
+        function getVehicleTypeMeta(veh) {
+            const moto = isMotorcycle(veh);
+            return {
+                type: moto ? 'moto' : 'car',
+                isMoto: moto,
+                icon: moto ? '🏍️' : '🚗',
+                label: moto ? 'Motorka' : 'Auto'
+            };
+        }
+
         function getPrimaryVehicleId() {
             return allVehicles.length > 0 ? allVehicles[0].id : null;
         }
@@ -6508,6 +6537,7 @@ service cloud.firestore {
                 id: 'veh_' + (currentUser ? currentUser.uid.slice(0, 8) : 'default'),
                 userId: currentUser ? currentUser.uid : '',
                 recordType: 'vehicle',
+                vehicleType: 'car',
                 name: 'Moje vozidlo',
                 spz: '',
                 vin: '',
@@ -6591,6 +6621,37 @@ service cloud.firestore {
             window.renderVehicle();
         };
 
+        window.onVehModalTypeChange = () => {
+            const typeVal = document.getElementById('vehModalType')?.value || 'car';
+            const isMoto = typeVal === 'moto';
+            const vigLabel = document.getElementById('vehModalVignetteLabel');
+            const vigHint = document.getElementById('vehModalVignetteHint');
+            const vigInput = document.getElementById('vehModalVignetteDate');
+            const nameInput = document.getElementById('vehModalName');
+            const engInput = document.getElementById('vehModalEngine');
+
+            if (vigLabel) {
+                vigLabel.textContent = isMoto
+                    ? '🛣️ Zahraniční dálnička do (v ČR zdarma)'
+                    : '🛣️ Platnost dálničky do';
+                vigLabel.className = isMoto
+                    ? 'block text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1'
+                    : 'block text-[11px] font-bold text-blue-400 uppercase tracking-wider mb-1';
+            }
+            if (vigHint) vigHint.classList.toggle('hidden', !isMoto);
+            if (vigInput) vigInput.classList.toggle('opacity-70', isMoto);
+            if (nameInput) {
+                nameInput.placeholder = isMoto
+                    ? 'Např. Yamaha MT-07 / Honda CB650R'
+                    : 'Např. Škoda Octavia III 2.0 TDI';
+            }
+            if (engInput) {
+                engInput.placeholder = isMoto
+                    ? 'Např. 689 ccm 54 kW'
+                    : 'Např. 2.0 TDI 110 kW';
+            }
+        };
+
         window.openVehicleProfileModal = (isNew = false) => {
             const modal = document.getElementById('modalVehicleProfile');
             const titleEl = document.getElementById('modalVehicleProfileTitle');
@@ -6600,6 +6661,8 @@ service cloud.firestore {
                 const nextColor = VEHICLE_COLOR_KEYS[allVehicles.length % VEHICLE_COLOR_KEYS.length];
                 titleEl.innerHTML = "<span>➕</span><span>Přidat nové vozidlo</span>";
                 document.getElementById('vehModalId').value = 'veh_' + Date.now();
+                const typeSel = document.getElementById('vehModalType');
+                if (typeSel) typeSel.value = 'car';
                 document.getElementById('vehModalName').value = '';
                 document.getElementById('vehModalYear').value = '';
                 document.getElementById('vehModalSpz').value = '';
@@ -6618,8 +6681,11 @@ service cloud.firestore {
             } else {
                 const v = getActiveVehicle();
                 const vIdx = Math.max(0, allVehicles.findIndex(x => x.id === v.id));
-                titleEl.innerHTML = "<span>🚗</span><span>Upravit kartu vozidla</span>";
+                const tMeta = getVehicleTypeMeta(v);
+                titleEl.innerHTML = `<span>${tMeta.icon}</span><span>Upravit kartu vozidla</span>`;
                 document.getElementById('vehModalId').value = v.id || 'veh_default';
+                const typeSel = document.getElementById('vehModalType');
+                if (typeSel) typeSel.value = tMeta.type;
                 document.getElementById('vehModalName').value = v.name && v.name !== 'Moje vozidlo' ? v.name : '';
                 document.getElementById('vehModalYear').value = v.year || '';
                 document.getElementById('vehModalSpz').value = v.spz || '';
@@ -6637,6 +6703,7 @@ service cloud.firestore {
                 document.getElementById('vehModalNotes').value = v.notes || '';
             }
 
+            window.onVehModalTypeChange();
             modal.classList.remove('hidden');
             document.getElementById('vehModalName').focus();
         };
@@ -6649,6 +6716,7 @@ service cloud.firestore {
         window.saveVehicleProfile = async () => {
             if (!currentUser) return alert("Musíte být přihlášeni.");
             const id = document.getElementById('vehModalId').value || 'veh_default';
+            const vehicleType = document.getElementById('vehModalType')?.value === 'moto' ? 'moto' : 'car';
             const name = document.getElementById('vehModalName').value.trim() || 'Moje vozidlo';
             const year = document.getElementById('vehModalYear').value.trim();
             const spz = document.getElementById('vehModalSpz').value.trim().toUpperCase();
@@ -6683,6 +6751,7 @@ service cloud.firestore {
                 ...(existingInList || {}),
                 id,
                 userId: currentUser.uid,
+                vehicleType,
                 name,
                 year,
                 spz,
@@ -7587,6 +7656,32 @@ service cloud.firestore {
             }
         }
 
+        function computeVignetteStatus(veh) {
+            if (isMotorcycle(veh)) {
+                if (!veh.vignetteUntil) {
+                    return {
+                        formattedDate: 'Neomezeně (ČR)',
+                        daysText: '🏍️ Motorky mají v ČR dálnice bez poplatku',
+                        badgeText: '✅ Zdarma v ČR',
+                        badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+                        barColor: 'bg-emerald-500',
+                        barWidth: '100%',
+                        diffDays: null,
+                        level: 'ok',
+                        isMotoExempt: true
+                    };
+                }
+                const foreignSt = computeValidityStatus(veh.vignetteUntil);
+                return {
+                    ...foreignSt,
+                    daysText: `${foreignSt.daysText} • v ČR zdarma`,
+                    isMotoExempt: false,
+                    isMotoForeign: true
+                };
+            }
+            return computeValidityStatus(veh ? veh.vignetteUntil : '');
+        }
+
         function isDateInGlobalPeriod(d) {
             if (!d || isNaN(d.getTime())) return false;
             const filterEl = document.getElementById('globalPeriodFilter');
@@ -7883,17 +7978,19 @@ service cloud.firestore {
                 const kmInfo = computeVehicleKmData(veh, idx);
                 const events = getVehicleEvents(veh.id);
                 const theme = getVehicleColorTheme(veh, idx);
+                const typeMeta = getVehicleTypeMeta(veh);
                 const stk = computeValidityStatus(veh.stkUntil);
-                const vig = computeValidityStatus(veh.vignetteUntil);
+                const vig = computeVignetteStatus(veh);
                 const ins = computeValidityStatus(veh.insuranceUntil);
                 const srv = computeServiceStatus(veh, kmInfo.displayKm);
                 const hasExpired = [stk.level, vig.level, ins.level, srv.level].includes('expired');
                 const hasSoon = [stk.level, vig.level, ins.level, srv.level].includes('soon');
                 const eventsCost = events.reduce((acc, ev) => acc + (parseFloat(ev.price) || 0), 0);
-                return { veh, idx, theme, kmInfo, events, eventsCost, stk, vig, ins, srv, hasExpired, hasSoon };
+                return { veh, idx, theme, typeMeta, kmInfo, events, eventsCost, stk, vig, ins, srv, hasExpired, hasSoon };
             });
 
             const activeSummary = fleetSummaries.find(s => s.veh.id === v.id) || fleetSummaries[0];
+            const activeTypeMeta = activeSummary.typeMeta || getVehicleTypeMeta(v);
 
             // 0. Přehled vozového parku (#vehicleFleetBar) & Upozornění (#vehicleAlertsBanner)
             const fleetBarEl = document.getElementById('vehicleFleetBar');
@@ -7915,6 +8012,7 @@ service cloud.firestore {
                                 <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${s.theme.hex}; box-shadow: 0 0 8px ${s.theme.hex}66;"></span>
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-1.5">
+                                        <span class="text-xs leading-none">${s.typeMeta.icon}</span>
                                         <span class="text-xs font-bold ${isActive ? 'text-white' : 'text-slate-200'} truncate max-w-[140px]">${escapeHtml(s.veh.name || 'Vozidlo')}</span>
                                         ${s.veh.spz ? `<span class="px-1.5 py-0.2 rounded bg-white text-slate-950 font-mono font-extrabold text-[9px] tracking-wider">${escapeHtml(s.veh.spz)}</span>` : ''}
                                         ${warnDot}
@@ -7955,7 +8053,7 @@ service cloud.firestore {
                     const labelPrefix = vehiclesList.length > 1 ? `${s.veh.name || 'Vozidlo'}: ` : '';
                     const checks = [
                         { title: 'STK', st: s.stk },
-                        { title: 'Dálniční známka', st: s.vig },
+                        { title: s.vig.isMotoForeign ? 'Zahraniční dálnička' : 'Dálniční známka', st: s.vig },
                         { title: 'Pojištění', st: s.ins }
                     ];
                     checks.forEach(c => {
@@ -7998,18 +8096,22 @@ service cloud.firestore {
                 if (allVehicles.length === 0) {
                     const opt = document.createElement('option');
                     opt.value = 'veh_default';
-                    opt.textContent = `🚗 ${v.name}${v.spz ? ' (' + v.spz + ')' : ''}`;
+                    opt.textContent = `${activeTypeMeta.icon} ${v.name}${v.spz ? ' (' + v.spz + ')' : ''}`;
                     selEl.appendChild(opt);
                 } else {
                     allVehicles.forEach(veh => {
+                        const tMeta = getVehicleTypeMeta(veh);
                         const opt = document.createElement('option');
                         opt.value = veh.id;
-                        opt.textContent = `🚗 ${veh.name || 'Vozidlo'}${veh.spz ? ' • ' + veh.spz : ''}`;
+                        opt.textContent = `${tMeta.icon} ${veh.name || 'Vozidlo'}${veh.spz ? ' • ' + veh.spz : ''}`;
                         selEl.appendChild(opt);
                     });
                     selEl.value = v.id;
                 }
             }
+
+            const typeIconEl = document.getElementById('vehCardTypeIcon');
+            if (typeIconEl) typeIconEl.textContent = activeTypeMeta.icon;
 
             const btnDelVeh = document.getElementById('btnDeleteVehicle');
             if (btnDelVeh) {
@@ -8024,13 +8126,14 @@ service cloud.firestore {
 
             const formVehBadge = document.getElementById('vehFormVehicleBadge');
             if (formVehBadge) {
-                formVehBadge.textContent = `${v.name || 'Vozidlo'}${v.spz ? ' • ' + v.spz : ''}`;
+                formVehBadge.textContent = `${activeTypeMeta.icon} ${v.name || 'Vozidlo'}${v.spz ? ' • ' + v.spz : ''}`;
                 formVehBadge.style.borderColor = activeTheme.hex + '66';
                 formVehBadge.style.color = activeTheme.hex;
                 formVehBadge.style.backgroundColor = activeTheme.rgba(0.15);
             }
 
-            const subParts = [];
+            const subParts = [activeTypeMeta.label];
+            if (activeTypeMeta.isMoto) subParts.push('ČR dálnice zdarma');
             if (v.year) subParts.push(`Rok výroby: ${v.year}`);
             if (v.fuelType) subParts.push(`Palivo: ${v.fuelType}`);
             if (v.engine) subParts.push(v.engine);
@@ -8100,8 +8203,15 @@ service cloud.firestore {
             if (quickStkIn) quickStkIn.value = v.stkUntil || '';
 
             const vigStatus = activeSummary.vig;
+            const vigTitleEl = document.getElementById('vehCardVignetteTitle');
+            if (vigTitleEl) {
+                vigTitleEl.textContent = vigStatus.isMotoForeign ? 'Zahraniční dálnička' : 'Platnost dálničky';
+            }
             const vigDateEl = document.getElementById('vehCardVignetteDate');
-            if (vigDateEl) vigDateEl.textContent = vigStatus.formattedDate;
+            if (vigDateEl) {
+                vigDateEl.textContent = vigStatus.formattedDate;
+                vigDateEl.className = `text-xl sm:text-2xl font-extrabold font-mono mt-1 ${vigStatus.isMotoExempt ? 'text-emerald-400' : 'text-white'}`;
+            }
             const vigDaysEl = document.getElementById('vehCardVignetteDays');
             if (vigDaysEl) vigDaysEl.textContent = vigStatus.daysText;
             const vigBadgeEl = document.getElementById('vehCardVignetteBadge');
@@ -8116,6 +8226,10 @@ service cloud.firestore {
             }
             const quickVigIn = document.getElementById('quickVignetteDateInput');
             if (quickVigIn) quickVigIn.value = v.vignetteUntil || '';
+            const vigQuickWrap = document.getElementById('vehCardVignetteQuickWrap');
+            if (vigQuickWrap) vigQuickWrap.classList.toggle('hidden', !!vigStatus.isMotoExempt);
+            const vigMotoExemptWrap = document.getElementById('vehCardVignetteMotoExemptWrap');
+            if (vigMotoExemptWrap) vigMotoExemptWrap.classList.toggle('hidden', !vigStatus.isMotoExempt);
 
             const insStatus = activeSummary.ins;
             const insDateEl = document.getElementById('vehCardInsuranceDate');
@@ -8933,12 +9047,13 @@ service cloud.firestore {
             // List 1: Karta vozidla
             const cardRows = [
                 ["KARTA VOZIDLA", ""],
+                ["Typ vozidla", getVehicleTypeMeta(v).label],
                 ["Název / Model", v.name || "Moje vozidlo"],
                 ["SPZ (Registrační značka)", v.spz || "-"],
                 ["VIN kód", v.vin || "-"],
                 ["Aktuální stav km", kmData.displayKm || 0],
                 ["Platnost STK do", v.stkUntil || "-"],
-                ["Platnost dálniční známky do", v.vignetteUntil || "-"],
+                ["Platnost dálniční známky do", isMotorcycle(v) && !v.vignetteUntil ? "Neomezeně (v ČR zdarma)" : (v.vignetteUntil || "-")],
                 ["Platnost pojištění do", v.insuranceUntil || "-"],
                 ["Příští servis (km)", v.nextServiceKm || "-"],
                 ["Příští servis (datum)", v.nextServiceDate || "-"],
@@ -9075,14 +9190,15 @@ service cloud.firestore {
             });
 
             // Vozidla a servisní knížka
-            sql += `\nCREATE TABLE IF NOT EXISTS vehicles (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  name VARCHAR(128),\n  spz VARCHAR(32),\n  vin VARCHAR(64),\n  current_km INT,\n  stk_until VARCHAR(32),\n  vignette_until VARCHAR(32),\n  insurance_until VARCHAR(32),\n  fuel_type VARCHAR(32),\n  next_service_km INT,\n  next_service_date VARCHAR(32),\n  service_interval_km INT,\n  color VARCHAR(32)\n);\n\n`;
+            sql += `\nCREATE TABLE IF NOT EXISTS vehicles (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  vehicle_type VARCHAR(16),\n  name VARCHAR(128),\n  spz VARCHAR(32),\n  vin VARCHAR(64),\n  current_km INT,\n  stk_until VARCHAR(32),\n  vignette_until VARCHAR(32),\n  insurance_until VARCHAR(32),\n  fuel_type VARCHAR(32),\n  next_service_km INT,\n  next_service_date VARCHAR(32),\n  service_interval_km INT,\n  color VARCHAR(32)\n);\n\n`;
             allVehicles.forEach(v => {
+                const typeEsc = getVehicleTypeMeta(v).type;
                 const nameEsc = (v.name || "").replace(/'/g, "''");
                 const spzEsc = (v.spz || "").replace(/'/g, "''");
                 const vinEsc = (v.vin || "").replace(/'/g, "''");
                 const fuelEsc = (v.fuelType || "").replace(/'/g, "''");
                 const colorEsc = (v.color || "").replace(/'/g, "''");
-                sql += `INSERT INTO vehicles (id, user_id, name, spz, vin, current_km, stk_until, vignette_until, insurance_until, fuel_type, next_service_km, next_service_date, service_interval_km, color) VALUES ('${v.id}', '${currentUser.uid}', '${nameEsc}', '${spzEsc}', '${vinEsc}', ${v.currentKm || 0}, '${v.stkUntil || ''}', '${v.vignetteUntil || ''}', '${v.insuranceUntil || ''}', '${fuelEsc}', ${v.nextServiceKm || 0}, '${v.nextServiceDate || ''}', ${v.serviceIntervalKm || 0}, '${colorEsc}');\n`;
+                sql += `INSERT INTO vehicles (id, user_id, vehicle_type, name, spz, vin, current_km, stk_until, vignette_until, insurance_until, fuel_type, next_service_km, next_service_date, service_interval_km, color) VALUES ('${v.id}', '${currentUser.uid}', '${typeEsc}', '${nameEsc}', '${spzEsc}', '${vinEsc}', ${v.currentKm || 0}, '${v.stkUntil || ''}', '${v.vignetteUntil || ''}', '${v.insuranceUntil || ''}', '${fuelEsc}', ${v.nextServiceKm || 0}, '${v.nextServiceDate || ''}', ${v.serviceIntervalKm || 0}, '${colorEsc}');\n`;
             });
 
             sql += `\nCREATE TABLE IF NOT EXISTS vehicle_events (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  vehicle_id VARCHAR(64),\n  type VARCHAR(64),\n  title VARCHAR(255),\n  price DECIMAL(15,2),\n  km INT,\n  liters DECIMAL(10,2),\n  full_tank BOOLEAN,\n  next_service_km INT,\n  date VARCHAR(32),\n  time VARCHAR(64),\n  note TEXT\n);\n\n`;
