@@ -714,15 +714,21 @@
                                             class="w-full p-2 rounded-lg bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-500">
                                     </div>
                                 </div>
-                                <div id="txVehicleFuelLitersBox" class="hidden grid grid-cols-2 gap-2 items-center pt-1">
-                                    <div>
-                                        <label class="block text-[10px] font-semibold text-amber-300 uppercase mb-0.5">Množství (litry / kWh)</label>
-                                        <input id="txVehicleLiters" type="number" min="0" step="0.01" placeholder="Např. 45.5"
-                                            class="w-full p-2 rounded-lg bg-slate-900 border border-amber-500/40 text-amber-200 font-mono text-xs focus:outline-none focus:border-amber-400">
+                                <div id="txVehicleFuelLitersBox" class="hidden space-y-2 pt-1">
+                                    <div class="grid grid-cols-2 gap-2 items-center">
+                                        <div>
+                                            <label class="block text-[10px] font-semibold text-amber-300 uppercase mb-0.5">Množství (litry / kWh)</label>
+                                            <input id="txVehicleLiters" type="number" min="0" step="0.01" placeholder="Např. 45.5"
+                                                class="w-full p-2 rounded-lg bg-slate-900 border border-amber-500/40 text-amber-200 font-mono text-xs focus:outline-none focus:border-amber-400">
+                                        </div>
+                                        <label class="flex items-center gap-1.5 pt-4 cursor-pointer text-[11px] text-slate-300">
+                                            <input id="txVehicleFullTank" type="checkbox" checked class="w-3.5 h-3.5 rounded text-amber-500 bg-slate-900 border-slate-600">
+                                            <span>Plná nádrž</span>
+                                        </label>
                                     </div>
-                                    <label class="flex items-center gap-1.5 pt-4 cursor-pointer text-[11px] text-slate-300">
-                                        <input id="txVehicleFullTank" type="checkbox" checked class="w-3.5 h-3.5 rounded text-amber-500 bg-slate-900 border-slate-600">
-                                        <span>Plná nádrž</span>
+                                    <label class="flex items-center gap-1.5 cursor-pointer text-[11px] text-slate-400 hover:text-slate-200 transition">
+                                        <input id="txVehicleExcludeConsumption" type="checkbox" class="w-3.5 h-3.5 rounded text-rose-500 bg-slate-900 border-slate-600">
+                                        <span>🚫 Nezapočítávat do spotřeby</span>
                                     </label>
                                 </div>
                             </div>
@@ -1463,17 +1469,24 @@
                                     Palivo
                                 </span>
                             </div>
-                            <div class="flex items-baseline justify-between gap-2">
-                                <div id="vehCardAvgConsumption" class="text-lg font-extrabold font-mono text-amber-300">-- l/100 km</div>
-                                <p id="vehCardFuelCostPerKm" class="text-[11px] text-slate-400 font-mono truncate">-- Kč/km</p>
+                            <div class="grid grid-cols-2 gap-2 mt-1">
+                                <div>
+                                    <span class="block text-[9px] uppercase font-bold tracking-wider text-slate-500">Poslední úsek</span>
+                                    <div id="vehCardAvgConsumption" class="text-base sm:text-lg font-extrabold font-mono text-amber-300 leading-tight">-- l/100</div>
+                                </div>
+                                <div>
+                                    <span class="block text-[9px] uppercase font-bold tracking-wider text-slate-500">Dlouhodobá</span>
+                                    <div id="vehCardLongTermConsumption" class="text-base sm:text-lg font-extrabold font-mono text-emerald-300 leading-tight">-- l/100</div>
+                                </div>
                             </div>
-                            <p id="vehCardFuelSummarySub" class="text-[10px] text-slate-500 mt-1.5 font-mono truncate">
-                                Zadejte tankování s litry a stavem km pro výpočet spotřeby
+                            <p id="vehCardFuelSummarySub" class="text-[10px] text-slate-400 mt-1.5 font-mono truncate">
+                                Zadejte 2× tankování (4–11 l/100 km) pro výpočet
                             </p>
                         </div>
-                        <div class="mt-2.5 pt-2 border-t border-slate-800/70 flex items-center justify-between text-[11px] no-print">
-                            <span id="vehCardFuelTotalLiters" class="text-slate-400 font-mono">Celkem: 0 l</span>
-                            <button onclick="window.quickPrefillFuelEvent()" class="text-amber-400 hover:text-amber-300 font-bold whitespace-nowrap ml-2">⛽ Zapsat tankování</button>
+                        <div class="mt-2.5 pt-2 border-t border-slate-800/70 flex items-center justify-between text-[11px] no-print gap-2">
+                            <span id="vehCardFuelTotalLiters" class="text-slate-400 font-mono truncate">Celkem: 0 l</span>
+                            <span id="vehCardFuelCostPerKm" class="text-slate-500 font-mono whitespace-nowrap">-- Kč/km</span>
+                            <button onclick="window.quickPrefillFuelEvent()" class="text-amber-400 hover:text-amber-300 font-bold whitespace-nowrap">⛽ Tankovat</button>
                         </div>
                     </div>
 
@@ -1545,7 +1558,7 @@
                         <!-- Dynamické pole pro Tankování (litry, plná nádrž, cena/l) -->
                         <div id="vehEventFuelBox" class="hidden p-3 rounded-xl bg-amber-950/25 border border-amber-500/30 space-y-2 animate-fadeIn">
                             <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold text-amber-300 uppercase tracking-wider">⛽ Údaje o tankování (pro výpočet spotřeby)</span>
+                                <span class="text-[10px] font-bold text-amber-300 uppercase tracking-wider">⛽ Údaje o tankování (4–11 l/100 = OK)</span>
                                 <span id="vehEventUnitPricePreview" class="text-[11px] font-mono font-bold text-amber-200"></span>
                             </div>
                             <div class="grid grid-cols-2 gap-2.5 items-center">
@@ -1559,6 +1572,10 @@
                                     <span class="font-medium">Plná nádrž</span>
                                 </label>
                             </div>
+                            <label class="flex items-center gap-2 pt-0.5 cursor-pointer text-[11px] text-slate-300 hover:text-white transition">
+                                <input id="vehEventExcludeConsumption" type="checkbox" class="w-3.5 h-3.5 rounded text-rose-500 bg-slate-900 border-slate-600">
+                                <span>🚫 Nezapočítávat do spotřeby (např. kanystr / neúplný zápis)</span>
+                            </label>
                         </div>
 
                         <!-- Dynamické pole pro Příští servis při Servisu -->
@@ -4051,7 +4068,8 @@ service cloud.firestore {
                     const evTime = document.getElementById('txVehicleTime')?.value.trim() || '';
                     const evLiters = evType === 'Palivo' ? (parseFloat(document.getElementById('txVehicleLiters')?.value) || 0) : 0;
                     const evFullTank = evType === 'Palivo' ? !!document.getElementById('txVehicleFullTank')?.checked : false;
-                    await window.createVehicleEventFromOverviewTx(docRef.id, amount, noteVal, txDateInputVal, evType, evKm, evTime, targetVehId, evLiters, evFullTank);
+                    const evExcludeConsumption = evType === 'Palivo' ? !!document.getElementById('txVehicleExcludeConsumption')?.checked : false;
+                    await window.createVehicleEventFromOverviewTx(docRef.id, amount, noteVal, txDateInputVal, evType, evKm, evTime, targetVehId, evLiters, evFullTank, evExcludeConsumption);
                 }
             }
             cancelEdit();
@@ -4112,6 +4130,8 @@ service cloud.firestore {
             if (txTimeEl) txTimeEl.value = "";
             const txLitEl = document.getElementById('txVehicleLiters');
             if (txLitEl) txLitEl.value = "";
+            const txExclEl = document.getElementById('txVehicleExcludeConsumption');
+            if (txExclEl) txExclEl.checked = false;
             const txFuelBox = document.getElementById('txVehicleFuelLitersBox');
             if (txFuelBox) txFuelBox.classList.add('hidden');
             const txVehEvType = document.getElementById('txVehicleEventType');
@@ -6948,6 +6968,7 @@ service cloud.firestore {
             const newValidityDate = document.getElementById('vehEventNewValidityDate')?.value || '';
             const liters = type === 'Palivo' ? (parseFloat(document.getElementById('vehEventLiters')?.value) || 0) : 0;
             const fullTank = type === 'Palivo' ? !!document.getElementById('vehEventFullTank')?.checked : false;
+            const excludeFromConsumption = type === 'Palivo' ? !!document.getElementById('vehEventExcludeConsumption')?.checked : false;
             const nextServiceKm = type === 'Servis' ? (parseInt(document.getElementById('vehEventNextServiceKm')?.value) || 0) : 0;
             const syncFinance = document.getElementById('vehEventSyncFinance').checked;
             const fileInput = document.getElementById('vehEventFileInput');
@@ -7076,6 +7097,7 @@ service cloud.firestore {
                 km,
                 liters,
                 fullTank,
+                excludeFromConsumption,
                 nextServiceKm,
                 date: dateVal,
                 time: timeVal,
@@ -7146,6 +7168,8 @@ service cloud.firestore {
             if (litersEl) litersEl.value = ev.liters || '';
             const fullEl = document.getElementById('vehEventFullTank');
             if (fullEl) fullEl.checked = ev.fullTank !== false;
+            const exclEl = document.getElementById('vehEventExcludeConsumption');
+            if (exclEl) exclEl.checked = !!ev.excludeFromConsumption;
             const nextSrvEl = document.getElementById('vehEventNextServiceKm');
             if (nextSrvEl) nextSrvEl.value = ev.nextServiceKm || '';
             window.updateFuelUnitPricePreview();
@@ -7172,6 +7196,8 @@ service cloud.firestore {
             if (litersEl) litersEl.value = '';
             const fullEl = document.getElementById('vehEventFullTank');
             if (fullEl) fullEl.checked = true;
+            const exclEl = document.getElementById('vehEventExcludeConsumption');
+            if (exclEl) exclEl.checked = false;
             const nextSrvEl = document.getElementById('vehEventNextServiceKm');
             if (nextSrvEl) nextSrvEl.value = '';
             const unitPreview = document.getElementById('vehEventUnitPricePreview');
@@ -7261,7 +7287,7 @@ service cloud.firestore {
         };
 
         // Vytvoření události v Kartě vozidla přímo z transakce v Přehledu (Kategorie: Vozidlo)
-        window.createVehicleEventFromOverviewTx = async (txId, amount, note, dateStr, evType = 'Oprava', evKm = 0, evTime = '', targetVehicleId = null, evLiters = 0, evFullTank = true) => {
+        window.createVehicleEventFromOverviewTx = async (txId, amount, note, dateStr, evType = 'Oprava', evKm = 0, evTime = '', targetVehicleId = null, evLiters = 0, evFullTank = true, evExcludeConsumption = false) => {
             if (!currentUser) return;
             const matchedVeh = targetVehicleId ? allVehicles.find(x => x.id === targetVehicleId) : null;
             const v = { ...(matchedVeh || getActiveVehicle()) };
@@ -7290,6 +7316,7 @@ service cloud.firestore {
                 km: parseInt(evKm) || 0,
                 liters: evType === 'Palivo' ? (parseFloat(evLiters) || 0) : 0,
                 fullTank: evType === 'Palivo' ? !!evFullTank : false,
+                excludeFromConsumption: evType === 'Palivo' ? !!evExcludeConsumption : false,
                 date: dateVal,
                 time: evTime || '',
                 note: 'Vytvořeno z finančních výdajů (Kategorie: Vozidlo)',
@@ -7316,6 +7343,24 @@ service cloud.firestore {
             }
             allVehicleEvents.sort((a, b) => (b.dateObj || 0) - (a.dateObj || 0));
             saveLocalVehicleEvents(allVehicleEvents);
+            window.renderVehicle();
+        };
+
+        window.toggleVehicleEventExcludeConsumption = async (eventId) => {
+            const ev = allVehicleEvents.find(x => x.id === eventId);
+            if (!ev || ev.type !== 'Palivo') return;
+            const nextVal = !ev.excludeFromConsumption;
+            ev.excludeFromConsumption = nextVal;
+            saveLocalVehicleEvents(allVehicleEvents);
+
+            const isLocalTempId = String(ev.id).startsWith('vev_');
+            if (vehicleStorageMode === 'cloud' && !isLocalTempId) {
+                try {
+                    await updateDoc(doc(db, "work_projects", ev.id), {
+                        excludeFromConsumption: nextVal
+                    });
+                } catch (e) { }
+            }
             window.renderVehicle();
         };
 
@@ -7646,62 +7691,95 @@ service cloud.firestore {
             const fuelEvents = vehEvents.filter(ev => ev.type === 'Palivo');
             const totalFuelCost = fuelEvents.reduce((acc, ev) => acc + (parseFloat(ev.price) || 0), 0);
             const totalLiters = fuelEvents.reduce((acc, ev) => acc + (parseFloat(ev.liters) || 0), 0);
+            const excludedCount = fuelEvents.filter(ev => !!ev.excludeFromConsumption).length;
 
-            const fuelWithKmAndLiters = fuelEvents
-                .filter(ev => (parseInt(ev.km) || 0) > 0 && (parseFloat(ev.liters) || 0) > 0)
+            // Pouze události zahrnuté do výpočtu spotřeby se známými km a litry, chronologicky
+            const eligibleFuelEvents = fuelEvents
+                .filter(ev => !ev.excludeFromConsumption && (parseInt(ev.km) || 0) > 0 && (parseFloat(ev.liters) || 0) > 0)
                 .sort((a, b) => {
-                    const kmDiff = (parseInt(a.km) || 0) - (parseInt(b.km) || 0);
-                    if (kmDiff !== 0) return kmDiff;
-                    return new Date(a.date || 0) - new Date(b.date || 0);
+                    const dateDiff = new Date(a.date || 0) - new Date(b.date || 0);
+                    if (dateDiff !== 0 && !isNaN(dateDiff)) return dateDiff;
+                    return (parseInt(a.km) || 0) - (parseInt(b.km) || 0);
                 });
 
-            let intervalKm = 0;
-            let intervalLiters = 0;
-            let lastFullKm = null;
+            const segments = [];
+            const segmentByEventId = new Map();
+            let anchorKm = null;
+            let anchorDate = null;
             let accLiters = 0;
+            let partialSteps = 0;
 
-            fuelWithKmAndLiters.forEach(ev => {
+            eligibleFuelEvents.forEach(ev => {
                 const kmVal = parseInt(ev.km) || 0;
                 const litersVal = parseFloat(ev.liters) || 0;
                 const isFull = ev.fullTank !== false;
 
-                if (lastFullKm === null) {
+                if (anchorKm === null) {
                     if (isFull) {
-                        lastFullKm = kmVal;
+                        anchorKm = kmVal;
+                        anchorDate = ev.date || '';
                         accLiters = 0;
+                        partialSteps = 0;
                     }
-                } else {
-                    accLiters += litersVal;
-                    if (isFull && kmVal > lastFullKm) {
-                        intervalKm += (kmVal - lastFullKm);
-                        intervalLiters += accLiters;
-                        lastFullKm = kmVal;
-                        accLiters = 0;
+                    return;
+                }
+
+                accLiters += litersVal;
+                partialSteps += 1;
+
+                if (isFull) {
+                    const segKm = kmVal - anchorKm;
+                    if (segKm > 0 && accLiters > 0) {
+                        const lPer100 = (accLiters / segKm) * 100;
+                        const isOk = lPer100 >= 4 && lPer100 <= 11;
+                        const seg = {
+                            eventId: ev.id,
+                            fromKm: anchorKm,
+                            toKm: kmVal,
+                            fromDate: anchorDate,
+                            toDate: ev.date || '',
+                            distKm: segKm,
+                            liters: accLiters,
+                            lPer100,
+                            isOk,
+                            stepsCount: partialSteps
+                        };
+                        segments.push(seg);
+                        if (ev.id) segmentByEventId.set(ev.id, seg);
                     }
+                    anchorKm = kmVal;
+                    anchorDate = ev.date || '';
+                    accLiters = 0;
+                    partialSteps = 0;
                 }
             });
 
-            let avgLPer100 = null;
-            if (intervalKm > 0 && intervalLiters > 0) {
-                avgLPer100 = (intervalLiters / intervalKm) * 100;
-            } else if (fuelWithKmAndLiters.length >= 2) {
-                const firstKm = parseInt(fuelWithKmAndLiters[0].km) || 0;
-                const lastKm = parseInt(fuelWithKmAndLiters[fuelWithKmAndLiters.length - 1].km) || 0;
-                const spanKm = lastKm - firstKm;
-                const spanLiters = fuelWithKmAndLiters.slice(1).reduce((s, e) => s + (parseFloat(e.liters) || 0), 0);
-                if (spanKm > 0 && spanLiters > 0) {
-                    avgLPer100 = (spanLiters / spanKm) * 100;
-                }
-            }
+            const okSegments = segments.filter(s => s.isOk);
+            const okTotalKm = okSegments.reduce((s, seg) => s + seg.distKm, 0);
+            const okTotalLiters = okSegments.reduce((s, seg) => s + seg.liters, 0);
+            const longTermLPer100 = (okTotalKm > 0 && okTotalLiters > 0) ? (okTotalLiters / okTotalKm) * 100 : null;
+            const lastSegment = okSegments.length > 0 ? okSegments[okSegments.length - 1] : null;
+            const latestAttemptSegment = segments.length > 0 ? segments[segments.length - 1] : null;
+            const ignoredOutlierSegments = segments.length - okSegments.length;
 
             const fuelCostPerKm = (totalDrivenKm > 0 && totalFuelCost > 0) ? (totalFuelCost / totalDrivenKm) : null;
             const avgPricePerLiter = totalLiters > 0 && totalFuelCost > 0 ? (totalFuelCost / totalLiters) : null;
 
             return {
                 fuelCount: fuelEvents.length,
+                eligibleCount: eligibleFuelEvents.length,
+                excludedCount,
                 totalFuelCost,
                 totalLiters,
-                avgLPer100,
+                lastSegment,
+                latestAttemptSegment,
+                longTermLPer100,
+                avgLPer100: longTermLPer100,
+                okSegmentsCount: okSegments.length,
+                ignoredOutlierSegments,
+                okTotalKm,
+                okTotalLiters,
+                segmentByEventId,
                 fuelCostPerKm,
                 avgPricePerLiter
             };
@@ -8079,20 +8157,46 @@ service cloud.firestore {
             const fuelTypeBadgeEl = document.getElementById('vehCardFuelTypeBadge');
             if (fuelTypeBadgeEl) fuelTypeBadgeEl.textContent = v.fuelType || 'Palivo';
             const avgConsEl = document.getElementById('vehCardAvgConsumption');
-            if (avgConsEl) avgConsEl.textContent = fuelStats.avgLPer100 !== null ? `${fuelStats.avgLPer100.toFixed(1)} l/100 km` : '-- l/100 km';
+            if (avgConsEl) {
+                avgConsEl.textContent = fuelStats.lastSegment
+                    ? `${fuelStats.lastSegment.lPer100.toFixed(1)} l/100`
+                    : '-- l/100';
+            }
+            const longConsEl = document.getElementById('vehCardLongTermConsumption');
+            if (longConsEl) {
+                longConsEl.textContent = fuelStats.longTermLPer100 !== null
+                    ? `${fuelStats.longTermLPer100.toFixed(1)} l/100`
+                    : '-- l/100';
+            }
             const fuelCpkEl = document.getElementById('vehCardFuelCostPerKm');
             if (fuelCpkEl) fuelCpkEl.textContent = fuelStats.fuelCostPerKm !== null ? `${fuelStats.fuelCostPerKm.toFixed(2)} Kč/km` : '-- Kč/km';
             const fuelSubEl = document.getElementById('vehCardFuelSummarySub');
             if (fuelSubEl) {
                 if (fuelStats.fuelCount > 0) {
-                    const pricePerLExtra = fuelStats.avgPricePerLiter !== null ? ` • Průměr: ${fuelStats.avgPricePerLiter.toFixed(1)} Kč/l` : '';
-                    fuelSubEl.textContent = `Tankování: ${fuelStats.fuelCount}× • ${fuelStats.totalFuelCost.toLocaleString('cs-CZ')} Kč${pricePerLExtra}`;
+                    const parts = [];
+                    if (fuelStats.lastSegment) {
+                        parts.push(`Poslední úsek: ${fuelStats.lastSegment.distKm.toLocaleString('cs-CZ')} km / ${fuelStats.lastSegment.liters.toFixed(1)} l`);
+                    } else if (fuelStats.latestAttemptSegment && !fuelStats.latestAttemptSegment.isOk) {
+                        parts.push(`Poslední úsek ${fuelStats.latestAttemptSegment.lPer100.toFixed(1)} l/100 mimo 4–11`);
+                    }
+                    if (fuelStats.okSegmentsCount > 0) {
+                        parts.push(`Dlouhodobá ze ${fuelStats.okSegmentsCount} ús. (${fuelStats.okTotalKm.toLocaleString('cs-CZ')} km)`);
+                    } else {
+                        parts.push('Pro výpočet jsou třeba 2 OK plná tankování v rozmezí 4–11 l/100');
+                    }
+                    if (fuelStats.avgPricePerLiter !== null) {
+                        parts.push(`${fuelStats.avgPricePerLiter.toFixed(1)} Kč/l`);
+                    }
+                    if (fuelStats.excludedCount > 0) {
+                        parts.push(`Vyřazeno: ${fuelStats.excludedCount}×`);
+                    }
+                    fuelSubEl.textContent = parts.join(' • ');
                 } else {
                     fuelSubEl.textContent = 'Zadejte tankování s litry a stavem km pro výpočet spotřeby';
                 }
             }
             const fuelLitersEl = document.getElementById('vehCardFuelTotalLiters');
-            if (fuelLitersEl) fuelLitersEl.textContent = `Celkem: ${fuelStats.totalLiters.toLocaleString('cs-CZ', { maximumFractionDigits: 1 })} l`;
+            if (fuelLitersEl) fuelLitersEl.textContent = `Celkem: ${fuelStats.totalLiters.toLocaleString('cs-CZ', { maximumFractionDigits: 1 })} l (${fuelStats.fuelCount}×)`;
 
             // 5. Náklady na vozidlo (přísně oddělené podle vozidla + globální mapa propojených transakcí)
             const vehicleNameById = new Map(vehiclesList.map(veh => [veh.id, veh.name || 'Vozidlo']));
@@ -8202,8 +8306,22 @@ service cloud.firestore {
                         const nextSrvKm = parseInt(ev.nextServiceKm) || 0;
                         const isSynced = ev.linkedTxId && allTx.some(t => t.id === ev.linkedTxId);
 
+                        const isFuel = ev.type === 'Palivo';
+                        const isExcludedFuel = isFuel && !!ev.excludeFromConsumption;
+                        const segInfo = (isFuel && fuelStats.segmentByEventId) ? fuelStats.segmentByEventId.get(ev.id) : null;
+
                         const fuelPillHtml = litersVal > 0
-                            ? `<span class="mt-1 mr-1 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-[10px] font-mono text-amber-300">⛽ ${litersVal.toLocaleString('cs-CZ', { maximumFractionDigits: 2 })} l${priceVal > 0 ? ` (${(priceVal / litersVal).toFixed(2)} Kč/l)` : ''}${ev.fullTank === false ? ' • částečná' : ''}</span>`
+                            ? `<span class="mt-1 mr-1 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-[10px] font-mono text-amber-300 ${isExcludedFuel ? 'opacity-55 line-through' : ''}">⛽ ${litersVal.toLocaleString('cs-CZ', { maximumFractionDigits: 2 })} l${priceVal > 0 ? ` (${(priceVal / litersVal).toFixed(2)} Kč/l)` : ''}${ev.fullTank === false ? ' • částečná' : ''}</span>`
+                            : '';
+                        const segPillHtml = segInfo
+                            ? (segInfo.isOk
+                                ? `<span class="mt-1 mr-1 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-mono text-emerald-300" title="${segInfo.fromKm.toLocaleString('cs-CZ')} → ${segInfo.toKm.toLocaleString('cs-CZ')} km">📊 Úsek: ${segInfo.lPer100.toFixed(1)} l/100 (${segInfo.distKm} km)</span>`
+                                : `<span class="mt-1 mr-1 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/30 text-[10px] font-mono text-rose-300" title="Úsek ${segInfo.distKm} km je mimo rozmezí 4–11 l/100 km, nezapočítán">⚠️ Mimo 4–11: ${segInfo.lPer100.toFixed(1)} l/100</span>`)
+                            : '';
+                        const excludeBtnHtml = isFuel
+                            ? (isExcludedFuel
+                                ? `<button onclick="window.toggleVehicleEventExcludeConsumption('${ev.id}')" title="Kliknutím znovu započítáte do výpočtu spotřeby" class="mt-1 mr-1 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 border border-slate-600 text-[10px] font-medium text-slate-300 hover:border-emerald-500/50 hover:text-emerald-300 transition">🚫 Mimo spotřebu</button>`
+                                : `<button onclick="window.toggleVehicleEventExcludeConsumption('${ev.id}')" title="Kliknutím vyřadíte toto tankování z výpočtu spotřeby" class="mt-1 mr-1 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-cyan-950/40 border border-cyan-500/25 text-[10px] font-medium text-cyan-300/80 hover:border-rose-500/50 hover:text-rose-300 transition">✓ Ve spotřebě</button>`)
                             : '';
                         const nextSrvPillHtml = nextSrvKm > 0
                             ? `<span class="mt-1 mr-1 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-mono text-emerald-300">🛢️ Příští servis: ${nextSrvKm.toLocaleString('cs-CZ')} km</span>`
@@ -8226,7 +8344,7 @@ service cloud.firestore {
                                 <td class="p-3">
                                     <div class="font-bold text-white text-xs sm:text-sm">${escapeHtml(ev.title)}</div>
                                     ${ev.note ? `<div class="text-[11px] text-slate-400 mt-0.5 leading-snug">${escapeHtml(ev.note)}</div>` : ''}
-                                    <div class="flex flex-wrap items-center gap-1">${fuelPillHtml}${nextSrvPillHtml}${fileBtnHtml}</div>
+                                    <div class="flex flex-wrap items-center gap-1">${fuelPillHtml}${segPillHtml}${excludeBtnHtml}${nextSrvPillHtml}${fileBtnHtml}</div>
                                 </td>
                                 <td class="p-3 text-right font-mono font-bold text-cyan-300 whitespace-nowrap text-xs">
                                     ${kmVal > 0 ? kmVal.toLocaleString('cs-CZ') + ' km' : '-'}
@@ -8391,144 +8509,227 @@ service cloud.firestore {
             if (kmCanvas && typeof Chart !== 'undefined' && isVehTabVisible) {
                 if (vehKmChartInstance) vehKmChartInstance.destroy();
 
-                let chartType = 'line';
-                let chartLabels = [];
-                let chartDatasets = [];
+                const parseDateUtcMs = (dateStr) => {
+                    if (!dateStr) return null;
+                    const m = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+                    if (m) return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+                    const parsed = Date.parse(dateStr);
+                    return isNaN(parsed) ? null : parsed;
+                };
+                const formatDateCzUtc = (ms, fallback = '') => {
+                    if (ms === null || ms === undefined || isNaN(ms)) return fallback;
+                    const d = new Date(ms);
+                    return `${d.getUTCDate()}. ${d.getUTCMonth() + 1}. ${d.getUTCFullYear()}`;
+                };
+                const toUtcDayStr = (ms) => new Date(ms).toISOString().slice(0, 10);
 
-                if (!showAllVehiclesInKm) {
-                    const activeLabel = `${v.name || 'Vozidlo'}${v.spz ? ' (' + v.spz + ')' : ''}`;
-                    if (vehKmChartMetric === 'delta') {
-                        chartType = 'bar';
-                        const deltaRecs = allKmRecordsAsc.filter(r => r.delta > 0);
-                        chartLabels = deltaRecs.length > 0
-                            ? deltaRecs.map(r => r.date ? new Date(r.date).toLocaleDateString('cs-CZ') : 'Zápis')
-                            : ['Žádný přírůstek'];
-                        chartDatasets = [{
-                            label: `Nájezd (+km) – ${activeLabel}`,
-                            data: deltaRecs.length > 0 ? deltaRecs.map(r => r.delta) : [0],
-                            backgroundColor: activeTheme.rgba(0.65),
-                            borderColor: activeTheme.hex,
-                            borderWidth: 1.5,
-                            borderRadius: 6
-                        }];
-                    } else {
-                        chartType = 'line';
-                        chartLabels = allKmRecordsAsc.length > 0
-                            ? allKmRecordsAsc.map(r => r.date ? new Date(r.date).toLocaleDateString('cs-CZ') : 'Zápis')
-                            : ['Aktuální stav'];
-                        chartDatasets = [{
-                            label: `Tachometr (km) – ${activeLabel}`,
-                            data: allKmRecordsAsc.length > 0 ? allKmRecordsAsc.map(r => r.km) : [displayKm],
-                            borderColor: activeTheme.hex,
-                            backgroundColor: activeTheme.rgba(0.16),
-                            borderWidth: 2.5,
-                            fill: true,
-                            tension: 0.25,
-                            pointRadius: 4,
-                            pointBackgroundColor: activeTheme.hex
-                        }];
-                    }
-                } else if (vehKmChartMetric === 'odometer') {
+                let chartType = 'line';
+                let chartData = { datasets: [] };
+                let xScaleConfig = {
+                    grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                    ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0, autoSkip: true }
+                };
+                let interactionConfig = { mode: 'index', intersect: false };
+                let tooltipCallbacks = {
+                    label: (ctx) => `${ctx.dataset.label}: ${Number(ctx.parsed.y || 0).toLocaleString('cs-CZ')} km`
+                };
+
+                const chartSeriesTargets = showAllVehiclesInKm
+                    ? fleetSummaries.map(s => ({
+                        label: `${s.veh.name || 'Vozidlo'}${s.veh.spz ? ' (' + s.veh.spz + ')' : ''}`,
+                        recordsAsc: s.kmInfo.recordsAsc,
+                        displayKm: s.kmInfo.displayKm,
+                        totalDrivenKm: s.kmInfo.totalDrivenKm,
+                        theme: s.theme
+                    }))
+                    : [{
+                        label: `${v.name || 'Vozidlo'}${v.spz ? ' (' + v.spz + ')' : ''}`,
+                        recordsAsc: allKmRecordsAsc,
+                        displayKm,
+                        totalDrivenKm,
+                        theme: activeTheme
+                    }];
+
+                if (vehKmChartMetric === 'odometer') {
                     chartType = 'line';
-                    const allDatesSet = new Set();
-                    fleetSummaries.forEach(s => {
-                        s.kmInfo.recordsAsc.forEach(r => {
-                            if (r.date) allDatesSet.add(r.date);
+                    const todayUtcMs = parseDateUtcMs(new Date().toISOString().slice(0, 10));
+                    let minX = Infinity;
+                    let maxX = -Infinity;
+
+                    const datasets = chartSeriesTargets.map(target => {
+                        const datedPts = target.recordsAsc
+                            .map(r => ({ x: parseDateUtcMs(r.date), y: r.km, dateStr: r.date, note: r.note }))
+                            .filter(p => p.x !== null)
+                            .sort((a, b) => a.x - b.x || a.y - b.y);
+
+                        const pts = datedPts.length > 0
+                            ? datedPts
+                            : [{ x: todayUtcMs, y: target.displayKm, dateStr: toUtcDayStr(todayUtcMs), note: 'Aktuální stav' }];
+
+                        pts.forEach(p => {
+                            if (p.x < minX) minX = p.x;
+                            if (p.x > maxX) maxX = p.x;
                         });
-                    });
-                    const sortedDateKeys = Array.from(allDatesSet).sort();
-                    if (sortedDateKeys.length === 0) {
-                        chartLabels = ['Aktuální stav'];
-                        chartDatasets = fleetSummaries.map(s => ({
-                            label: `${s.veh.name || 'Vozidlo'}${s.veh.spz ? ' (' + s.veh.spz + ')' : ''}`,
-                            data: [s.kmInfo.displayKm],
-                            borderColor: s.theme.hex,
-                            backgroundColor: s.theme.rgba(0.18),
+
+                        return {
+                            label: `${showAllVehiclesInKm ? '' : 'Tachometr (km) – '}${target.label}`,
+                            data: pts,
+                            borderColor: target.theme.hex,
+                            backgroundColor: target.theme.rgba(showAllVehiclesInKm ? 0.12 : 0.16),
                             borderWidth: 2.5,
-                            pointRadius: 5,
-                            pointBackgroundColor: s.theme.hex
-                        }));
+                            fill: !showAllVehiclesInKm,
+                            tension: 0.15,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: target.theme.hex
+                        };
+                    });
+
+                    const dayMs = 86400000;
+                    if (!isFinite(minX) || !isFinite(maxX)) {
+                        minX = todayUtcMs - 7 * dayMs;
+                        maxX = todayUtcMs + 7 * dayMs;
+                    } else if (minX === maxX) {
+                        minX -= 7 * dayMs;
+                        maxX += 7 * dayMs;
                     } else {
-                        chartLabels = sortedDateKeys.map(dk => new Date(dk).toLocaleDateString('cs-CZ'));
-                        chartDatasets = fleetSummaries.map(s => {
-                            const byDate = new Map();
-                            s.kmInfo.recordsAsc.forEach(r => {
-                                if (!r.date) return;
-                                byDate.set(r.date, Math.max(byDate.get(r.date) || 0, r.km));
-                            });
-                            return {
-                                label: `${s.veh.name || 'Vozidlo'}${s.veh.spz ? ' (' + s.veh.spz + ')' : ''}`,
-                                data: sortedDateKeys.map(dk => byDate.has(dk) ? byDate.get(dk) : null),
-                                borderColor: s.theme.hex,
-                                backgroundColor: s.theme.rgba(0.12),
-                                borderWidth: 2.5,
-                                fill: false,
-                                spanGaps: true,
-                                tension: 0.25,
-                                pointRadius: 4,
-                                pointBackgroundColor: s.theme.hex
-                            };
-                        });
+                        const span = maxX - minX;
+                        const pad = Math.max(dayMs, Math.round(span * 0.04));
+                        minX -= pad;
+                        maxX += pad;
                     }
+                    const spanDays = (maxX - minX) / dayMs;
+
+                    chartData = { datasets };
+                    interactionConfig = { mode: 'nearest', axis: 'x', intersect: false };
+                    xScaleConfig = {
+                        type: 'linear',
+                        min: minX,
+                        max: maxX,
+                        grid: { color: 'rgba(51, 65, 85, 0.3)' },
+                        ticks: {
+                            color: '#94a3b8',
+                            font: { family: 'JetBrains Mono', size: 10 },
+                            maxTicksLimit: 7,
+                            callback: (val) => {
+                                const d = new Date(val);
+                                if (isNaN(d.getTime())) return '';
+                                const day = d.getUTCDate();
+                                const mon = d.getUTCMonth() + 1;
+                                const yr = String(d.getUTCFullYear()).slice(2);
+                                return spanDays > 240 ? `${mon}/${yr}` : `${day}.${mon}.${spanDays > 90 ? yr : ''}`;
+                            }
+                        }
+                    };
+                    tooltipCallbacks = {
+                        title: (items) => {
+                            if (!items || !items.length) return '';
+                            const raw = items[0].raw;
+                            return formatDateCzUtc(raw && typeof raw.x === 'number' ? raw.x : items[0].parsed.x);
+                        },
+                        label: (ctx) => {
+                            const kmFormatted = Number(ctx.parsed.y || 0).toLocaleString('cs-CZ');
+                            const note = ctx.raw && ctx.raw.note ? ` (${ctx.raw.note})` : '';
+                            return `${ctx.dataset.label}: ${kmFormatted} km${note}`;
+                        }
+                    };
                 } else {
                     chartType = 'bar';
-                    const monthSet = new Set();
-                    fleetSummaries.forEach(s => {
-                        s.kmInfo.recordsAsc.forEach(r => {
-                            if (r.delta > 0 && r.date && r.date.length >= 7) {
-                                monthSet.add(r.date.slice(0, 7));
+                    const datedDeltas = [];
+                    chartSeriesTargets.forEach(target => {
+                        target.recordsAsc.forEach(r => {
+                            if (r.delta > 0) {
+                                const ms = parseDateUtcMs(r.date);
+                                if (ms !== null) datedDeltas.push({ ms, dayKey: toUtcDayStr(ms) });
                             }
                         });
                     });
-                    const sortedMonths = Array.from(monthSet).sort();
-                    if (sortedMonths.length === 0) {
-                        chartLabels = ['Dosavadní nájezd (+km)'];
-                        chartDatasets = fleetSummaries.map(s => ({
-                            label: `${s.veh.name || 'Vozidlo'}${s.veh.spz ? ' (' + s.veh.spz + ')' : ''}`,
-                            data: [s.kmInfo.totalDrivenKm],
-                            backgroundColor: s.theme.rgba(0.75),
-                            borderColor: s.theme.hex,
-                            borderWidth: 1.5,
-                            borderRadius: 6
-                        }));
-                    } else {
-                        chartLabels = sortedMonths.map(ym => {
-                            const [yy, mm] = ym.split('-');
-                            const mIdx = Math.max(0, Math.min(11, parseInt(mm, 10) - 1));
-                            return `${monthNames[mIdx].slice(0, 3)} ${yy}`;
-                        });
-                        chartDatasets = fleetSummaries.map(s => {
-                            const byMonth = new Map();
-                            s.kmInfo.recordsAsc.forEach(r => {
-                                if (r.delta > 0 && r.date && r.date.length >= 7) {
-                                    const mk = r.date.slice(0, 7);
-                                    byMonth.set(mk, (byMonth.get(mk) || 0) + r.delta);
-                                }
-                            });
-                            return {
-                                label: `${s.veh.name || 'Vozidlo'}${s.veh.spz ? ' (' + s.veh.spz + ')' : ''}`,
-                                data: sortedMonths.map(mk => byMonth.get(mk) || 0),
-                                backgroundColor: s.theme.rgba(0.75),
-                                borderColor: s.theme.hex,
+
+                    if (datedDeltas.length === 0) {
+                        chartData = {
+                            labels: ['Dosavadní nájezd (+km)'],
+                            datasets: chartSeriesTargets.map(target => ({
+                                label: `${showAllVehiclesInKm ? '' : 'Nájezd (+km) – '}${target.label}`,
+                                data: [target.totalDrivenKm || 0],
+                                backgroundColor: target.theme.rgba(0.75),
+                                borderColor: target.theme.hex,
                                 borderWidth: 1.5,
                                 borderRadius: 6
-                            };
-                        });
+                            }))
+                        };
+                    } else {
+                        const minMs = Math.min(...datedDeltas.map(d => d.ms));
+                        const maxMs = Math.max(...datedDeltas.map(d => d.ms));
+                        const spanDays = Math.round((maxMs - minMs) / 86400000);
+                        const useDailyBuckets = spanDays <= 45;
+
+                        const bucketKeys = [];
+                        const chartLabels = [];
+
+                        if (useDailyBuckets) {
+                            const dayMs = 86400000;
+                            for (let t = minMs; t <= maxMs; t += dayMs) {
+                                const key = toUtcDayStr(t);
+                                bucketKeys.push(key);
+                                const d = new Date(t);
+                                chartLabels.push(`${d.getUTCDate()}.${d.getUTCMonth() + 1}.`);
+                            }
+                        } else {
+                            const startD = new Date(minMs);
+                            const endD = new Date(maxMs);
+                            let y = startD.getUTCFullYear();
+                            let m = startD.getUTCMonth();
+                            const endY = endD.getUTCFullYear();
+                            const endM = endD.getUTCMonth();
+                            while (y < endY || (y === endY && m <= endM)) {
+                                const key = `${y}-${String(m + 1).padStart(2, '0')}`;
+                                bucketKeys.push(key);
+                                chartLabels.push(`${monthNames[m].slice(0, 3)} ${y}`);
+                                m += 1;
+                                if (m > 11) {
+                                    m = 0;
+                                    y += 1;
+                                }
+                            }
+                        }
+
+                        chartData = {
+                            labels: chartLabels,
+                            datasets: chartSeriesTargets.map(target => {
+                                const byBucket = new Map();
+                                target.recordsAsc.forEach(r => {
+                                    if (r.delta <= 0) return;
+                                    const ms = parseDateUtcMs(r.date);
+                                    if (ms === null) return;
+                                    const dayStr = toUtcDayStr(ms);
+                                    const key = useDailyBuckets ? dayStr : dayStr.slice(0, 7);
+                                    byBucket.set(key, (byBucket.get(key) || 0) + r.delta);
+                                });
+                                return {
+                                    label: `${showAllVehiclesInKm ? '' : 'Nájezd (+km) – '}${target.label}`,
+                                    data: bucketKeys.map(k => byBucket.get(k) || 0),
+                                    backgroundColor: target.theme.rgba(showAllVehiclesInKm ? 0.75 : 0.65),
+                                    borderColor: target.theme.hex,
+                                    borderWidth: 1.5,
+                                    borderRadius: 6
+                                };
+                            })
+                        };
                     }
+                    tooltipCallbacks = {
+                        label: (ctx) => `${ctx.dataset.label}: +${Number(ctx.parsed.y || 0).toLocaleString('cs-CZ')} km`
+                    };
                 }
 
                 vehKmChartInstance = new Chart(kmCanvas, {
                     type: chartType,
-                    data: {
-                        labels: chartLabels,
-                        datasets: chartDatasets
-                    },
+                    data: chartData,
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false },
+                        interaction: interactionConfig,
                         scales: {
-                            x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } } },
+                            x: xScaleConfig,
                             y: {
                                 beginAtZero: vehKmChartMetric === 'delta',
                                 grid: { color: 'rgba(51, 65, 85, 0.3)' },
@@ -8546,9 +8747,7 @@ service cloud.firestore {
                                 labels: { color: '#cbd5e1', boxWidth: 10, padding: 10, font: { family: 'Outfit', size: 11 } }
                             },
                             tooltip: {
-                                callbacks: {
-                                    label: (ctx) => `${ctx.dataset.label}: ${Number(ctx.parsed.y || 0).toLocaleString('cs-CZ')} km`
-                                }
+                                callbacks: tooltipCallbacks
                             }
                         }
                     }
