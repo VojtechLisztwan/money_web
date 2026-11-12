@@ -33,32 +33,45 @@
         }
     </script>
     <style>
+        :root {
+            color-scheme: dark;
+        }
+
         body {
             font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: radial-gradient(circle at 10% 15%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 85%, rgba(147, 51, 234, 0.12) 0%, transparent 45%),
-                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.9) 0%, #090d16 100%);
+            background-color: #060913;
+            background-image:
+                radial-gradient(ellipse 80% 50% at 15% 0%, rgba(37, 99, 235, 0.16) 0%, transparent 55%),
+                radial-gradient(ellipse 65% 45% at 88% 12%, rgba(6, 182, 212, 0.10) 0%, transparent 50%),
+                radial-gradient(ellipse 70% 50% at 80% 95%, rgba(99, 102, 241, 0.12) 0%, transparent 55%),
+                radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 26px 26px;
             background-attachment: fixed;
-            color: #f3f4f6;
+            color: #f1f5f9;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-mono {
+            font-variant-numeric: tabular-nums;
         }
 
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(9, 13, 22, 0.7);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(71, 85, 105, 0.8);
-            border-radius: 4px;
+            background: rgba(71, 85, 105, 0.65);
+            border-radius: 9999px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(100, 116, 139, 1);
+            background: rgba(100, 116, 139, 0.95);
         }
 
         @keyframes fadeIn {
@@ -73,24 +86,40 @@
             }
         }
 
-        .tab-content.block {
+        .animate-fadeIn {
             animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* Glassmorphism utility */
+        .tab-content.block {
+            animation: fadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Glassmorphism & elevated dark surface utilities */
         .glass-card {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(51, 65, 85, 0.6);
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(165deg, rgba(17, 25, 45, 0.84) 0%, rgba(10, 15, 28, 0.92) 100%);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(71, 85, 105, 0.42);
+            box-shadow: 0 22px 44px -18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+            transition: border-color 0.22s ease, box-shadow 0.22s ease;
         }
 
         .glass-header {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(10, 15, 28, 0.88) 100%);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(71, 85, 105, 0.48);
+            box-shadow: 0 14px 36px -14px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.8);
+            cursor: pointer;
+            opacity: 0.75;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
         }
 
         /* Print styles */
@@ -111,6 +140,7 @@
 
             body {
                 background: white !important;
+                background-image: none !important;
                 color: black !important;
                 padding: 0 !important;
                 margin: 0 !important;
@@ -207,16 +237,16 @@
                 class="absolute -bottom-24 -left-24 w-48 h-48 bg-purple-600/20 rounded-full blur-3xl pointer-events-none">
             </div>
 
-            <div class="flex items-center justify-center gap-3 mb-8">
+            <div class="flex items-center justify-center gap-3.5 mb-8">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30 text-2xl">
-                    💎
+                    class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 text-2xl ring-1 ring-white/15">
+                    💼
                 </div>
                 <div>
                     <h1
-                        class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-white bg-clip-text text-transparent">
+                        class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-white via-blue-200 to-cyan-300 bg-clip-text text-transparent">
                         Finanční brána</h1>
-                    <p class="text-xs text-slate-400 font-medium">Správa a analýza osobního jmění</p>
+                    <p class="text-xs text-slate-400 font-medium">Osobní finance • Práce • Vozový park</p>
                 </div>
             </div>
 
@@ -327,10 +357,6 @@
                         class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
                         <span class="text-base">📑</span><span>Reporty</span>
                     </button>
-                    <button onclick="switchTab('investments')" data-tab="investments" data-mobile-tab="true"
-                        class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-orange-400 hover:text-orange-300 hover:bg-orange-950/30 transition flex items-center gap-3">
-                        <span class="text-base">₿</span><span>Bitcoin</span>
-                    </button>
                     <button onclick="switchTab('settings')" data-tab="settings" data-mobile-tab="true"
                         class="w-full text-left px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition flex items-center gap-3">
                         <span class="text-base">⚙️</span><span>Data / DB</span>
@@ -359,7 +385,7 @@
     <div id="app-section" class="hidden max-w-[1536px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-4">
 
         <!-- TOP NAVBAR -->
-        <header class="glass-header rounded-2xl p-3.5 sm:p-4 mb-6 sm:mb-8 no-print shadow-xl">
+        <header class="glass-header rounded-2xl p-3 sm:p-3.5 mb-6 sm:mb-8 no-print lg:sticky lg:top-3 z-40">
             <div class="flex flex-col lg:flex-row justify-between items-center gap-3 xl:gap-4">
 
                 <!-- Logo & Title & Mobile Hamburger Button -->
@@ -376,7 +402,7 @@
                         </button>
 
                         <div
-                            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-md shadow-blue-500/30 text-xl font-bold shrink-0">
+                            class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/25 text-xl font-bold shrink-0 ring-1 ring-white/15">
                             💼
                         </div>
                         <div>
@@ -397,37 +423,33 @@
 
                 <!-- Desktop Navigation Tabs (Hidden on mobile / narrow view, accessible via sidebar drawer) -->
                 <nav
-                    class="hidden lg:flex items-center justify-center gap-1 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800/80 shrink-0">
+                    class="hidden lg:flex items-center justify-center gap-1 bg-slate-950/70 p-1 rounded-xl border border-slate-800/90 shrink-0 shadow-inner">
                     <button onclick="switchTab('overview')" data-tab="overview"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-lg font-bold text-xs xl:text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
+                        class="px-3 py-1.5 rounded-lg font-bold text-xs xl:text-sm bg-gradient-to-b from-blue-500/25 to-indigo-500/15 text-blue-300 border border-blue-400/35 shadow-sm transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
                         <span>📊</span><span>Přehled</span>
                     </button>
                     <button onclick="switchTab('work')" data-tab="work"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
+                        class="px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
                         <span>💼</span><span>Práce</span>
                     </button>
                     <button onclick="switchTab('vehicle')" data-tab="vehicle"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
+                        class="px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
                         <span>🚗</span><span>Vozidlo</span>
                     </button>
                     <button onclick="switchTab('analysis')" data-tab="analysis"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
+                        class="px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
                         <span>📈</span><span>Analýza</span>
                     </button>
                     <button onclick="switchTab('recurring')" data-tab="recurring"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
+                        class="px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
                         <span>🔁</span><span>Trvalé</span>
                     </button>
                     <button onclick="switchTab('reports')" data-tab="reports"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
+                        class="px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
                         <span>📑</span><span>Reporty</span>
                     </button>
-                    <button onclick="switchTab('investments')" data-tab="investments"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-orange-400 hover:text-orange-300 hover:bg-orange-950/30 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
-                        <span>₿</span><span>Bitcoin</span>
-                    </button>
                     <button onclick="switchTab('settings')" data-tab="settings"
-                        class="px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
+                        class="px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap">
                         <span>⚙️</span><span>Data / DB</span>
                     </button>
                 </nav>
@@ -487,86 +509,90 @@
         <div id="tab-overview" class="tab-content block">
 
             <!-- Summary Stats Cards (2x2 grid on mobile, 4 columns on desktop) -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-8">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5 mb-6 sm:mb-8">
                 <!-- Příjmy -->
                 <div
-                    class="glass-card p-3.5 sm:p-5 rounded-2xl relative overflow-hidden group hover:border-emerald-500/40 transition-all duration-300">
+                    class="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group hover:border-emerald-500/45 transition-all duration-300">
+                    <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-500/70 via-teal-400/50 to-transparent"></div>
                     <div
-                        class="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all">
+                        class="absolute -top-6 -right-6 w-24 sm:w-32 h-24 sm:h-32 bg-emerald-500/12 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all pointer-events-none">
                     </div>
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center justify-between mb-2.5">
                         <span
                             class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Příjmy</span>
                         <div
-                            class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs sm:text-base">
+                            class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400 font-bold text-xs sm:text-sm">
                             ↗</div>
                     </div>
                     <div id="summary-income"
                         class="text-lg sm:text-2xl lg:text-3xl font-extrabold text-emerald-400 font-mono tracking-tight truncate">
                         0 Kč</div>
-                    <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1 sm:mt-2 font-medium truncate">Zvolené
-                        období</p>
+                    <p id="summary-income-sub" class="text-[10px] sm:text-[11px] text-slate-400 mt-1.5 font-medium truncate">Zvolené období</p>
                 </div>
 
                 <!-- Výdaje -->
                 <div
-                    class="glass-card p-3.5 sm:p-5 rounded-2xl relative overflow-hidden group hover:border-rose-500/40 transition-all duration-300">
+                    class="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group hover:border-rose-500/45 transition-all duration-300">
+                    <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-500/70 via-pink-400/50 to-transparent"></div>
                     <div
-                        class="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all">
+                        class="absolute -top-6 -right-6 w-24 sm:w-32 h-24 sm:h-32 bg-rose-500/12 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-all pointer-events-none">
                     </div>
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center justify-between mb-2.5">
                         <span
                             class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Výdaje</span>
                         <div
-                            class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 font-bold text-xs sm:text-base">
+                            class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-rose-400 font-bold text-xs sm:text-sm">
                             ↘</div>
                     </div>
                     <div id="summary-expense"
                         class="text-lg sm:text-2xl lg:text-3xl font-extrabold text-rose-400 font-mono tracking-tight truncate">
                         0 Kč</div>
-                    <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1 sm:mt-2 font-medium truncate">Zvolené
-                        období</p>
+                    <p id="summary-expense-sub" class="text-[10px] sm:text-[11px] text-slate-400 mt-1.5 font-medium truncate">Zvolené období</p>
                 </div>
 
                 <!-- Zůstatek -->
                 <div
-                    class="glass-card p-3.5 sm:p-5 rounded-2xl relative overflow-hidden group hover:border-blue-500/40 transition-all duration-300 border-l-2 sm:border-l-4 border-l-blue-500">
+                    class="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group hover:border-blue-500/45 transition-all duration-300">
+                    <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-blue-500/80 via-cyan-400/60 to-transparent"></div>
                     <div
-                        class="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all">
+                        class="absolute -top-6 -right-6 w-24 sm:w-32 h-24 sm:h-32 bg-blue-500/12 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all pointer-events-none">
                     </div>
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center justify-between mb-2.5">
                         <span
-                            class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Zůstatek</span>
+                            class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Čistý zůstatek</span>
                         <div
-                            class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs sm:text-base">
-                            💎</div>
+                            class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-blue-400 font-bold text-xs sm:text-sm">
+                            ⚖️</div>
                     </div>
                     <div id="summary-balance"
                         class="text-lg sm:text-2xl lg:text-3xl font-extrabold text-blue-400 font-mono tracking-tight truncate">
                         0 Kč</div>
-                    <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1 sm:mt-2 font-medium truncate">Příjmy mínus
-                        výdaje</p>
+                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-1.5 font-medium truncate">Příjmy mínus výdaje</p>
                 </div>
 
-                <!-- BTC Přehledové okénko -->
-                <div onclick="switchTab('investments')" title="Kliknutím přejdete do sekce Bitcoin"
-                    class="glass-card p-3.5 sm:p-5 rounded-2xl relative overflow-hidden group hover:border-orange-500/40 transition-all duration-300 cursor-pointer border-l-2 sm:border-l-4 border-l-orange-500 active:scale-[0.98]">
+                <!-- Míra úspor (Klikací přehled do Analýzy) -->
+                <div onclick="switchTab('analysis')" title="Kliknutím zobrazíte detailní finanční analýzu"
+                    class="glass-card p-4 sm:p-5 rounded-2xl relative overflow-hidden group hover:border-indigo-500/45 transition-all duration-300 cursor-pointer active:scale-[0.99]">
+                    <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-indigo-500/80 via-violet-400/60 to-transparent"></div>
                     <div
-                        class="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-all">
+                        class="absolute -top-6 -right-6 w-24 sm:w-32 h-24 sm:h-32 bg-indigo-500/12 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all pointer-events-none">
                     </div>
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center justify-between mb-2.5">
                         <span
-                            class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Bitcoin</span>
+                            class="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Míra úspor</span>
                         <div
-                            class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-xs sm:text-base">
-                            ₿</div>
+                            class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-indigo-300 font-bold text-xs sm:text-sm">
+                            📈</div>
                     </div>
-                    <div id="overview-btc-value"
-                        class="text-lg sm:text-2xl lg:text-3xl font-extrabold text-orange-400 font-mono tracking-tight truncate">
-                        0 Kč</div>
-                    <p id="overview-btc-rate"
-                        class="text-[10px] sm:text-[11px] text-slate-400 mt-1 sm:mt-2 font-mono flex items-center gap-1 truncate">
-                        Kurz: 0 Kč / BTC
+                    <div id="overview-savings-rate"
+                        class="text-lg sm:text-2xl lg:text-3xl font-extrabold text-indigo-300 font-mono tracking-tight truncate">
+                        0.0 %</div>
+                    <div class="w-full bg-slate-900/90 h-1.5 rounded-full mt-2 overflow-hidden border border-slate-800/80">
+                        <div id="overview-savings-bar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <p id="overview-savings-sub"
+                        class="text-[10px] sm:text-[11px] text-slate-400 mt-1.5 font-mono truncate">
+                        Detail analýzy ➔
                     </p>
                 </div>
             </div>
@@ -1864,7 +1890,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 <!-- Míra úspor -->
                 <div
-                    class="glass-card p-5 rounded-2xl border border-slate-800/80 shadow-xl relative overflow-hidden group hover:border-emerald-500/40 transition">
+                    class="glass-card p-5 rounded-2xl shadow-xl relative overflow-hidden group hover:border-emerald-500/45 transition">
+                    <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-500/75 via-teal-400/50 to-transparent"></div>
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Míra úspor (Savings
                             Rate)</span>
@@ -1873,7 +1900,7 @@
                     </div>
                     <div id="analysis-savings-rate"
                         class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono">0.0 %</div>
-                    <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+                    <div class="w-full bg-slate-800/90 h-1.5 rounded-full mt-3 overflow-hidden">
                         <div id="analysis-savings-bar"
                             class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
                             style="width: 0%"></div>
@@ -1882,28 +1909,30 @@
 
                 <!-- Průměrný denní výdaj -->
                 <div
-                    class="glass-card p-5 rounded-2xl border border-slate-800/80 shadow-xl relative overflow-hidden group hover:border-rose-500/40 transition">
+                    class="glass-card p-5 rounded-2xl shadow-xl relative overflow-hidden group hover:border-rose-500/45 transition">
+                    <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-rose-500/75 via-pink-400/50 to-transparent"></div>
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Průměrný denní
                             výdaj</span>
                         <div
-                            class="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-xs font-bold">
+                            class="w-7 h-7 rounded-xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-rose-400 text-xs font-bold">
                             📅</div>
                     </div>
                     <div id="analysis-daily-exp" class="text-2xl sm:text-3xl font-extrabold text-rose-400 font-mono">0
                         Kč / den</div>
-                    <p id="analysis-period-days" class="text-[11px] text-slate-500 mt-2 font-medium">Za zvolené období
+                    <p id="analysis-period-days" class="text-[11px] text-slate-400 mt-2 font-medium">Za zvolené období
                     </p>
                 </div>
 
                 <!-- Top výdajová kategorie -->
                 <div
-                    class="glass-card p-5 rounded-2xl border border-slate-800/80 shadow-xl relative overflow-hidden group hover:border-amber-500/40 transition">
+                    class="glass-card p-5 rounded-2xl shadow-xl relative overflow-hidden group hover:border-amber-500/45 transition">
+                    <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-amber-500/75 via-yellow-400/50 to-transparent"></div>
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Největší zátěž
                             výdajů</span>
                         <div
-                            class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xs font-bold">
+                            class="w-7 h-7 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-amber-400 text-xs font-bold">
                             ⚠️</div>
                     </div>
                     <div id="analysis-top-exp-cat"
@@ -1914,12 +1943,13 @@
 
                 <!-- Top zdroj příjmů -->
                 <div
-                    class="glass-card p-5 rounded-2xl border border-slate-800/80 shadow-xl relative overflow-hidden group hover:border-blue-500/40 transition">
+                    class="glass-card p-5 rounded-2xl shadow-xl relative overflow-hidden group hover:border-blue-500/45 transition">
+                    <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-blue-500/75 via-cyan-400/50 to-transparent"></div>
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-slate-400 text-[11px] font-bold uppercase tracking-wider">Hlavní zdroj
                             příjmu</span>
                         <div
-                            class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-xs font-bold">
+                            class="w-7 h-7 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-blue-400 text-xs font-bold">
                             💼</div>
                     </div>
                     <div id="analysis-top-inc-cat"
@@ -1958,7 +1988,7 @@
                             class="text-sm font-bold text-emerald-400 mb-1 uppercase tracking-wider flex items-center gap-2">
                             <span>💰</span><span>Analýza příjmů podle zdrojů</span>
                         </h3>
-                        <p class="text-xs text-slate-400 mb-5">Struktura peněžních přítoků, mezd, investic a ostatních
+                        <p class="text-xs text-slate-400 mb-5">Struktura peněžních přítoků, mezd, brigád a ostatních
                             příjmů</p>
                     </div>
                     <div class="h-[280px] w-full flex items-center justify-center">
@@ -1985,8 +2015,7 @@
                                 class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300">Sloupečky
                                 vedle sebe</span>
                         </div>
-                        <p class="text-xs text-slate-400 mb-5">Porovnání mezd (výplat) vůči investicím a ostatním
-                            příjmům měsíc po měsíci</p>
+                        <p class="text-xs text-slate-400 mb-5">Porovnání mezd (výplat) vůči ostatním příjmům měsíc po měsíci</p>
                     </div>
                     <div class="h-[320px] w-full">
                         <canvas id="incomeSalaryChart"></canvas>
@@ -2203,142 +2232,6 @@
             </div>
         </div>
 
-        <!-- TAB: INVESTMENTS (ONLY BITCOIN) -->
-        <div id="tab-investments" class="tab-content hidden space-y-12">
-
-            <!-- BITCOIN SECTION -->
-            <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-800/80 shadow-xl">
-                <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-800">
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 text-xl font-bold">
-                            ₿</div>
-                        <div>
-                            <h1 class="text-xl font-extrabold text-white">Kryptoměny: Bitcoin (BTC)</h1>
-                            <p class="text-xs text-slate-400">Portfolio, nákupy, prodeje a vývoj kurzu</p>
-                        </div>
-                    </div>
-                    <button onclick="fetchBtcPrice()"
-                        class="text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-orange-300 px-3.5 py-1.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
-                        <span>🔄 Akt. kurz</span>
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Aktuální kurz 1
-                            BTC</span>
-                        <div id="btc-current-rate" class="text-lg md:text-xl font-mono font-bold text-yellow-400 mt-1">0
-                            Kč</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Celkem
-                            vloženo</span>
-                        <div id="btc-total-czk" class="text-lg md:text-xl font-mono font-bold text-slate-300 mt-1">0 Kč
-                        </div>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 border-l-4 border-l-orange-500">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Množství v
-                            držení</span>
-                        <div id="btc-total-amount" class="text-lg md:text-xl font-mono font-bold text-orange-400 mt-1">
-                            0.00000000</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Tržní hodnota</span>
-                        <div id="btc-current-value" class="text-lg md:text-xl font-mono font-bold text-blue-400 mt-1">0
-                            Kč</div>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Zisk / Ztráta</span>
-                        <div id="btc-profit" class="text-lg md:text-xl font-mono font-bold text-slate-300 mt-1">0 Kč
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 mb-8 no-print">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-sm font-bold text-orange-400 uppercase tracking-wider">📈 Vývoj ceny BTC (CZK)
-                        </h2>
-                        <select id="btcChartPeriod"
-                            class="px-3 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-orange-300 outline-none cursor-pointer">
-                            <option value="1">1 Den</option>
-                            <option value="7">1 Týden</option>
-                            <option value="30" selected>1 Měsíc</option>
-                            <option value="365">1 Rok</option>
-                        </select>
-                    </div>
-                    <div class="h-[260px] w-full"><canvas id="btcChart"></canvas></div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <!-- BTC Form & Calc -->
-                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 col-span-1 h-fit no-print">
-                        <h2 class="text-sm font-bold mb-4 text-orange-400 uppercase tracking-wider">➕ Nový záznam BTC
-                        </h2>
-
-                        <div class="space-y-3">
-                            <input id="btcDateInput" type="date"
-                                class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs font-medium focus:outline-none focus:border-orange-500">
-                            <select id="btcType"
-                                class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-bold text-xs focus:outline-none focus:border-orange-500">
-                                <option value="Nákup">🟢 Nákup</option>
-                                <option value="Prodej">🔴 Prodej</option>
-                            </select>
-                            <input id="btcAmountCzk" type="number" step="1" placeholder="Částka (Kč)"
-                                class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs focus:outline-none focus:border-orange-500">
-                            <input id="btcAmountCoin" type="number" step="0.00000001" placeholder="Množství BTC"
-                                class="w-full p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs focus:outline-none focus:border-orange-500">
-                            <button id="btnAddBtc"
-                                class="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 p-3 rounded-xl font-bold text-xs text-white transition shadow-md shadow-orange-600/20">
-                                ULOŽIT BTC ZÁZNAM
-                            </button>
-                        </div>
-
-                        <div class="mt-6 border-t border-slate-800 pt-5">
-                            <h2 class="text-xs font-bold mb-3 text-yellow-400 uppercase tracking-wider">🧮 Kalkulačka
-                                budoucí hodnoty</h2>
-                            <input id="btcCalcRate" type="number" step="1" placeholder="Hypotetický kurz (Kč)"
-                                class="w-full mb-3 p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono font-bold text-xs outline-none focus:border-yellow-500">
-                            <div class="space-y-2">
-                                <div
-                                    class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-                                    <span class="text-slate-500 text-[10px] uppercase font-bold">Hodnota</span>
-                                    <div id="btcCalcValue" class="font-mono font-bold text-blue-400">0 Kč</div>
-                                </div>
-                                <div
-                                    class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
-                                    <span class="text-slate-500 text-[10px] uppercase font-bold">Zisk</span>
-                                    <div id="btcCalcProfit" class="font-mono font-bold text-slate-300">0 Kč</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- BTC Table -->
-                    <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 col-span-1 lg:col-span-3">
-                        <h2 class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">📜 Historie BTC
-                            transakcí</h2>
-                        <div class="overflow-x-auto max-h-[460px] rounded-xl border border-slate-800 bg-slate-950/40">
-                            <table class="w-full text-left border-collapse">
-                                <thead
-                                    class="sticky top-0 bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
-                                    <tr>
-                                        <th class="p-3">Datum</th>
-                                        <th class="p-3">Typ</th>
-                                        <th class="p-3 text-right">Částka (Kč)</th>
-                                        <th class="p-3 text-right">Množství (BTC)</th>
-                                        <th class="p-3 text-center w-12 no-print">Akce</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="btcTableBody" class="divide-y divide-slate-800/60 text-xs"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
         <!-- TAB: SETTINGS & DATABASE -->
         <div id="tab-settings" class="tab-content hidden space-y-8 max-w-5xl mx-auto">
 
@@ -2443,7 +2336,7 @@
                                 </div>
                             </div>
                             <p class="text-[11px] text-slate-500 mt-3 pt-2.5 border-t border-slate-800/80">Příjmové
-                                kategorie slouží pro sledování mezd, brigád, investic a darů.</p>
+                                kategorie slouží pro sledování mezd, brigád, fakturací a darů.</p>
                         </div>
 
                     </div>
@@ -2620,7 +2513,7 @@
                         <span>🔄</span><span>Import a obnova dat do databáze</span>
                     </h3>
                     <p class="text-xs text-slate-400 mb-4">Podporuje jak kompletní zálohy ze systému (JSON s kolekcemi
-                        transakcí a BTC), tak i původní pole transakcí.</p>
+                        transakcí, práce a vozidel), tak i původní pole transakcí.</p>
 
                     <div class="flex flex-col sm:flex-row items-center gap-4">
                         <input type="file" id="importFile" accept=".json"
@@ -3002,12 +2895,6 @@ service cloud.firestore {
       allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
     }
 
-    match /btc_transactions/{docId} {
-      allow read, delete: if isWhitelisted() && isOwner(resource.data.userId);
-      allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
-      allow update: if isWhitelisted() && isOwner(resource.data.userId) && isOwner(request.resource.data.userId);
-    }
-
     match /work_projects/{docId} {
       allow read, delete: if isWhitelisted() && isOwner(resource.data.userId);
       allow create: if isWhitelisted() && isOwner(request.resource.data.userId);
@@ -3246,7 +3133,7 @@ service cloud.firestore {
         // Výchozí a uživatelsky editovatelné kategorie
         const defaultCategories = {
             "Výdaj": ["Jídlo", "Bydlení", "Vozidlo", "Doprava", "Zábava", "Sport", "Dar", "Ostatní"],
-            "Příjem": ["Mzda", "Investice", "Dar", "Ostatní"]
+            "Příjem": ["Mzda", "Brigáda / Práce", "Dar", "Ostatní"]
         };
         let userCategories = {
             "Výdaj": [...defaultCategories["Výdaj"]],
@@ -3261,15 +3148,31 @@ service cloud.firestore {
                         const parsed = JSON.parse(raw);
                         if (parsed && Array.isArray(parsed["Výdaj"]) && Array.isArray(parsed["Příjem"])) {
                             userCategories = parsed;
+                            let changed = false;
                             const migratedKey = `vehicle_cat_migrated_${currentUser.uid}`;
                             if (!localStorage.getItem(migratedKey)) {
                                 if (!userCategories["Výdaj"].some(c => c.toLowerCase() === "vozidlo")) {
                                     const dopIdx = userCategories["Výdaj"].indexOf("Doprava");
                                     if (dopIdx !== -1) userCategories["Výdaj"].splice(dopIdx, 0, "Vozidlo");
                                     else userCategories["Výdaj"].push("Vozidlo");
-                                    localStorage.setItem(`user_categories_${currentUser.uid}`, JSON.stringify(userCategories));
+                                    changed = true;
                                 }
                                 localStorage.setItem(migratedKey, "1");
+                            }
+                            const invRemovedKey = `invest_cat_removed_${currentUser.uid}`;
+                            if (!localStorage.getItem(invRemovedKey)) {
+                                const beforeLen = userCategories["Příjem"].length;
+                                userCategories["Příjem"] = userCategories["Příjem"].filter(c => c.toLowerCase() !== "investice");
+                                if (userCategories["Příjem"].length !== beforeLen) {
+                                    if (!userCategories["Příjem"].some(c => c.toLowerCase().includes("brigád"))) {
+                                        userCategories["Příjem"].splice(1, 0, "Brigáda / Práce");
+                                    }
+                                    changed = true;
+                                }
+                                localStorage.setItem(invRemovedKey, "1");
+                            }
+                            if (changed) {
+                                localStorage.setItem(`user_categories_${currentUser.uid}`, JSON.stringify(userCategories));
                             }
                             return;
                         }
@@ -3324,10 +3227,6 @@ service cloud.firestore {
         const monthNames = ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"];
 
         let currentUser = null, allTx = [], expChart = null, incChart = null, salaryChart = null, trendChart = null;
-
-        // BTC Proměnné
-        let allBtcTx = [], currentBtcPriceCzk = 0, globalTotalBtc = 0, globalTotalCzk = 0;
-        let btcChartInstance = null, btcChartLoaded = false;
 
         // Práce & Projekty Proměnné
         let allProjects = [], allWorkLogs = [], activeWorkProjectFilter = 'all';
@@ -3516,21 +3415,14 @@ service cloud.firestore {
                     }
                 } else {
                     if (isAct) {
-                        btn.className = "px-2.5 xl:px-3 py-1.5 rounded-lg font-bold text-xs xl:text-sm bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-sm transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap";
+                        btn.className = "px-3 py-1.5 rounded-lg font-bold text-xs xl:text-sm bg-gradient-to-b from-blue-500/25 to-indigo-500/15 text-blue-300 border border-blue-400/35 shadow-sm transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap";
                     } else {
-                        btn.className = "px-2.5 xl:px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap";
+                        btn.className = "px-3 py-1.5 rounded-lg font-medium text-xs xl:text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap";
                     }
                 }
             });
 
             render();
-            if (id === 'investments') {
-                renderBtc();
-                if (!btcChartLoaded) {
-                    fetchBtcChart(document.getElementById('btcChartPeriod').value);
-                    btcChartLoaded = true;
-                }
-            }
             if (id === 'work') {
                 renderWork();
             }
@@ -3547,7 +3439,6 @@ service cloud.firestore {
             const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
 
             document.getElementById('txDateInput').value = today;
-            document.getElementById('btcDateInput').value = today;
             const workDate = document.getElementById('workLogModalDate');
             if (workDate && !workDate.value) workDate.value = today;
             const vehDate = document.getElementById('vehEventDate');
@@ -3621,7 +3512,6 @@ service cloud.firestore {
 
             // Vyčistit data v paměti
             allTx = [];
-            allBtcTx = [];
             allProjects = [];
             allWorkLogs = [];
             allVehicles = [];
@@ -3657,10 +3547,8 @@ service cloud.firestore {
             if (incChart) { try { incChart.destroy(); } catch (e) { } incChart = null; }
             if (salaryChart) { try { salaryChart.destroy(); } catch (e) { } salaryChart = null; }
             if (trendChart) { try { trendChart.destroy(); } catch (e) { } trendChart = null; }
-            if (btcChartInstance) { try { btcChartInstance.destroy(); } catch (e) { } btcChartInstance = null; }
             if (vehKmChartInstance) { try { vehKmChartInstance.destroy(); } catch (e) { } vehKmChartInstance = null; }
             if (vehCostChartInstance) { try { vehCostChartInstance.destroy(); } catch (e) { } vehCostChartInstance = null; }
-            btcChartLoaded = false;
         }
 
         // --- ZMĚNA HESLA & OBNOVA HESLA ---
@@ -3876,19 +3764,6 @@ service cloud.firestore {
             });
             activeUnsubscribers.push(unsubTx);
 
-            // BTC transakce
-            const btcQ = query(collection(db, "btc_transactions"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc"));
-            const unsubBtc = onSnapshot(btcQ, (snap) => {
-                allBtcTx = [];
-                snap.forEach(d => {
-                    let data = d.data(); data.id = d.id;
-                    data.dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
-                    allBtcTx.push(data);
-                });
-                renderBtc();
-            });
-            activeUnsubscribers.push(unsubBtc);
-
             const toSafeDate = (val, fallbackStr) => {
                 if (val && typeof val.toDate === 'function') return val.toDate();
                 if (val instanceof Date && !isNaN(val.getTime())) return val;
@@ -4061,7 +3936,6 @@ service cloud.firestore {
             });
             activeUnsubscribers.push(unsubWl);
 
-            fetchBtcPrice();
             loadTimerFromStorage();
             updateTimerProjectsDropdown();
             if (window.initVehicleData) window.initVehicleData();
@@ -4353,12 +4227,11 @@ service cloud.firestore {
             allTx.forEach(t => {
                 const mKey = t.dateObj.getFullYear() + "-" + (t.dateObj.getMonth() + 1).toString().padStart(2, '0');
                 if (!trend[mKey]) trend[mKey] = { i: 0, e: 0 };
-                if (!salaryMonths[mKey]) salaryMonths[mKey] = { mzda: 0, investice: 0, ostatni: 0 };
+                if (!salaryMonths[mKey]) salaryMonths[mKey] = { mzda: 0, ostatni: 0 };
 
                 if (t.type === "Příjem") {
                     trend[mKey].i += t.amount;
                     if (t.category === "Mzda") salaryMonths[mKey].mzda += t.amount;
-                    else if (t.category === "Investice") salaryMonths[mKey].investice += t.amount;
                     else salaryMonths[mKey].ostatni += t.amount;
                 } else {
                     trend[mKey].e += t.amount;
@@ -4377,9 +4250,17 @@ service cloud.firestore {
             });
 
             const bal = inc - exp;
+            const incCount = filtered.filter(t => t.type === "Příjem").length;
+            const expCount = filtered.filter(t => t.type === "Výdaj").length;
             document.getElementById('summary-income').textContent = inc.toLocaleString('cs-CZ') + " Kč";
+            const incSubEl = document.getElementById('summary-income-sub');
+            if (incSubEl) incSubEl.textContent = `${incCount} ${incCount === 1 ? 'příjem' : incCount >= 2 && incCount <= 4 ? 'příjmy' : 'příjmů'} • ${customPeriodLabel}`;
             document.getElementById('summary-expense').textContent = exp.toLocaleString('cs-CZ') + " Kč";
-            document.getElementById('summary-balance').textContent = bal.toLocaleString('cs-CZ') + " Kč";
+            const expSubEl = document.getElementById('summary-expense-sub');
+            if (expSubEl) expSubEl.textContent = `${expCount} ${expCount === 1 ? 'výdaj' : expCount >= 2 && expCount <= 4 ? 'výdaje' : 'výdajů'} • ${customPeriodLabel}`;
+            const sumBalEl = document.getElementById('summary-balance');
+            sumBalEl.textContent = bal.toLocaleString('cs-CZ') + " Kč";
+            sumBalEl.className = `text-lg sm:text-2xl lg:text-3xl font-extrabold font-mono tracking-tight truncate ${bal >= 0 ? 'text-blue-400' : 'text-rose-400'}`;
 
             document.getElementById('reportPeriodText').textContent = `Období: ${customPeriodLabel}`;
             if (currentUser) document.getElementById('reportUserEmail').textContent = `Vygenerováno pro: ${currentUser.email}`;
@@ -4453,7 +4334,21 @@ service cloud.firestore {
             const avgDailyExp = exp / Math.max(1, daysInPeriod);
             const savingsRate = inc > 0 ? ((inc - exp) / inc * 100) : 0;
 
-            // Row 1: KPI Cards
+            // Row 1: KPI Cards (Přehled + Analýza)
+            const ovSavRateEl = document.getElementById('overview-savings-rate');
+            const ovSavBarEl = document.getElementById('overview-savings-bar');
+            const ovSavSubEl = document.getElementById('overview-savings-sub');
+            if (ovSavRateEl) {
+                ovSavRateEl.textContent = savingsRate.toFixed(1) + " %";
+                ovSavRateEl.className = `text-lg sm:text-2xl lg:text-3xl font-extrabold font-mono tracking-tight truncate ${savingsRate >= 20 ? 'text-emerald-400' : savingsRate >= 0 ? 'text-indigo-300' : 'text-rose-400'}`;
+            }
+            if (ovSavBarEl) {
+                ovSavBarEl.style.width = Math.min(100, Math.max(0, savingsRate)) + "%";
+            }
+            if (ovSavSubEl) {
+                ovSavSubEl.textContent = `Prům. výdaj: ${avgDailyExp.toLocaleString('cs-CZ', { maximumFractionDigits: 0 })} Kč/den`;
+            }
+
             const savRateEl = document.getElementById('analysis-savings-rate');
             const savBadgeEl = document.getElementById('analysis-savings-badge');
             const savBarEl = document.getElementById('analysis-savings-bar');
@@ -4619,8 +4514,7 @@ service cloud.firestore {
                     labels: sortedSalaryMonths,
                     datasets: [
                         { label: 'Mzda (Výplata)', data: sortedSalaryMonths.map(m => salaryMonths[m].mzda), backgroundColor: '#10b981', borderRadius: 6 },
-                        { label: 'Investice & pasivní', data: sortedSalaryMonths.map(m => salaryMonths[m].investice), backgroundColor: '#3b82f6', borderRadius: 6 },
-                        { label: 'Ostatní příjmy / Dar', data: sortedSalaryMonths.map(m => salaryMonths[m].ostatni), backgroundColor: '#f59e0b', borderRadius: 6 }
+                        { label: 'Ostatní příjmy / Práce & Dar', data: sortedSalaryMonths.map(m => salaryMonths[m].ostatni), backgroundColor: '#3b82f6', borderRadius: 6 }
                     ]
                 },
                 options: {
@@ -8926,7 +8820,6 @@ service cloud.firestore {
                 userEmail: currentUser.email,
                 categories: userCategories,
                 transactions: allTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
-                btc_transactions: allBtcTx.map(t => ({ ...t, createdAt: t.dateObj.toISOString() })),
                 work_projects: allProjects.map(p => ({ ...p, createdAt: p.dateObj.toISOString() })),
                 work_logs: allWorkLogs.map(l => ({ ...l, createdAt: l.dateObj.toISOString() })),
                 vehicles: allVehicles,
@@ -8954,13 +8847,6 @@ service cloud.firestore {
                 const noteEsc = (t.note || "").replace(/'/g, "''");
                 const dateStr = t.dateObj.toISOString().slice(0, 19).replace('T', ' ');
                 sql += `INSERT INTO transactions (id, user_id, type, category, amount, note, recurring, created_at) VALUES ('${t.id}', '${currentUser.uid}', '${t.type}', '${t.category}', ${t.amount}, '${noteEsc}', ${t.recurring ? 1 : 0}, '${dateStr}');\n`;
-            });
-
-            // Bitcoin
-            sql += `\nCREATE TABLE IF NOT EXISTS btc_transactions (\n  id VARCHAR(64) PRIMARY KEY,\n  user_id VARCHAR(64),\n  type VARCHAR(32),\n  amount_czk DECIMAL(15,2),\n  amount_coin DECIMAL(18,8),\n  created_at DATETIME\n);\n\n`;
-            allBtcTx.forEach(t => {
-                const dateStr = t.dateObj.toISOString().slice(0, 19).replace('T', ' ');
-                sql += `INSERT INTO btc_transactions (id, user_id, type, amount_czk, amount_coin, created_at) VALUES ('${t.id}', '${currentUser.uid}', '${t.type}', ${t.amountCzk}, ${t.amountCoin}, '${dateStr}');\n`;
             });
 
             // Projekty
@@ -9227,7 +9113,7 @@ service cloud.firestore {
             reader.onload = async (e) => {
                 try {
                     const data = JSON.parse(e.target.result);
-                    let txCount = 0, btcCount = 0, projCount = 0, workCount = 0, vehCount = 0, vehEvCount = 0;
+                    let txCount = 0, projCount = 0, workCount = 0, vehCount = 0, vehEvCount = 0;
 
                     if (data.transactions && Array.isArray(data.transactions)) {
                         for (const tx of data.transactions) {
@@ -9242,19 +9128,6 @@ service cloud.firestore {
                                 createdAt: Timestamp.fromDate(d)
                             });
                             txCount++;
-                        }
-                        if (data.btc_transactions && Array.isArray(data.btc_transactions)) {
-                            for (const tx of data.btc_transactions) {
-                                let d = tx.createdAt ? new Date(tx.createdAt) : new Date();
-                                await addDoc(collection(db, "btc_transactions"), {
-                                    userId: currentUser.uid,
-                                    type: tx.type || "Nákup",
-                                    amountCzk: parseFloat(tx.amountCzk) || 0,
-                                    amountCoin: parseFloat(tx.amountCoin) || 0,
-                                    createdAt: Timestamp.fromDate(d)
-                                });
-                                btcCount++;
-                            }
                         }
                         if (data.work_projects && Array.isArray(data.work_projects)) {
                             for (const p of data.work_projects) {
@@ -9394,7 +9267,7 @@ service cloud.firestore {
                             }
                         }
                         if (window.renderVehicle) window.renderVehicle();
-                        alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${btcCount} BTC záznamů\n• ${projCount} projektů\n• ${workCount} záznamů odpracovaných hodin\n• ${vehCount} vozidel a ${vehEvCount} záznamů servisní knížky.`);
+                        alert(`DB Import úspěšný!\nNačteno:\n• ${txCount} běžných transakcí\n• ${projCount} projektů\n• ${workCount} záznamů odpracovaných hodin\n• ${vehCount} vozidel a ${vehEvCount} záznamů servisní knížky.`);
                     } else if (Array.isArray(data)) {
                         for (const tx of data) {
                             let d = new Date();
@@ -9420,142 +9293,6 @@ service cloud.firestore {
                 } catch (err) { alert("Chyba při importu: " + err.message); }
             };
             reader.readAsText(fileInput.files[0]);
-        };
-
-        // --- BTC LOGIKA ---
-        window.fetchBtcPrice = async () => {
-            try {
-                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=czk');
-                const data = await res.json();
-                if (data.bitcoin && data.bitcoin.czk) {
-                    currentBtcPriceCzk = data.bitcoin.czk;
-                    const btcRateEl = document.getElementById('btc-current-rate');
-                    if (btcRateEl) btcRateEl.textContent = currentBtcPriceCzk.toLocaleString('cs-CZ', { maximumFractionDigits: 0 }) + " Kč";
-                    renderBtc();
-                }
-            } catch (e) { console.error("Chyba při stahování ceny BTC:", e); }
-        };
-
-        window.fetchBtcChart = async (days) => {
-            try {
-                const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=czk&days=${days}`);
-                const data = await res.json();
-                const labels = data.prices.map(p => {
-                    const d = new Date(p[0]);
-                    if (days == 1) return d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
-                    if (days == 365) return d.toLocaleDateString('cs-CZ', { month: 'short', year: 'numeric' });
-                    return d.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' });
-                });
-                const values = data.prices.map(p => p[1]);
-
-                if (btcChartInstance) btcChartInstance.destroy();
-                btcChartInstance = new Chart(document.getElementById('btcChart'), {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Cena BTC (Kč)',
-                            data: values,
-                            borderColor: '#f97316',
-                            backgroundColor: 'rgba(249, 115, 22, 0.15)',
-                            borderWidth: 2,
-                            fill: true,
-                            pointRadius: 0,
-                            pointHoverRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', maxTicksLimit: 8, font: { family: 'JetBrains Mono' } } },
-                            y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono' } } }
-                        },
-                        plugins: { legend: { display: false } },
-                        interaction: { intersect: false, mode: 'index' }
-                    }
-                });
-            } catch (e) { console.error("Chyba při stahování grafu BTC:", e); }
-        };
-
-        document.getElementById('btcChartPeriod').onchange = (e) => fetchBtcChart(e.target.value);
-
-        window.updateCalculator = () => {
-            const customRateInput = document.getElementById('btcCalcRate');
-            if (!customRateInput) return;
-            const customRate = parseFloat(customRateInput.value);
-            const valEl = document.getElementById('btcCalcValue');
-            const profEl = document.getElementById('btcCalcProfit');
-
-            if (isNaN(customRate) || customRate <= 0) {
-                valEl.textContent = "0 Kč"; profEl.textContent = "0 Kč"; profEl.className = "font-mono font-bold text-slate-300";
-                return;
-            }
-            const potentialValue = globalTotalBtc * customRate;
-            const potentialProfit = potentialValue - globalTotalCzk;
-            valEl.textContent = potentialValue.toLocaleString('cs-CZ', { maximumFractionDigits: 0 }) + " Kč";
-            profEl.textContent = potentialProfit.toLocaleString('cs-CZ', { maximumFractionDigits: 0 }) + " Kč";
-            profEl.className = `font-mono font-bold ${potentialProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-        };
-        document.getElementById('btcCalcRate').addEventListener('input', updateCalculator);
-
-        document.getElementById('btnAddBtc').onclick = async () => {
-            const type = document.getElementById('btcType').value;
-            const amountCzk = parseFloat(document.getElementById('btcAmountCzk').value) || 0;
-            const amountCoin = parseFloat(document.getElementById('btcAmountCoin').value) || 0;
-            const txDate = new Date(document.getElementById('btcDateInput').value);
-            if (amountCzk <= 0 || amountCoin <= 0) return alert("Zadejte platné částky větší než nula.");
-            await addDoc(collection(db, "btc_transactions"), { userId: currentUser.uid, type: type, amountCzk: amountCzk, amountCoin: amountCoin, createdAt: Timestamp.fromDate(txDate) });
-            document.getElementById('btcAmountCzk').value = ""; document.getElementById('btcAmountCoin').value = "";
-        };
-
-        window.deleteBtcTx = async (id) => { if (confirm("Opravdu smazat tento záznam?")) await deleteDoc(doc(db, "btc_transactions", id)); };
-
-        window.renderBtc = () => {
-            let totalCzk = 0, totalBtc = 0;
-            const tbody = document.getElementById('btcTableBody');
-            if (tbody) {
-                tbody.innerHTML = "";
-                allBtcTx.forEach(t => {
-                    const isBuy = t.type === "Nákup";
-                    if (isBuy) { totalCzk += t.amountCzk; totalBtc += t.amountCoin; } else { totalCzk -= t.amountCzk; totalBtc -= t.amountCoin; }
-                    tbody.innerHTML += `<tr class="hover:bg-slate-800/60 transition-colors">
-                        <td class="p-3 text-slate-400 text-xs font-mono">${t.dateObj.toLocaleDateString('cs-CZ')}</td>
-                        <td class="p-3 font-medium ${isBuy ? 'text-emerald-400' : 'text-rose-400'}">${t.type}</td>
-                        <td class="p-3 text-right font-mono font-bold text-slate-200">${t.amountCzk.toLocaleString('cs-CZ')} Kč</td>
-                        <td class="p-3 text-right font-mono font-bold text-orange-400">${t.amountCoin.toFixed(8)}</td>
-                        <td class="p-3 text-center no-print"><button onclick="deleteBtcTx('${t.id}')" title="Smazat" class="p-1 hover:bg-rose-950/40 rounded-lg text-rose-500 hover:text-rose-400 transition">🗑️</button></td>
-                    </tr>`;
-                });
-            } else {
-                allBtcTx.forEach(t => {
-                    if (t.type === "Nákup") { totalCzk += t.amountCzk; totalBtc += t.amountCoin; } else { totalCzk -= t.amountCzk; totalBtc -= t.amountCoin; }
-                });
-            }
-            globalTotalBtc = totalBtc; globalTotalCzk = totalCzk;
-            const currentValue = totalBtc * currentBtcPriceCzk; const profit = currentValue - totalCzk;
-
-            const btcTotalCzkEl = document.getElementById('btc-total-czk');
-            if (btcTotalCzkEl) btcTotalCzkEl.textContent = totalCzk.toLocaleString('cs-CZ') + " Kč";
-            const btcTotalAmountEl = document.getElementById('btc-total-amount');
-            if (btcTotalAmountEl) btcTotalAmountEl.textContent = totalBtc.toFixed(8);
-            const btcCurrentValEl = document.getElementById('btc-current-value');
-            if (btcCurrentValEl) btcCurrentValEl.textContent = currentValue.toLocaleString('cs-CZ', { maximumFractionDigits: 0 }) + " Kč";
-            const profitEl = document.getElementById('btc-profit');
-            if (profitEl) {
-                profitEl.textContent = profit.toLocaleString('cs-CZ', { maximumFractionDigits: 0 }) + " Kč";
-                profitEl.className = `text-lg md:text-xl font-mono font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-1`;
-            }
-            updateCalculator();
-
-            // Aktualizace přehledového okénka BTC na hlavní záložce (tab-overview)
-            const overviewBtcVal = document.getElementById('overview-btc-value');
-            const overviewBtcRate = document.getElementById('overview-btc-rate');
-            if (overviewBtcVal) overviewBtcVal.textContent = currentValue.toLocaleString('cs-CZ', { maximumFractionDigits: 0 }) + " Kč";
-            if (overviewBtcRate) {
-                const rateStr = currentBtcPriceCzk.toLocaleString('cs-CZ', { maximumFractionDigits: 0 });
-                overviewBtcRate.innerHTML = `<span class="text-yellow-400 font-bold">Kurz: ${rateStr} Kč</span> • <span class="text-orange-300 font-bold">${totalBtc.toFixed(4)} BTC</span>`;
-            }
         };
 
     </script>
